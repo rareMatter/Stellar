@@ -1,6 +1,6 @@
 //
 //  RMContentView.swift
-//  life-tool-1-iOS
+//  Stellar
 //
 //  Created by Jesse Spencer on 2/1/21.
 //  Copyright © 2021 Jesse Spencer. All rights reserved.
