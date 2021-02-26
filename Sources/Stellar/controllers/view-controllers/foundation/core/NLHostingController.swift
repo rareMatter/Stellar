@@ -10,7 +10,14 @@ import SwiftUI
 import Combine
 
 public
-final class NLHostingController<RootView: View>: UIHostingController<RootView>, ViewControllerDismissalNotifier {
+final class NLHostingController<RootView: View>: UIHostingController<RootView>, ViewHierarchyObject {
+
+    private var _rootController: RootController!
+    public var rootController: RootController {
+        get { _rootController }
+        set { _rootController = newValue }
+    }
+    
     /// A publisher for ViewControllerDismissalNotifier conformance.
     private let _dismissalPublisher = PassthroughSubject<UIViewController, Never>()
     public var dismissalPublisher: AnyPublisher<UIViewController, Never> {

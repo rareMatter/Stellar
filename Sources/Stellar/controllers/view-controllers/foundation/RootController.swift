@@ -12,7 +12,7 @@ import Combine
 /// Manages root navigational architecture using a split view controller.
 ///
 /// This class provides API for interacting with the root navigational architecture. Generally, it is a simplification of UISplitViewController.
-/// - Warning: Modal presentations performed (via the HierarchyManager interface) can fail if the top modal controller is dismissed following the time that a presentation is requested, causing an attempt to perform the presentation on the dismissed controller. The only exception to this is attempted presentations on UIAlertControllers.
+/// - Warning: Modal presentations can fail if the top modal controller is dismissed following the time that a presentation is requested, causing an attempt to perform the presentation on the dismissed controller. The only exception to this is attempted presentations on UIAlertControllers.
 public
 final
 class RootController: NSObject {
@@ -54,7 +54,7 @@ class RootController: NSObject {
 	private var cancellables = [AnyCancellable]()
 	
 	// MARK: - init
-	public override init() {
+	override init() {
 		self.splitViewController = .init(style: .doubleColumn)
 		self.primaryNavigationController = .init(nibName: nil, bundle: nil)
 		self.contentNavigationController = .init(nibName: nil, bundle: nil)
@@ -81,26 +81,27 @@ RootController {
 	/// - Note: At times it may be necessary for this method to defer the presentation for some amount of time.
 	/// - Return: Whether or not the presentation was successful. A successful presentation does not mean immediate display on screen but rather the receiver has successfully processed the presentation as needed.
 	@discardableResult
-	func performPresentationOf(_ viewController: UIViewController & ViewControllerDismissalNotifier, in context: NLPresentationContext, withStyle style: PresentationStyle, withAnimation animated: Bool) -> Bool {
+    func performPresentationOf(_ viewController: ViewHierarchyObject, with route: SDestinationRoute, at location: SDestinationLocation, withAnimation animated: Bool) -> Bool {
 		dispatchPrecondition(condition: .onQueue(.main))
 		
 		var wasSuccessful = false
-		if style == .modal() {
+		if location == .modal {
 			wasSuccessful = showModal(viewController, withAnimation: animated)
 		}
 		else {
-			switch context {
+			switch route {
 				case .primary:
-					wasSuccessful = showPrimary(viewController: viewController, as: style, withAnimation: animated)
+					wasSuccessful = showPrimary(viewController: viewController, at: location, withAnimation: animated)
 
-				case .content:
-					wasSuccessful = showContent(viewController: viewController, as: style, withAnimation: animated)
+				case .secondary:
+					wasSuccessful = showContent(viewController: viewController, at: location, withAnimation: animated)
 			}
 		}
 		
-		// connect to dismissal publisher if presentation was successful
+		// connect to dismissal publisher and update state if presentation was successful
 		if wasSuccessful {
 			connectToDismissalPublisherFor(viewController)
+            viewController.rootController = self
 		}
 		return wasSuccessful
 	}
@@ -108,19 +109,19 @@ RootController {
 	/// Shows the view controller in the primary column.
 	///
 	/// - Warning: This method only supports `root` `PresentationStyle`. If a different one is provided, an assertion is thrown.
-	func showPrimary(viewController: UIViewController & ViewControllerDismissalNotifier, as style: PresentationStyle, withAnimation animated: Bool) -> Bool {
+	func showPrimary(viewController: UIViewController & ViewHierarchyObject, at location: SDestinationLocation, withAnimation animated: Bool) -> Bool {
 
-		switch style {
+		switch location {
 			case .root:
 				primaryNavigationController.setViewControllers([viewController], animated: animated)
 				primaryRootViewController = viewController
 				return true
 				
 			case .stack:
-				assertionFailure("\(#function) : \(style) is not supported for the primary column. Use content column instead.")
+				assertionFailure("\(#function) : \(location) is not supported for the primary column. Use content column instead.")
 				
 			default:
-				assertionFailure("Unexpected style passed to \(#function): \(style).")
+				assertionFailure("Unexpected style passed to \(#function): \(location).")
 		}
 		
 		return false
@@ -128,9 +129,9 @@ RootController {
 	
 	/// Shows the view controller as a content view, alongside the primary column.
 	/// - Note: If the root controller is collapsed this method will stack content onto the primary view. This means the `root` `PresentationStyle` will have the same effect as `stack`, only while the root controller is collapsed.
-	func showContent(viewController: UIViewController & ViewControllerDismissalNotifier, as style: PresentationStyle, withAnimation animated: Bool) -> Bool {
+	func showContent(viewController: UIViewController & ViewHierarchyObject, at location: SDestinationLocation, withAnimation animated: Bool) -> Bool {
 		
-		switch style {
+		switch location {
 			case .root:
 				contentViewControllers.insert(viewController, at: 0)
 				
@@ -157,7 +158,7 @@ RootController {
 				return true
 				
 			default:
-				assertionFailure("Unexpected style passed to \(#function): \(style).")
+				assertionFailure("Unexpected style passed to \(#function): \(location).")
 		}
 		
 		return false
@@ -166,7 +167,7 @@ RootController {
 	/// Performs a modal presentation.
 	///
 	/// - Returns:
-	func showModal(_ viewController: UIViewController & ViewControllerDismissalNotifier, withAnimation animated: Bool) -> Bool {
+	func showModal(_ viewController: UIViewController & ViewHierarchyObject, withAnimation animated: Bool) -> Bool {
 		// check for deferral
 		if let deferredModalData = deferModalPresentationIfNeeded(viewController: viewController, withAnimation: animated) {
 			self.deferredModalPresentationData = deferredModalData
@@ -187,7 +188,7 @@ extension
 RootController {
 	
 	/// Connects to the dismissal publisher of the controller to perform cache updates upon receiving updates.
-	private func connectToDismissalPublisherFor(_ viewController: UIViewController & ViewControllerDismissalNotifier) {
+	private func connectToDismissalPublisherFor(_ viewController: UIViewController & ViewHierarchyObject) {
 		viewController.dismissalPublisher
 			.receive(on: DispatchQueue.main)
 			.sink { [unowned self] viewController in
@@ -224,15 +225,17 @@ private
 extension
 RootController {
 	
+    private
 	struct DeferredModalPresentationData {
-		var viewController: UIViewController & ViewControllerDismissalNotifier
+		var viewController: UIViewController & ViewHierarchyObject
 		var animated: Bool
 	}
 	
 	/// Determines whether a modal presentation can take place now. If not, this method returns data to use for deferring the presentation.
 	///
 	/// - Returns: Data to use for deferring the modal presentation, if needed. Returns nil if the presentation can be performed now.
-	func deferModalPresentationIfNeeded(viewController: UIViewController & ViewControllerDismissalNotifier, withAnimation animated: Bool) -> DeferredModalPresentationData? {
+	private
+    func deferModalPresentationIfNeeded(viewController: UIViewController & ViewHierarchyObject, withAnimation animated: Bool) -> DeferredModalPresentationData? {
 		if topViewController is UIAlertController {
 			return .init(viewController: viewController, animated: animated)
 		}
@@ -268,20 +271,19 @@ extension RootController: UINavigationControllerDelegate {
 }
 
 // MARK: - api
-
-extension RootController: HierarchyManager {
+extension RootController {
 	
-	public var rootViewController: UIViewController {
+	var rootViewController: UIViewController {
 		splitViewController
 	}
 	
-	public func show(viewController: UIViewController & ViewControllerDismissalNotifier, inContext presentationContext: NLPresentationContext, withStyle presentationStyle: PresentationStyle, withAnimation isAnimated: Bool) {
-		performPresentationOf(viewController, in: presentationContext, withStyle: presentationStyle, withAnimation: isAnimated)
+    func show(viewController: UIViewController & ViewHierarchyObject, with route: SDestinationRoute, at location: SDestinationLocation, withAnimation isAnimated: Bool) {
+        performPresentationOf(viewController, with: route, at: location, withAnimation: isAnimated)
 	}
 	
 	/// Dismisses the view controller if it is currently in the navigation hierarchy.
-	public func dismissControllerIfNeeded(_ viewController: UIViewController, withAnimation: Bool = true) {
-		// TODO: check current thread to enforce main.
+	func dismissControllerIfNeeded(_ viewController: UIViewController, withAnimation: Bool = true) {
+        dispatchPrecondition(condition: .onQueue(.main))
 		
 		if let index = primaryNavigationController.viewControllers.firstIndex(of: viewController) {
 			var updatedViewControllers = primaryNavigationController.viewControllers

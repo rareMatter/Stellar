@@ -10,8 +10,14 @@ import UIKit
 import Combine
 
 public
-class NLNavigationController: UINavigationController, ViewControllerDismissalNotifier {
-	
+class NLNavigationController: UINavigationController, ViewHierarchyObject {
+
+    private var _rootController: RootController!
+    public var rootController: RootController {
+        get { _rootController }
+        set { _rootController = newValue }
+    }
+    
 	/// A publisher for ViewControllerDismissalNotifier conformance.
 	private let _dismissalPublisher = PassthroughSubject<UIViewController, Never>()
     public var dismissalPublisher: AnyPublisher<UIViewController, Never> {

@@ -1,5 +1,5 @@
 //
-//  NLAppDelegate.swift
+//  SAppDelegate.swift
 //  Stellar
 //
 //  Created by Jesse Spencer on 2/16/21.
@@ -8,33 +8,30 @@
 
 import UIKit
 
-final class NLAppDelegate: UIResponder, UIApplicationDelegate {
+/// The `UIApplicationDelegate` conforming object given to UIKit for creation. This object is provided an `AnySApp` instance during program entry which it uses to manage app delegate behaviors.
+final
+class SAppDelegate: UIResponder, UIApplicationDelegate {
     
     // -- app
     /// The app instance provided by top level code during application initialization.
-    static var app: NLApp!
+    static var app: AnySApp!
     
     /// Convenient access to the static `NLApp` instance.
-    private var app: NLApp {
-        NLAppDelegate.app
+    private var app: AnySApp {
+        SAppDelegate.app
     }
     
     var window: UIWindow?
     
-    // -- view controller hierarchy
-    private let rootController = RootController()
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
         
         configureAppearance()
-        
         app.performAdditionalSetupForLaunch()
         
-        // Initiate view controller chain in the main window and start app
         let window = UIWindow(frame: UIScreen.main.bounds)
-        self.window = window
-        window.rootViewController = rootController.rootViewController
+        window.rootViewController = app.rootController.rootViewController
         window.makeKeyAndVisible()
+        self.window = window
         
         return true
     }
@@ -42,7 +39,7 @@ final class NLAppDelegate: UIResponder, UIApplicationDelegate {
 
 // MARK: Appearance
 private
-extension NLAppDelegate {
+extension SAppDelegate {
     func configureAppearance() {
         // Set tint color
         UIView.appearance().tintColor = UIColor(named: "Nebulist-Blue")
