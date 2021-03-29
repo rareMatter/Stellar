@@ -11,7 +11,7 @@ import SnapKit
 
 /// A composed content configuration which accepts a `LeadingViewLabelContentConfiguration` and centers its content.
 public
-struct CenteredLeadingViewContentConfiguration: UIContentConfiguration, Equatable {
+struct CenteredLeadingViewContentConfiguration: SContentConfiguration, Equatable {
     
     var contentConfiguration: LeadingViewLabelContentConfiguration
     

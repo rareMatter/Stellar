@@ -7,13 +7,13 @@
 
 import Foundation
 
-/// The basis for describing view content and how it should be navigated to.
+/// The description of view content.
 public
 protocol SView {
-    var content: ViewHierarchyObject { get }
     
-    var route: SDestinationRoute { get set }
-    var location: SDestinationLocation { get set }
+    var id: UUID { get set }
+    
+    var content: ViewHierarchyObject { get }
 }
 
 // MARK: - navigation
@@ -25,24 +25,18 @@ extension SView {
     ///   - destination: The view which will be shown.
     ///   - route: The route to take when showing `destination` or nil to use current context.
     ///   - location: The location to use when showing `destination` or nil to use current context.
-    func go(to destination: ViewHierarchyObject, with route: SDestinationRoute? = nil, at location: SDestinationLocation? = nil) {
-        let route = route ?? self.route
-        let location = location ?? self.location
-        content.rootController
-            .show(viewController: destination,
-                  with: route,
-                  at: location,
-                  withAnimation: true)
+    func go(to destination: SView, withRoute route: SDestinationRoute, atLocation location: SDestinationLocation, withAnimation animated: Bool = true) {
+        appDelegate
+            .go(to: destination,
+                from: self,
+                withRoute: route,
+                atLocation: location,
+                withAnimation: animated)
     }
     
-    /// A default value of `primary` which cannot be set unless implemented.
-    var route: SDestinationRoute {
-        get { .primary }
-        set {}
-    }
-    /// A default value of `modal` which cannot be set unless implemented.
-    var location: SDestinationLocation {
-        get { .modal }
-        set {}
+    /// Dismisses the topmost view which has been shown using `go(to:)`.
+    func dismiss(_ view: SView, withAnimation animated: Bool = true) {
+        appDelegate
+            .dismiss(view, withAnimation: animated)
     }
 }

@@ -11,7 +11,7 @@ import SnapKit
 
 /// A configuration which displays a leading button before a label.
 public
-struct LeadingButtonLabelContentConfiguration: UIContentConfiguration, Equatable {
+struct LeadingButtonLabelContentConfiguration: SContentConfiguration, Equatable {
 	
     public var labelConfiguration: TitleTextConfiguration
     public var buttonConfiguration: ButtonConfiguration

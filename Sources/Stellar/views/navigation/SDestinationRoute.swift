@@ -9,7 +9,7 @@ import Foundation
 
 /// Options for where a view will be located when shown.
 public
-enum SDestinationRoute {
+enum SDestinationRoute: Hashable {
     case primary
     case secondary
 }

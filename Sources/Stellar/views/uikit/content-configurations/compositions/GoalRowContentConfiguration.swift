@@ -10,7 +10,7 @@ import UIKit
 
 /// A composed content configuration designed specifically for use displaying Goals. Title and secondary text which appears below the title are displayed, with optional trailing views which follow the secondary text content. The title content is represented using a `LeadingButtonLabelContentConfiguration`, secondary text content uses `LeadingViewLabelContentConfiguration`.
 public
-struct GoalRowContentConfiguration: UIContentConfiguration, Equatable {
+struct GoalRowContentConfiguration: SContentConfiguration, Equatable {
 	public static var defaultPreferredTitleFont: UIFont {
 		.preferredFont(forTextStyle: .title2)
 	}

@@ -10,13 +10,7 @@ import UIKit
 import Combine
 
 class NLAlertController: UIAlertController, ViewHierarchyObject {
-    
-    private var _rootController: RootController!
-    public var rootController: RootController {
-        get { _rootController }
-        set { _rootController = newValue }
-    }
-    
+
 	/// A publisher for ViewControllerDismissalNotifier conformance.
 	private let _dismissalPublisher = PassthroughSubject<UIViewController, Never>()
 	var dismissalPublisher: AnyPublisher<UIViewController, Never> {

@@ -23,19 +23,13 @@ protocol SApp {
     func performAdditionalSetupForLaunch()
 }
 
-extension SApp {
-    /// The `RootController` instance provided by the contained window.
-    var rootController: RootController {
-        window.makeRootController()
-    }
-}
-
 // MARK: - application entry point
 public
 extension SApp {
     /// Application entry point.
     static func main() {
-        // Create NLApp instance and forward control.
+        // Create SApp instance and forward control.
+        // Provide SApp instance to SAppDelegate statically to avoid subclassing UIApplication.
         SAppDelegate.app = AnySApp(app: Self.init())
         let _ = UIApplicationMain(CommandLine.argc,
                                   CommandLine.unsafeArgv,

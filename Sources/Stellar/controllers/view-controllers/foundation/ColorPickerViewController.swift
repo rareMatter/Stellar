@@ -10,7 +10,8 @@ import UIKit
 import Combine
 
 /// A color picker subclass which accepts closure handlers for interactions.
-public class ColorPickerViewController: UIColorPickerViewController, UIColorPickerViewControllerDelegate, ViewHierarchyObject {
+public
+class ColorPickerViewController: UIColorPickerViewController, UIColorPickerViewControllerDelegate {
 	
 	/// A publisher for ViewControllerDismissalNotifier conformance.
 	private let _dismissalPublisher = PassthroughSubject<UIViewController, Never>()
@@ -61,15 +62,8 @@ public class ColorPickerViewController: UIColorPickerViewController, UIColorPick
 	public func colorPickerViewControllerDidFinish(_ viewController: UIColorPickerViewController) {
 		onDismiss?(self)
 	}
-    
-    // MARK: - view hierarchy object
-    
-    private var _rootController: RootController!
-    public var rootController: RootController {
-        get { _rootController }
-        set { _rootController = newValue }
-    }
-    
+}
+extension ColorPickerViewController: ViewHierarchyObject {
     public var dismissalPublisher: AnyPublisher<UIViewController, Never> {
         _dismissalPublisher.eraseToAnyPublisher()
     }

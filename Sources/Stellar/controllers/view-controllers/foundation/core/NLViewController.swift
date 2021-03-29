@@ -10,7 +10,7 @@ import UIKit
 import Combine
 
 open
-class NLViewController: UIViewController, ViewHierarchyObject {
+class NLViewController: UIViewController {
 	
 	/// Whether the view has appeared in the controller's lifetime.
 	private(set) var viewHasAppeared = false
@@ -33,15 +33,8 @@ class NLViewController: UIViewController, ViewHierarchyObject {
 			_dismissalPublisher.send(self)
 		}
 	}
-    
-    // MARK: - view hierarchy object
-    
-    private var _rootController: RootController!
-    public var rootController: RootController {
-        get { _rootController }
-        set { _rootController = newValue }
-    }
-    
+}
+extension NLViewController: ViewHierarchyObject {
     public var dismissalPublisher: AnyPublisher<UIViewController, Never> {
         _dismissalPublisher.eraseToAnyPublisher()
     }

@@ -10,23 +10,13 @@ import UIKit
 import SwiftUI
 import Combine
 
-/** A highly configurable list view controller.
+/** A highly configurable list view controller with robust layout options.
 */
-public
-final class ListViewController<Model: ListModeling>: NLViewController, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate {
+final
+class ListViewController<Model: SListModel, Configuration: ListViewControllerConfiguration>: NLViewController, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate where
+    Model.SectionType == Configuration.SectionType,
+    Model.ItemType == Configuration.ItemType {
 	
-	// -- typealiases
-	// data
-	public typealias SectionID = Model.SectionIdentifierType
-	public typealias ItemID = Model.ItemIdentifierType
-	// collection
-	public typealias Snapshot = Model.Snapshot
-	public typealias CollectionDataSource = UICollectionViewDiffableDataSource<SectionID, ItemID>
-	public typealias CellProvider = CollectionDataSource.CellProvider
-	// list
-	public typealias Configuration = ListConfiguration<SectionID, ItemID>
-	public typealias State = ListState<ItemID>
-
 	// -- collection view
 	// default list layout
 	private var defaultListLayoutConfiguration: UICollectionLayoutListConfiguration {
@@ -36,8 +26,8 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 			let itemID = self.itemInSnapshot(with: indexPath)
 			swipedItem = itemID
 			
-			if let swipeConfig = configuration.swipeActions
-				.leading(itemID, self) {
+            if let swipeConfig = configuration
+                .leadingSwipeActions(for: itemID) {
 				return swipeConfig
 					.bridgeToUISwipeActionsConfiguration(withDataForAction: self.dataForSwipeAction(_:))
 			}
@@ -49,8 +39,8 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 			let itemID = itemInSnapshot(with: indexPath)
 			swipedItem = itemID
 			
-			if let swipeConfig = configuration.swipeActions
-				.trailing(itemID, self) {
+			if let swipeConfig = configuration
+                .trailingSwipeActions(for: itemID) {
 				return swipeConfig
 					.bridgeToUISwipeActionsConfiguration(withDataForAction: self.dataForSwipeAction(_:))
 			}
@@ -60,50 +50,36 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 		}
 		
 		config.showsSeparators = false
-		
+        
 		return config
 	}
 	private var defaultListLayout: UICollectionViewLayout {
 		UICollectionViewCompositionalLayout.list(using: defaultListLayoutConfiguration)
 	}
 	private var collectionView: UICollectionView!
-	
+    private var collectionDataSource: CollectionDataSource!
+    
     // -- appearance defaults
-    public
     var backgroundColor: UIColor {
         didSet {
             collectionView.backgroundColor = backgroundColor
         }
     }
     
-	private lazy var collectionDataSource: CollectionDataSource = {
-		// Wrap the client cell provider in order to interface with DynamicHeightUpdating cells.
-		let wrappedCellProvider: CellProvider = { [unowned self] collectionView, indexPath, itemIdentifier -> UICollectionViewCell? in
-			let cell = self.cellProvider(collectionView, indexPath, itemIdentifier)
-			if let cell = cell {
-				if var dynamicCell = cell as? (UICollectionViewCell & DynamicSizeUpdating) {
-					dynamicCell.sizeDidChange = {
-						self.updateForCellSizeChanges(dynamicCell)
-					}
-				}
-				self.subscribeToResponderNotifierIfNeeded(cell)
-			}
-			return cell
-		}
-		return CollectionDataSource(collectionView: collectionView, cellProvider: wrappedCellProvider)
-	}()
-	private let cellProvider: CellProvider
-
 	// -- toolbar
 	private var toolbar: UIViewController?
 	
-	// -- list model
-	private let model: Model
-	
+    // -- configuration
 	/// Configuration used to control list behaviors and handle events.
-	private var configuration: Configuration { model.configuration }
-	private var snapshot: Snapshot { model.snapshot }
+	private var configuration: Configuration
 	
+    // -- model
+    private let listModel: Model
+    private var snapshot: Snapshot {
+        get { listModel.snapshotSubject.value }
+        set { listModel.snapshotSubject.value = newValue }
+    }
+    
 	// -- list state
 	/// The current state of the list.
 	private let listState: State
@@ -148,26 +124,48 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 	///   - listState: The state to initially apply to the list.
 	///   - layout: A custom layout. If nil, a default list layout will be used which applies the provided list configuration. If a custom layout is provided, some components of the list configuration will not be applied and it is up to the user to handle them, such as row swipe configuration. In general, if the layout includes properties which are also part of the list configuration, this controller will yield to the provided layout properties.
 	///   - cellProvider: A closure for returning configured cells.
-    public
-    init(listModel: Model, listState: State = .init(), layout: UICollectionViewLayout? = nil, backgroundColor: UIColor = .systemGroupedBackground, cellProvider: @escaping CellProvider) {
-		self.model = listModel
+    init<CellType>(configuration: Configuration, listModel: Model, listState: State = .init(), layout: UICollectionViewLayout? = nil, backgroundColor: UIColor = .systemGroupedBackground, cellRegistrationProvider: @escaping (SectionID, ItemID, State) -> UICollectionView.CellRegistration<CellType, ItemID>) where CellType: ConfigurableCollectionCell {
+		self.configuration = configuration
+        self.listModel = listModel
 		self.listState = listState
         self.backgroundColor = backgroundColor
-		self.cellProvider = cellProvider
-		
+        
 		super.init(nibName: nil, bundle: nil)
-		
+        
+        // create the collection view using the provided layout or default
 		if let layout = layout {
 			collectionView = makeCollectionView(with: layout)
 		}
 		else {
 			collectionView = makeCollectionView(with: defaultListLayout)
 		}
+        
+        self.collectionDataSource = .init(collectionView: collectionView, cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
+            // -- get registation and create cell
+            let cellRegistration = cellRegistrationProvider(self.sectionInSnapshot(with: indexPath),
+                                                            item,
+                                                            self.listState)
+            let cell = collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+            
+            // -- prepare cell
+            cell.sizeDidChange = {
+                self.updateForCellSizeChanges(cell)
+            }
+            
+            return cell
+        })
 		
 		subscribeToStateChanges()
-		let _ = { [weak self] in
-			self?.model.onSnapshotDidChange = self?.applySnapshot
-		}()
+        
+        // connect snapshot pipeline
+        self.listModel
+            .snapshotSubject
+            .receive(on: RunLoop.main)
+            .sink { [weak self] (updatedSnapshot: Snapshot) in
+                assert(self != nil, "Attempt to apply updated snapshot while self is nil.")
+                self?.applySnapshot(updatedSnapshot)
+            }
+            .store(in: &cancellables)
 	}
 	
 	private func subscribeToStateChanges() {
@@ -223,15 +221,15 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 	}
 	
 	/// Embeds the content in toolbar-style at the bottom of the list.
-	public
-    func toolbar<Content: View>(@ViewBuilder content: (State) -> Content) {
+    func toolbar<Content: View>(@ViewBuilder content: (State) -> Content) -> Self {
 		assert(!isViewLoaded, "Attempt to set toolbar after view has been loaded. This is not supported.")
 		self.toolbar = UIHostingController(rootView: content(self.listState))
+        return self
 	}
 
 	// MARK: - view lifecycle
 	
-    public override func viewDidLoad() {
+    override func viewDidLoad() {
 		super.viewDidLoad()
 		
 		embedView(collectionView)
@@ -253,22 +251,20 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 		}
 	}
 	
-    public override func viewWillAppear(_ animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		
 		if !viewHasAppeared,
-		   let initialFirstResponderItem = configuration.responding.initialFirstResponder?() {
+		   let initialFirstResponderItem = configuration.initialFirstResponder() {
 			updateFirstResponderToItem(initialFirstResponderItem)
 		}
 	}
 	
-	/// Updates subcriptions with the ResponderNotifier if possible.
+	/// Updates subscriptions with the ResponderNotifier if possible.
 	///
-	/// These subscriptions will be used for advanced responder chain behavior in combination with the list configuration. If the list configuration does not specify any item identifiers for becoming the subsequent first responder this method will simply return.
+	/// These subscriptions will be used for advanced responder chain behavior in combination with the list configuration.
 	private func subscribeToResponderNotifierIfNeeded(_ cell: UICollectionViewCell) {
 		if let responderNotifier = cell as? ResponderNotifier {
-			guard let subsequentFirstResponder = configuration.responding.subsequentFirstResponder else { return }
-			
 			let _ = { [unowned self] in
 				responderNotifier.didResignFirstResponderPublisher
 					.receive(on: DispatchQueue.main)
@@ -277,7 +273,8 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 							assertionFailure("Expected cached item id for first responder.")
 							return
 						}
-						if let nextResponderItem = subsequentFirstResponder(currentResponderItem) {
+						if let nextResponderItem =
+                            self.configuration.subsequentFirstResponder(following: currentResponderItem) {
 							self.updateFirstResponderToItem(nextResponderItem)
 						}
 						else {
@@ -293,87 +290,83 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 					.store(in: &responderDidRespondCancellables)
 			}()
 		}
-		else if configuration.responding.subsequentFirstResponder != nil {
-			debugPrint("\(self):")
-			debugPrint("Configuration provides closure for subsequent first responder but cell for initial first responder item identifier does not conform to ResponderNotifier, therefore nothing will happen.")
-			debugPrint("configuration: \(configuration)")
-			debugPrint("cell: \(cell)")
-		}
 	}
 	
 	// MARK: collection delegate
 
     // -- highlight
-    public func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
         
     }
     
-    public func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didUnhighlightItemAt indexPath: IndexPath) {
         
     }
     
 	// -- selection
 	
-    public func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+    func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        guard mode != .reordering else {
+            debugPrint(#function)
+            assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
+            return false
+        }
 		let itemID = itemInSnapshot(with: indexPath)
-		
-		let shouldSelect = configuration
-			.selection
-			.shouldSelect(itemID, mode)
-		if shouldSelect {
-			configuration
-				.selection
-				.willSelect(itemID)
-		}
-		return shouldSelect
+        let section = sectionInSnapshot(with: indexPath)
+        
+        if mode == .editing {
+            return configuration.canSelect(item: itemID, inSection: section)
+        }
+        else {
+            return configuration.canTap(item: itemID, inSection: section)
+        }
 	}
 
-    public func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard mode != .reordering else {
+            debugPrint(#function)
+            assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
+            return
+        }
 		let itemID = itemInSnapshot(with: indexPath)
 		let section = sectionInSnapshot(with: indexPath)
 		let isSectionHeader = (snapshot.headerForSection(section) == itemID)
 		
-		if isSectionHeader {
-			let isCollapsed = snapshot.isSectionCollapsed(section)
-			if isCollapsed {
-				if configuration.sections.shouldExpand(section, itemID, mode) {
-					configuration.sections.willExpand(section, itemID, mode)
-					
-					var updatedSnapshot = snapshot
-					updatedSnapshot.expandSection(section)
-					model.snapshot = updatedSnapshot
-				}
-			}
-			else {
-				if configuration.sections.shouldCollapse(section, itemID, mode) {
-					configuration.sections.willCollapse(section, itemID, mode)
-					
-					var updatedSnapshot = snapshot
-					updatedSnapshot.collapseSection(section)
-					model.snapshot = updatedSnapshot
-					
-					// remove selections in section.
-					editingSelections.subtract(snapshot.itemsIn(section))
-				}
-			}
-			collectionView.deselectItem(at: indexPath, animated: true)
-		}
-		else {
-			switch mode {
-				case .editing:
-					editingSelections.toggle(itemID)
-				case .normal:
-					collectionView.deselectItem(at: indexPath, animated: true)
-				case .reordering:
-					assertionFailure("selection was made during reordering")
-			}
-		}
-		
-		configuration.selection
-			.didSelect(itemID, self.mode, self)
+        // if editing, process as selection
+        if mode == .editing {
+            editingSelections.toggle(itemID)
+            configuration.didSelect(item: itemID, inSection: section)
+        }
+        // if not editing, process as tap (normal mode)
+        else {
+            // if section header, process as expand/collapse behavior
+            if isSectionHeader {
+                let isCollapsed = snapshot.isSectionCollapsed(section)
+                if isCollapsed {
+                    if configuration.canExpand(section: section, withHeader: itemID) {
+                        var updatedSnapshot = snapshot
+                        updatedSnapshot.expandSection(section)
+                        snapshot = updatedSnapshot
+                    }
+                }
+                else {
+                    if configuration.canCollapse(section: section, withHeader: itemID) {
+                        assert(editingSelections.isEmpty, "\(#function): editing selections exist in normal mode during a tap. state: \(listState).")
+                        var updatedSnapshot = snapshot
+                        updatedSnapshot.collapseSection(section)
+                        snapshot = updatedSnapshot
+                    }
+                }
+            }
+            // otherwise process as regular tap
+            else {
+                configuration.didTap(item: itemID, inSection: section)
+            }
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
 	}
 	
-    public func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
 		if mode == .editing {
 			let itemID = itemInSnapshot(with: indexPath)
 			editingSelections.remove(itemID)
@@ -382,14 +375,13 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 	
 	// -- drag
 	
-    public func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
+    func collectionView(_ collectionView: UICollectionView, itemsForBeginning session: UIDragSession, at indexPath: IndexPath) -> [UIDragItem] {
 		guard mode != .editing else { return [] }
 		
 		let draggedItem = itemInSnapshot(with: indexPath)
 		
 		guard configuration
-				.reordering
-				.canReorder(itemInSnapshot(with: indexPath))
+                .canReorder(item: itemInSnapshot(with: indexPath))
 		else { return [] }
 		
 		let sourceSection = sectionInSnapshot(with: indexPath)
@@ -406,13 +398,11 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 		}
 	}
 	
-    public func collectionView(_ collectionView: UICollectionView, dragSessionIsRestrictedToDraggingApplication session: UIDragSession) -> Bool {
+    func collectionView(_ collectionView: UICollectionView, dragSessionIsRestrictedToDraggingApplication session: UIDragSession) -> Bool {
 		true
 	}
 	
-    public func collectionView(_ collectionView: UICollectionView, dragSessionWillBegin session: UIDragSession) {
-		configuration.reordering
-			.willReorder()
+    func collectionView(_ collectionView: UICollectionView, dragSessionWillBegin session: UIDragSession) {
 		mode = .reordering
 		if dragItems.containsSection {
 			var dragSnapshot = snapshot
@@ -425,13 +415,14 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 	
 	// -- drop
 
-    public func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
+    func collectionView(_ collectionView: UICollectionView, canHandle session: UIDropSession) -> Bool {
 		collectionView.hasActiveDrag
 	}
 	
 	/// - Note: The drop proposal provided by this method is not guaranteed to be accurate when the performDrop method is subsequentally called.
-    public func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
-		debugPrint(destinationIndexPath)
+    /// destinationIndexPath will be nil when the drag location is not over any cells. If the drag location is at the end of a section, it might be equal to the count of items in the section.
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidUpdate session: UIDropSession, withDestinationIndexPath destinationIndexPath: IndexPath?) -> UICollectionViewDropProposal {
+        debugPrint(destinationIndexPath as Any)
 
 		// drag session is from external source which is not currently supported.
 		guard session.localDragSession != nil else {
@@ -466,8 +457,7 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 				return .init(operation: .forbidden)
 			}
 			guard configuration
-					.reordering
-					.canInsertItemIntoSection(draggedItem, destinationSection)
+                    .canInsertItemIntoSection(item: draggedItem, section: destinationSection)
 			else { return .init(operation: .forbidden, intent: .unspecified) }
 
 			// destination item exists at position
@@ -489,7 +479,7 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 		}
 	}
 	
-    public func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
+    func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
 		// drag session is from external source which is not currently supported.
 		guard coordinator.session.localDragSession != nil else { return }
 		// drag originated from an object that isn't the table view which isn't currently supported.
@@ -510,9 +500,6 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 			assert(!collectionDataSource.snapshot().sectionIdentifiers.contains(draggedSection), "Dragged section was not removed from table snapshot")
 			let destinationSection = sectionInSnapshot(with: destinationIndexPath)
 			
-			configuration.reordering
-				.willReorder()
-
 			// update snapshot
 			let oldSnapshot = snapshot
 			var newSnapshot = snapshot
@@ -524,14 +511,12 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 			else {
 				newSnapshot.move(dragItems.sections, before: destinationSection)
 			}
-			model.snapshot = newSnapshot
+			snapshot = newSnapshot
 			
-			configuration.reordering
-				.didReorder(
-					ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot)
-				)
-		}
-		// reordering item(s) only
+            configuration.didReorder(
+                with: ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot))
+        }
+        // reordering item(s) only
 		else {
 			guard let sourceItem = dragItems.items.first else {
 				debugPrint("expected drag items: \(dragItems)\n\(#line)")
@@ -541,28 +526,22 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 			let destinationSection = sectionInSnapshot(with: destinationIndexPath)
 			
 			guard configuration
-					.reordering
-					.canInsertItemIntoSection(sourceItem, destinationSection)
+                    .canInsertItemIntoSection(item: sourceItem, section: destinationSection)
 			else { return }
 			
 			// destination item exists at position
 			if let destinationItem = collectionDataSource.itemIdentifier(for: destinationIndexPath) {
 				
 				if snapshot.itemIsHeader(destinationItem) {
-					configuration.reordering
-						.willReorder()
-					
 					// update snapshot
 					let oldSnapshot = snapshot
 					var newSnapshot = snapshot
 					// insert items at beginning of section (after header item)
 					newSnapshot.moveItems(dragItems.items, after: destinationItem)
-					model.snapshot = newSnapshot
+					snapshot = newSnapshot
 
-					configuration.reordering
-						.didReorder(
-							ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot)
-						)
+                    configuration.didReorder(
+                        with: ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot))
 				}
 				// the destination is not a header position
 				else {
@@ -572,9 +551,6 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 					}
 					let sourceIndexPath = indexPath(for: draggedItem)
 					let sourceSection = sectionInSnapshot(with: sourceIndexPath)
-
-					configuration.reordering
-						.willReorder()
 
 					// update snapshot
 					let oldSnapshot = snapshot
@@ -592,35 +568,27 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 							newSnapshot.moveItems(dragItems.items, after: destinationItem) :
 							newSnapshot.moveItems(dragItems.items, before: destinationItem)
 					}
-					model.snapshot = newSnapshot
+					snapshot = newSnapshot
 
-					configuration.reordering
-						.didReorder(
-							ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot)
-						)
+                    configuration.didReorder(
+                        with: ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot))
 				}
 			}
 			// destination in table is a new position
 			// new index is being created in section == must be end of section
 			else {
-				configuration.reordering
-					.willReorder()
-				
 				// update snapshot
 				let oldSnapshot = snapshot
 				var newSnapshot = snapshot
 				newSnapshot.deleteItems(dragItems.items)
 				newSnapshot.appendItems(dragItems.items, to: destinationSection)
-				model.snapshot = newSnapshot
+				snapshot = newSnapshot
 
-				configuration.reordering
-					.didReorder(
-						ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot)
-					)
+                configuration.didReorder(
+                    with: ListReorderingTransaction(initialSnapshot: oldSnapshot, finalSnapshot: newSnapshot))
 			}
 			
-			configuration.reordering
-				.didInsertItemIntoSection(sourceItem, destinationSection)
+            configuration.didInsertItemIntoSection(item: sourceItem, section: destinationSection)
 		}
 		
 		// perform drop
@@ -631,7 +599,7 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
 		}
 	}
 	
-    public func collectionView(_ collectionView: UICollectionView, dropSessionDidEnd session: UIDropSession) {
+    func collectionView(_ collectionView: UICollectionView, dropSessionDidEnd session: UIDropSession) {
 		if dragItems.containsSection {
 			applySnapshot(snapshot)
 		}
@@ -641,7 +609,7 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
     
     // -- multiselection
     
-    public func collectionView(_ collectionView: UICollectionView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
+    func collectionView(_ collectionView: UICollectionView, shouldBeginMultipleSelectionInteractionAt indexPath: IndexPath) -> Bool {
         false
     }
     
@@ -664,14 +632,17 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
     }
     
     @objc
-    private func tapGestureDidUpdate(_ gesture: UITapGestureRecognizer) {
+    private
+    func tapGestureDidUpdate(_ gesture: UITapGestureRecognizer) {
         if gesture.state == .ended {
             let location = gesture.location(in: collectionView)
             updateDiscreteSelectionIn(location)
         }
     }
     
-    @objc func touchGestureDidUpdate(_ gesture: TouchGestureRecognizer) {
+    @objc
+    private
+    func touchGestureDidUpdate(_ gesture: TouchGestureRecognizer) {
         if gesture.state == .ended {
             let location = gesture.location(in: collectionView)
             updateDiscreteSelectionIn(location)
@@ -679,7 +650,8 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
     }
     
     /// Call to update a row if the location is within one. Selection state will be toggled in response to the discrete interaction. This is contrast to the continuous selection update which will check current multiselection session data.
-    private func updateDiscreteSelectionIn(_ location: CGPoint) {
+    private
+    func updateDiscreteSelectionIn(_ location: CGPoint) {
         if let indexPath = collectionView.indexPathForItem(at: location) {
             if let selections = collectionView.indexPathsForSelectedItems, selections.contains(indexPath) {
                 collectionView.deselectItem(at: indexPath, animated: true)
@@ -690,7 +662,8 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
         }
     }
 
-    private func handleContinuousSelectionIn(_ location: CGPoint) {
+    private
+    func handleContinuousSelectionIn(_ location: CGPoint) {
         // determine if a row has been selected
         guard let indexPath = collectionView.indexPathForItem(at: location) else { return }
         let item = itemInSnapshot(with: indexPath)
@@ -715,14 +688,16 @@ final class ListViewController<Model: ListModeling>: NLViewController, UICollect
         self.multiselectSessionData?.updatedItems.insert(item)
     }
 }
+
 // MARK: - convenience methods
-private extension ListViewController {
+private
+extension ListViewController {
 	
 	func itemInSnapshot(with indexPath: IndexPath) -> ItemID {
 		guard let itemID = collectionDataSource.itemIdentifier(for: indexPath) else {
 			debugPrint("Item identifier does not exist in collection view for index path: \(indexPath),")
-			debugPrint("collection view: \(collectionView)")
-			debugPrint("data source: \(collectionDataSource)")
+            debugPrint("collection view: \(collectionView.debugDescription)")
+            debugPrint("data source: \(collectionDataSource.debugDescription)")
 			fatalError()
 		}
 		return itemID
@@ -770,12 +745,14 @@ private extension ListViewController {
 	}
 	
 	/// A helper which consolidates bridging behavior for ListSwipeAction.
-	private func dataForSwipeAction(_ action: ListSwipeAction) -> (ListMode, ListSwipeAction.CompletionHandler) {
+	func dataForSwipeAction(_ action: ListSwipeAction) -> (ListMode, ListSwipeAction.CompletionHandler) {
 		(mode, { actionPerformed in })
 	}
 }
+
 // MARK: - view updates
-private extension ListViewController {
+private
+extension ListViewController {
 	
 	/// Handles a transition from a mode to a new mode.
 	func updateFrom(_ listMode: ListMode, to newMode: ListMode) {
@@ -792,7 +769,7 @@ private extension ListViewController {
                 
 			case .editing:
 				collectionView.isEditing = true
-                if configuration.selection.useMultiselectionPanGesture {
+                if configuration.multiselectionConfiguration.useMultiselectionPanGesture {
                     embedPanGestureRecognizer()
                 }
                 
@@ -886,9 +863,9 @@ private extension ListViewController {
         NSLayoutConstraint.activate([
             panRegionView.topAnchor.constraint(equalTo: view.topAnchor),
             panRegionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            panRegionView.widthAnchor.constraint(equalToConstant: CGFloat(configuration.selection.multiselectionPanGestureRegionSize))
+            panRegionView.widthAnchor.constraint(equalToConstant: CGFloat(configuration.multiselectionConfiguration.multiselectionPanGestureRegionSize))
         ])
-        if configuration.selection.multiselectionPanGestureEdge == .leading {
+        if configuration.multiselectionConfiguration.multiselectionPanGestureEdge == .leading {
             panRegionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
         }
         else {
@@ -931,7 +908,8 @@ private extension ListViewController {
 }
 
 // MARK: - snapshot updates
-private extension ListViewController {
+private
+extension ListViewController {
 
 	/** Applies the provided snapshot to the table data source which updates the table.
 	*/
@@ -952,7 +930,8 @@ private extension ListViewController {
 }
 
 // MARK: - private accessory types
-private extension ListViewController {
+private
+extension ListViewController {
 	
 	struct DragItems {
 		var sections: [SectionID] = []
@@ -971,7 +950,8 @@ private extension ListViewController {
     }
     
     /// A proxy class to delegate for gesture recognizers.
-    final class GestureRecognizerDelegate: NSObject, UIGestureRecognizerDelegate {
+    final
+    class GestureRecognizerDelegate: NSObject, UIGestureRecognizerDelegate {
         
         var panGesture: UIPanGestureRecognizer?
         var tapGesture: UITapGestureRecognizer?
@@ -1031,4 +1011,19 @@ extension ListDataDiffableSnapshot {
 		
 		return snapshot
 	}
+}
+
+// MARK: - typealiases
+extension ListViewController {
+    
+    // data
+    typealias SectionID = Model.SectionType
+    typealias ItemID = Model.ItemType
+    
+    // collection
+    typealias Snapshot = ListDataDiffableSnapshot<SectionID, ItemID>
+    
+    typealias CollectionDataSource = UICollectionViewDiffableDataSource<SectionID, ItemID>
+    
+    typealias State = ListState<ItemID>
 }

@@ -50,7 +50,7 @@ class CollapsibleTableSectionHeader: UITableViewHeaderFooterView {
 	}
 	
 	@objc func tapHeader(_ gestureRecognizer: UITapGestureRecognizer) {
-		guard let header = gestureRecognizer.view as? CollapsibleTableSectionHeader else {
+		guard let _ = gestureRecognizer.view as? CollapsibleTableSectionHeader else {
 			return
 		}
 		

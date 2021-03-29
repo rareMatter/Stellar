@@ -10,7 +10,7 @@ import UIKit
 
 /// Displays a button which shows a contexual menu containing provided actions.
 public
-struct ContextMenuButtonContentConfiguration: UIContentConfiguration, Equatable {
+struct ContextMenuButtonContentConfiguration: SContentConfiguration, Equatable {
 	
 	var title: String
 	var titleProperties: TextProperties

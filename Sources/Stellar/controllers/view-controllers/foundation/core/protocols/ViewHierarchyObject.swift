@@ -9,14 +9,11 @@
 import UIKit
 import Combine
 
-public typealias ViewController = ViewHierarchyObject
-
 /// Describes an object which performs notices when it has dismissed.
 public
 protocol ViewHierarchyObject: UIViewController {
     /// A publisher which posts after the view controller has dismissed itself or been dismissed externally.
     var dismissalPublisher: AnyPublisher<UIViewController, Never> { get }
-    var rootController: RootController { get set }
 }
 extension ViewHierarchyObject {
     

@@ -9,14 +9,14 @@ import UIKit
 
 /// A type-erased SView.
 struct AnySView: SView {
+
+    var id: UUID
     
-    var content: ViewHierarchyObject {
-        contentProvider()
-    }
-    private let contentProvider: () -> ViewHierarchyObject
+    var content: ViewHierarchyObject
     
     init<View: SView>(view: View) {
-        self.contentProvider = { view.content }
+        self.id = view.id
+        self.content = view.content
     }
     
     init() {

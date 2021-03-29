@@ -1,16 +1,15 @@
 //
-//  NLHostingController.swift
-//  Stellar
+//  SSplitViewController.swift
+//  
 //
-//  Created by Jesse Spencer on 2/15/21.
-//  Copyright © 2021 Jesse Spencer. All rights reserved.
+//  Created by Jesse Spencer on 3/12/21.
 //
 
-import SwiftUI
+import UIKit
 import Combine
 
-public
-final class NLHostingController<RootView: View>: UIHostingController<RootView>, ViewHierarchyObject {
+class SSplitViewController: UISplitViewController, ViewHierarchyObject {
+
     /// A publisher for ViewControllerDismissalNotifier conformance.
     private let _dismissalPublisher = PassthroughSubject<UIViewController, Never>()
     public var dismissalPublisher: AnyPublisher<UIViewController, Never> {
@@ -20,7 +19,7 @@ final class NLHostingController<RootView: View>: UIHostingController<RootView>, 
     /// Whether the controller has been dismissed in its lifetime.
     private(set) var didDismiss = false
     
-    override public func viewDidDisappear(_ animated: Bool) {
+    public override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
         if isDismissing || containerIsDismissing {
             didDismiss = true

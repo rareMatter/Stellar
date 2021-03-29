@@ -12,8 +12,10 @@ import Combine
 
 /// Displays a leading view before a text editor view.
 public
-struct LeadingViewTextEditorContentConfiguration: UIContentConfiguration, Equatable {
-	
+struct LeadingViewTextEditorContentConfiguration: SDynamicContentConfiguration {
+
+    public var sizeDidChange: () -> Void = { debugPrint("Blank `sizeDidChange` handler called.") }
+    
 	public var leadingView: UIView
 	
     public var text: String
@@ -28,7 +30,12 @@ struct LeadingViewTextEditorContentConfiguration: UIContentConfiguration, Equata
         self.font = font
     }
     
-    public var textViewConfiguration = TextViewConfiguration()
+    private var textViewConfiguration: TextViewConfiguration = {
+        var config = TextViewConfiguration()
+        config.isEditable = true
+        config.isScrollable = false
+        return config
+    }()
 	
     public func makeContentView() -> UIView & UIContentView {
 		ContentView(leadingViewTextEditorContentConfiguration: self)
@@ -38,6 +45,39 @@ struct LeadingViewTextEditorContentConfiguration: UIContentConfiguration, Equata
 		self
 	}
 }
+
+// MARK: - equatable
+extension LeadingViewTextEditorContentConfiguration: Equatable {
+    
+    public
+    static
+    func ==(lhs: LeadingViewTextEditorContentConfiguration, rhs: LeadingViewTextEditorContentConfiguration) -> Bool {
+        lhs.leadingView == rhs.leadingView &&
+        lhs.text == rhs.text &&
+        lhs.placeholderText == rhs.placeholderText &&
+        lhs.font == rhs.font
+    }
+}
+
+// MARK: - api
+public
+extension LeadingViewTextEditorContentConfiguration {
+    
+    func onTextChange(_ handler: @escaping (String) -> Void) -> Self {
+        self.textViewConfiguration.delegate.didChange = { textView in
+            sizeDidChange()
+            handler(textView.text)
+        }
+        return self
+    }
+    
+    func inputAccessory(_ view: UIView) -> Self {
+        var modified = self
+        modified.textViewConfiguration.inputAccessoryView = view
+        return modified
+    }
+}
+
 // MARK: - content view
 private
 extension LeadingViewTextEditorContentConfiguration {

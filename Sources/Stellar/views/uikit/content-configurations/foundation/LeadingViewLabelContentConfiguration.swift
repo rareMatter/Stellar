@@ -11,7 +11,7 @@ import SnapKit
 
 /// Displays a leading view before a label.
 public
-struct LeadingViewLabelContentConfiguration: UIContentConfiguration, Equatable {
+struct LeadingViewLabelContentConfiguration: SContentConfiguration, Equatable {
 	
 	public var leadingView: UIView
 	/// Whether the leading view should be vertically aligned to the label using first baselines. If false, the views will be aligned by their centers.

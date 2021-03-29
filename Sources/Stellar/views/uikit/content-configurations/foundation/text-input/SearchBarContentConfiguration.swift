@@ -10,18 +10,20 @@ import UIKit
 
 /// Displays an interactive search bar.
 public
-struct SearchBarContentConfiguration: UIContentConfiguration {
+struct SearchBarContentConfiguration: SDynamicContentConfiguration {
 	
+    public var sizeDidChange: () -> Void = { debugPrint("Blank `sizeDidChange` handler called.") }
+    
     public var placeholderText: String
-    public var delegate: UISearchBarDelegate?
     public var style: UISearchBar.Style
-	
+
     public
-    init(placeholderText: String, delegate: UISearchBarDelegate? = nil, style: UISearchBar.Style = .minimal) {
+    init(placeholderText: String, style: UISearchBar.Style = .minimal) {
         self.placeholderText = placeholderText
-        self.delegate = delegate
         self.style = style
     }
+    
+    private var searchBarDelegateConfiguration: SSearchBarDelegateConfiguration = .init()
     
     public func makeContentView() -> UIView & UIContentView {
 		ContentView(configuration: self)
@@ -31,8 +33,25 @@ struct SearchBarContentConfiguration: UIContentConfiguration {
 		self
 	}
 }
-private extension SearchBarContentConfiguration {
-	final class ContentView: UIView, UIContentView {
+
+// MARK: - api
+public
+extension SearchBarContentConfiguration {
+    
+    func onSearchTextChange(_ handler: @escaping (String) -> Void) -> Self {
+        searchBarDelegateConfiguration.searchTextDidChangeHandler = { searchBar in
+            sizeDidChange()
+            handler(searchBar.text ?? "")
+        }
+        return self
+    }
+}
+
+// MARK: - content view
+private
+extension SearchBarContentConfiguration {
+	final
+    class ContentView: UIView, UIContentView {
 		
 		// -- configuration
 		
@@ -78,7 +97,7 @@ private extension SearchBarContentConfiguration {
 		// -- view lifecycle
 		
 		private func updateViewState() {
-			searchBar.delegate = searchBarContentConfiguration.delegate
+            searchBar.delegate = searchBarContentConfiguration.searchBarDelegateConfiguration
 			searchBar.searchBarStyle = searchBarContentConfiguration.style
 			searchBar.placeholder = searchBarContentConfiguration.placeholderText
 		}
@@ -100,12 +119,12 @@ private extension SearchBarContentConfiguration {
 extension SearchBarContentConfiguration: Hashable {
     public static func ==(_ left: SearchBarContentConfiguration, _ right: SearchBarContentConfiguration) -> Bool {
 		left.placeholderText == right.placeholderText &&
-			left.delegate === right.delegate &&
+			left.searchBarDelegateConfiguration === right.searchBarDelegateConfiguration &&
 			left.style == right.style
 	}
     public func hash(into hasher: inout Hasher) {
 		hasher.combine(placeholderText)
-		hasher.combine(delegate?.hash)
+		hasher.combine(searchBarDelegateConfiguration.hash)
 		hasher.combine(style)
 	}
 }
