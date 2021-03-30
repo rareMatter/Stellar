@@ -1,5 +1,5 @@
 //
-//  TextViewDelegateConfiguration.swift
+//  STextViewDelegate.swift
 //  Stellar
 //
 //  Created by Jesse Spencer on 11/6/20.
@@ -11,10 +11,7 @@ import Combine
 
 /// Delegates for a UITextView and forwards requests through closures. Events are also published through corresponding publishers.
 final
-class TextViewDelegateConfiguration: NSObject {
-	
-    typealias TextViewRequestHandler = (_ textView: UITextView) -> Bool
-    typealias TextViewEventHandler = (UITextView) -> Void
+class STextViewDelegate: NSObject {
 	
 	// -- editing
     var shouldBeginEditing: TextViewRequestHandler = { _ in true }
@@ -35,8 +32,7 @@ class TextViewDelegateConfiguration: NSObject {
 }
 
 // MARK: - delegate
-
-extension TextViewDelegateConfiguration: UITextViewDelegate {
+extension STextViewDelegate: UITextViewDelegate {
     // -- editing
     
     func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
@@ -66,4 +62,11 @@ extension TextViewDelegateConfiguration: UITextViewDelegate {
         didChangeSelection(textView)
         didChangeSelectionPublisher.send(textView)
     }
+}
+
+// MARK: - typealiases
+extension STextViewDelegate {
+
+    typealias TextViewRequestHandler = (_ textView: UITextView) -> Bool
+    typealias TextViewEventHandler = (UITextView) -> Void
 }

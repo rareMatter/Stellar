@@ -9,7 +9,7 @@
 import UIKit
 
 struct TextViewConfiguration: Equatable {
-    var delegate: TextViewDelegateConfiguration = .init()
+    var delegate: STextViewDelegate = .init()
     var isEditable: Bool = true
     var isScrollable: Bool = true
     var inputAccessoryView: UIView?

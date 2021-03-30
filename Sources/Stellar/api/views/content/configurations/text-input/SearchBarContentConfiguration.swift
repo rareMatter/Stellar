@@ -23,7 +23,7 @@ struct SearchBarContentConfiguration: SDynamicContentConfiguration {
         self.style = style
     }
     
-    private var searchBarDelegateConfiguration: SSearchBarDelegateConfiguration = .init()
+    private var searchBarDelegateConfiguration: SSearchBarDelegate = .init()
     
     public func makeContentView() -> UIView & UIContentView {
 		ContentView(configuration: self)
@@ -39,7 +39,7 @@ public
 extension SearchBarContentConfiguration {
     
     func onSearchTextChange(_ handler: @escaping (String) -> Void) -> Self {
-        searchBarDelegateConfiguration.searchTextDidChangeHandler = { searchBar in
+        searchBarDelegateConfiguration.onTextChange = { searchBar in
             sizeDidChange()
             handler(searchBar.text ?? "")
         }
