@@ -8,22 +8,62 @@
 
 import UIKit
 
-/// Displays an interactive search bar.
+/// An interactive search bar.
 public
 struct SearchBarContentConfiguration: SDynamicContentConfiguration {
 	
-    public var sizeDidChange: () -> Void = { debugPrint("Blank `sizeDidChange` handler called.") }
+    public var sizeDidChange: () -> Void = { debugPrint("Blank `sizeDidChange` handler called.") } {
+        didSet {
+            // update delegate
+            searchBarDelegateConfiguration.onTextChange = { [onSearch, sizeDidChange] searchBar in
+                sizeDidChange()
+                onSearch(searchBar.text ?? "")
+            }
+        }
+    }
     
     public var placeholderText: String
     public var style: UISearchBar.Style
 
+    // search bar delegate
+    private var searchBarDelegateConfiguration: SSearchBarDelegate = .init()
+    
+    // search handlers
+    private
+    let onSearch: (String) -> Void
+    private
+    let onSearchEnded: () -> Void
+    
     public
-    init(placeholderText: String, style: UISearchBar.Style = .minimal) {
+    init(placeholderText: String = "Search...", style: UISearchBar.Style = .minimal, onSearch: @escaping (String) -> Void, onSearchEnded: @escaping () -> Void) {
         self.placeholderText = placeholderText
         self.style = style
+        self.onSearch = onSearch
+        self.onSearchEnded = onSearchEnded
+        
+        // prepare search bar delegate
+        searchBarDelegateConfiguration.didBeginEditing = { searchBar in
+            searchBar.setShowsCancelButton(true, animated: true)
+            onSearch(searchBar.text ?? "")
+        }
+        searchBarDelegateConfiguration.onTextChange = { [sizeDidChange] searchBar in
+            sizeDidChange()
+            onSearch(searchBar.text ?? "")
+        }
+        searchBarDelegateConfiguration.onSearchClicked = { searchBar in
+            searchBar.endEditing(true)
+        }
+        searchBarDelegateConfiguration.didEndEditing = { searchBar in
+            searchBar.setShowsCancelButton(false, animated: true)
+            onSearch(searchBar.searchTextField.text ?? "")
+        }
+        searchBarDelegateConfiguration.onCancel = { searchBar in
+            searchBar.searchTextField.text = nil
+            searchBar.setShowsCancelButton(false, animated: true)
+            searchBar.endEditing(true)
+            onSearchEnded()
+        }
     }
-    
-    private var searchBarDelegateConfiguration: SSearchBarDelegate = .init()
     
     public func makeContentView() -> UIView & UIContentView {
 		ContentView(configuration: self)
@@ -32,19 +72,6 @@ struct SearchBarContentConfiguration: SDynamicContentConfiguration {
     public func updated(for state: UIConfigurationState) -> SearchBarContentConfiguration {
 		self
 	}
-}
-
-// MARK: - api
-public
-extension SearchBarContentConfiguration {
-    
-    func onSearchTextChange(_ handler: @escaping (String) -> Void) -> Self {
-        searchBarDelegateConfiguration.onTextChange = { searchBar in
-            sizeDidChange()
-            handler(searchBar.text ?? "")
-        }
-        return self
-    }
 }
 
 // MARK: - content view

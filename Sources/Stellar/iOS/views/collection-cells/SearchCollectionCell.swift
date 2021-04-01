@@ -13,7 +13,12 @@ public
 final class SearchCollectionCell: UICollectionViewCell {
     
     public func defaultSearchContentConfiguration() -> SearchBarContentConfiguration {
-		.init(placeholderText: "Find something...")
+        .init(placeholderText: "Find something...") { (_) in
+            
+        }
+        onSearchEnded: {
+            
+        }
 	}
     public var searchBarContentConfiguration: SearchBarContentConfiguration {
 		get { searchContentView.configuration as! SearchBarContentConfiguration }
