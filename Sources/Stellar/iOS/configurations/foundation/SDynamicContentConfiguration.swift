@@ -7,6 +7,7 @@
 
 import Foundation
 
+#warning("TODO: This will become internal when content configurations have become internal.")
 /// A content configuration which can change size dynamically.
 public
 protocol SDynamicContentConfiguration: SContentConfiguration, SDynamicContentContainer {}

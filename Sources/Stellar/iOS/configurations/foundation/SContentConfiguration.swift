@@ -7,6 +7,7 @@
 
 import UIKit
 
+#warning("TODO: This will become internal when content configurations have become internal.")
 /// A content configuration used with SViews.
 public
 protocol SContentConfiguration: UIContentConfiguration {}

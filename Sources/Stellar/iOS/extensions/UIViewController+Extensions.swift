@@ -10,6 +10,7 @@ import UIKit
 import SnapKit
 
 // MARK: - presentation
+#warning("TODO: this should probably be internal.")
 public
 extension UIViewController {
 	
@@ -30,6 +31,7 @@ extension UIViewController {
 }
 
 // MARK: - Embedding views
+#warning("TODO: this should probably be internal.")
 public
 extension UIViewController {
 	/// Adds a view as the root subview of the receiver.
