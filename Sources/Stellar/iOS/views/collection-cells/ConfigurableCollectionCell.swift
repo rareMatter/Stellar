@@ -31,6 +31,22 @@ class ConfigurableCollectionCell: UICollectionViewListCell, SDynamicContentConta
     /// - Warning: Only call this closure from the main thread - it is UI updating
     var sizeDidChange: () -> Void = { debugPrint("Blank `sizeDidChange` handler called.") }
 	
+    
+    // -- init
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        // Disable automatic updates to apply them manually in updateConfiguration(using:), according to documentation.
+        automaticallyUpdatesContentConfiguration = false
+        automaticallyUpdatesBackgroundConfiguration = false
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
 	/// Updates the cell configuration using the provided state. Don't call this method directly, instead call setNeedsUpdateConfiguration() to schedule an update if state has changed which affects cell content configuration.
 	/// - Note: This method calls the configuration update handler.
     override
