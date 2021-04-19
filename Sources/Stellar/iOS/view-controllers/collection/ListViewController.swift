@@ -306,64 +306,11 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
 	// -- selection
 	
     func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        guard mode != .reordering else {
-            debugPrint(#function)
-            assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
-            return false
-        }
-		let itemID = itemInSnapshot(with: indexPath)
-        let section = sectionInSnapshot(with: indexPath)
-        
-        if mode == .editing {
-            return configuration.canSelect(item: itemID, inSection: section)
-        }
-        else {
-            return configuration.canTap(item: itemID, inSection: section)
-        }
+        shouldSelect(indexPath)
 	}
 
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard mode != .reordering else {
-            debugPrint(#function)
-            assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
-            return
-        }
-		let itemID = itemInSnapshot(with: indexPath)
-		let section = sectionInSnapshot(with: indexPath)
-		let isSectionHeader = (snapshot.headerForSection(section) == itemID)
-		
-        // if editing, process as selection
-        if mode == .editing {
-            editingSelections.toggle(itemID)
-            configuration.didSelect(item: itemID, inSection: section)
-        }
-        // if not editing, process as tap (normal mode)
-        else {
-            // if section header, process as expand/collapse behavior
-            if isSectionHeader {
-                let isCollapsed = snapshot.isSectionCollapsed(section)
-                if isCollapsed {
-                    if configuration.canExpand(section: section, withHeader: itemID) {
-                        var updatedSnapshot = snapshot
-                        updatedSnapshot.expandSection(section)
-                        snapshot = updatedSnapshot
-                    }
-                }
-                else {
-                    if configuration.canCollapse(section: section, withHeader: itemID) {
-                        assert(editingSelections.isEmpty, "\(#function): editing selections exist in normal mode during a tap. state: \(listState).")
-                        var updatedSnapshot = snapshot
-                        updatedSnapshot.collapseSection(section)
-                        snapshot = updatedSnapshot
-                    }
-                }
-            }
-            // otherwise process as regular tap
-            else {
-                configuration.didTap(item: itemID, inSection: section)
-            }
-            collectionView.deselectItem(at: indexPath, animated: true)
-        }
+        handleSelection(at: indexPath)
 	}
 	
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
@@ -613,14 +560,80 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
         false
     }
     
-    // MARK: - multiselection handlers
+    // MARK: - multiselection
     
+    /// Creates and embeds gesture recognizers needed for multiselection interactions. Current configuration state is used for setup.
+    func startMultiselectionGestureRecognizers() {
+        guard panGesture == nil else {
+            assertionFailure("Found existing pan gesture recognizer when attempting to embed a new one.")
+            return
+        }
+        guard panRegionView == nil else {
+            assertionFailure("Found existing pan region view when attempting to embed a new one.")
+            return
+        }
+        
+        // Create pan region view
+        panRegionView = .init()
+        guard let panRegionView = self.panRegionView else { fatalError() }
+        view.addSubview(panRegionView)
+        panRegionView.translatesAutoresizingMaskIntoConstraints = false
+        panRegionView.backgroundColor = .clear
+        NSLayoutConstraint.activate([
+            panRegionView.topAnchor.constraint(equalTo: view.topAnchor),
+            panRegionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            panRegionView.widthAnchor.constraint(equalToConstant: CGFloat(configuration.multiselectionConfiguration.multiselectionPanGestureRegionSize))
+        ])
+        if configuration.multiselectionConfiguration.multiselectionPanGestureEdge == .leading {
+            panRegionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
+        }
+        else {
+            panRegionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
+        }
+        
+        // Add pan gesture
+        panGesture = .init(target: self, action: #selector(self.multiselectionPanGestureDidUpdate(_:)))
+        guard let panGesture = self.panGesture else { fatalError() }
+        panGesture.delegate = gestureRecognizerDelegate
+        panGesture.maximumNumberOfTouches = 1
+        panGesture.minimumNumberOfTouches = 1
+        panRegionView.addGestureRecognizer(panGesture)
+        
+        // Add tap gesture
+        tapGesture = .init(target: self, action: #selector(self.multiselectionTapGestureDidUpdate(_:)))
+        guard let tapGesture = self.tapGesture else { fatalError() }
+        tapGesture.delegate = gestureRecognizerDelegate
+        tapGesture.numberOfTouchesRequired = 1
+        tapGesture.numberOfTapsRequired = 1
+        panRegionView.addGestureRecognizer(tapGesture)
+        
+        // touch gesture
+        /* Suspened until further dev. Needs advanced delegation to coordinate with taps.
+         touchGesture = .init(target: self, action: #selector(self.multiselectionTouchGestureDidUpdate(_:)))
+         guard let touchGesture = self.touchGesture else { fatalError() }
+         touchGesture.delegate = gestureRecognizerDelegate
+         panRegionView.addGestureRecognizer(touchGesture)
+         */
+    }
+    
+    /// Removes gesture recognizers which were added by `startMultiselectionGestureRecognizers()`, if existing.
+    func removeMultiselectionGestureRecognizers() {
+        guard let panRegionView = self.panRegionView else { return }
+        panRegionView.removeFromSuperview()
+        self.panRegionView = nil
+        self.panGesture = nil
+        self.tapGesture = nil
+        self.touchGesture = nil
+    }
+    
+    /// Handles gesture interactions for the multiselection pan.
     @objc
-    private func panGestureDidUpdate(_ panGesture: UIPanGestureRecognizer) {
+    private
+    func multiselectionPanGestureDidUpdate(_ panGesture: UIPanGestureRecognizer) {
         switch panGesture.state {
             case .began, .changed:
                 let location = panGesture.location(in: collectionView)
-                handleContinuousSelectionIn(location)
+                handleContinuousSelectionAt(collectionViewLocation: location)
             
             case .ended, .cancelled, .failed:
                 // end continuous session
@@ -631,61 +644,140 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
         }
     }
     
+    /// Handles gesture interactions for the multiselection tap.
     @objc
     private
-    func tapGestureDidUpdate(_ gesture: UITapGestureRecognizer) {
+    func multiselectionTapGestureDidUpdate(_ gesture: UITapGestureRecognizer) {
+        // When the gesture ends, determine the location within the collection view and call the appropriate update method.
         if gesture.state == .ended {
-            let location = gesture.location(in: collectionView)
-            updateDiscreteSelectionIn(location)
+            handleDiscreteSelectionAt(collectionViewLocation:
+                                        gesture.location(in: collectionView))
         }
     }
     
+    /// Handles gesture interactions for the multiselection touch.
     @objc
     private
-    func touchGestureDidUpdate(_ gesture: TouchGestureRecognizer) {
+    func multiselectionTouchGestureDidUpdate(_ gesture: TouchGestureRecognizer) {
+        // When the gesture ends, determine the location within the collection view and call the appropriate update method.
         if gesture.state == .ended {
-            let location = gesture.location(in: collectionView)
-            updateDiscreteSelectionIn(location)
+            handleDiscreteSelectionAt(collectionViewLocation:
+                                        gesture.location(in: collectionView))
         }
     }
     
-    /// Call to update a row if the location is within one. Selection state will be toggled in response to the discrete interaction. This is contrast to the continuous selection update which will check current multiselection session data.
+    /// This method handles a selection at the collectionView location and performs updates if needed.
+    /// - Parameter collectionViewLocation: A location within the collection view's coordinate system.
     private
-    func updateDiscreteSelectionIn(_ location: CGPoint) {
+    func handleDiscreteSelectionAt(collectionViewLocation location: CGPoint) {
         if let indexPath = collectionView.indexPathForItem(at: location) {
-            if let selections = collectionView.indexPathsForSelectedItems, selections.contains(indexPath) {
-                collectionView.deselectItem(at: indexPath, animated: true)
-            }
-            else {
-                collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init())
+            if shouldSelect(indexPath) {
+                handleSelection(at: indexPath)
             }
         }
     }
-
+    
+    /// This method handles a selection at the collectionView location and performs updates if needed.
     private
-    func handleContinuousSelectionIn(_ location: CGPoint) {
+    func handleContinuousSelectionAt(collectionViewLocation location: CGPoint) {
         // determine if a row has been selected
         guard let indexPath = collectionView.indexPathForItem(at: location) else { return }
-        let item = itemInSnapshot(with: indexPath)
         
-        // begin a new session if needed
-        if self.multiselectSessionData == nil {
-            multiselectSessionData = .init(isSelecting: !listState.editingSelections.contains(item))
+        if shouldSelect(indexPath) {
+            handleSelection(at: indexPath, isContinuous: true)
         }
+    }
+}
+
+// MARK: - selection handlers
+private
+extension ListViewController {
+    
+    /// Determines whether the index path should be selected.
+    func shouldSelect(_ indexPath: IndexPath) -> Bool {
+        guard mode != .reordering else {
+            debugPrint(#function)
+            assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
+            return false
+        }
+        let itemID = itemInSnapshot(with: indexPath)
+        let section = sectionInSnapshot(with: indexPath)
         
-        guard let sessionData = self.multiselectSessionData else { fatalError("Session should exist") }
-        // Check if button has already been updated.
-        guard !sessionData.updatedItems.contains(item) else { return }
-        
-        // update selections
-        if sessionData.isSelecting {
-            listState.editingSelections.insert(item)
+        if mode == .editing {
+            return configuration.canSelect(item: itemID, inSection: section)
         }
         else {
-            listState.editingSelections.remove(item)
+            return configuration.canTap(item: itemID, inSection: section)
         }
+    }
+    
+    /// Handles a selection by performing needed updates.
+    /// - Parameter isContinuous: Whether the selection is part of a continuous multiselection gesture. If true, selections will be updated according to the multiselection session data. If false, selections will simply be toggled using current selection state.
+    func handleSelection(at indexPath: IndexPath, isContinuous continuous: Bool = false) {
+        guard mode != .reordering else {
+            debugPrint(#function)
+            assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
+            return
+        }
+        let item = itemInSnapshot(with: indexPath)
+        let section = sectionInSnapshot(with: indexPath)
+        let isSectionHeader = (snapshot.headerForSection(section) == item)
         
-        self.multiselectSessionData?.updatedItems.insert(item)
+        // if editing, process as selection
+        if mode == .editing {
+            if continuous {
+                // Update the selection according to multiselection session.
+                // begin a new session if needed
+                if self.multiselectSessionData == nil {
+                    multiselectSessionData = .init(isSelecting: !listState.editingSelections.contains(item))
+                }
+                
+                guard let sessionData = self.multiselectSessionData else { fatalError("Session should exist") }
+                // Check if button has already been updated.
+                guard !sessionData.updatedItems.contains(item) else { return }
+                
+                // update selections
+                if sessionData.isSelecting {
+                    listState.editingSelections.insert(item)
+                }
+                else {
+                    listState.editingSelections.remove(item)
+                }
+                
+                self.multiselectSessionData?.updatedItems.insert(item)
+            }
+            else {
+                editingSelections.toggle(item)
+                configuration.didSelect(item: item, inSection: section)
+            }
+        }
+        // if not editing, process as tap (normal mode)
+        else {
+            // if section header, process as expand/collapse behavior
+            if isSectionHeader {
+                let isCollapsed = snapshot.isSectionCollapsed(section)
+                if isCollapsed {
+                    if configuration.canExpand(section: section, withHeader: item) {
+                        var updatedSnapshot = snapshot
+                        updatedSnapshot.expandSection(section)
+                        snapshot = updatedSnapshot
+                    }
+                }
+                else {
+                    if configuration.canCollapse(section: section, withHeader: item) {
+                        assert(editingSelections.isEmpty, "\(#function): editing selections exist in normal mode during a tap. state: \(listState).")
+                        var updatedSnapshot = snapshot
+                        updatedSnapshot.collapseSection(section)
+                        snapshot = updatedSnapshot
+                    }
+                }
+            }
+            // otherwise process as regular tap
+            else {
+                configuration.didTap(item: item, inSection: section)
+            }
+            collectionView.deselectItem(at: indexPath, animated: true)
+        }
     }
 }
 
@@ -754,6 +846,8 @@ extension ListViewController {
 private
 extension ListViewController {
 	
+    // -- modes
+    
 	/// Handles a transition from a mode to a new mode.
 	func updateFrom(_ listMode: ListMode, to newMode: ListMode) {
 		validateModeTransition(from: listMode, to: newMode)
@@ -765,16 +859,16 @@ extension ListViewController {
 		switch mode {
 			case .normal:
 				collectionView.isEditing = false
-				removeMultiselectionInteraction()
+				removeMultiselectionGestureRecognizers()
                 
 			case .editing:
 				collectionView.isEditing = true
                 if configuration.multiselectionConfiguration.useMultiselectionPanGesture {
-                    embedPanGestureRecognizer()
+                    startMultiselectionGestureRecognizers()
                 }
                 
 			default:
-				removeMultiselectionInteraction()
+				removeMultiselectionGestureRecognizers()
 		}
 	}
 	
@@ -794,6 +888,8 @@ extension ListViewController {
 		}
 	}
 	
+    // -- cells and subviews
+    
 	/// Updates views using the selections.
 	func updateSelections(from currentSelections: Set<ItemID>, to newSelections: Set<ItemID>) {
 		let removedSelections = currentSelections.subtracting(newSelections)
@@ -842,69 +938,6 @@ extension ListViewController {
 			debugPrint("Could not retrieve cell for item ID: \(respondingItem)")
 		}
 	}
-    
-    /// Creates and adds a pan gesture recognizer to the view using current configuration state.
-    func embedPanGestureRecognizer() {
-        guard panGesture == nil else {
-            assertionFailure("Found existing pan gesture recognizer when attempting to embed a new one.")
-            return
-        }
-        guard panRegionView == nil else {
-            assertionFailure("Found existing pan region view when attempting to embed a new one.")
-            return
-        }
-        
-        // Create pan region view
-        panRegionView = .init()
-        guard let panRegionView = self.panRegionView else { fatalError() }
-        view.addSubview(panRegionView)
-        panRegionView.translatesAutoresizingMaskIntoConstraints = false
-        panRegionView.backgroundColor = .clear
-        NSLayoutConstraint.activate([
-            panRegionView.topAnchor.constraint(equalTo: view.topAnchor),
-            panRegionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            panRegionView.widthAnchor.constraint(equalToConstant: CGFloat(configuration.multiselectionConfiguration.multiselectionPanGestureRegionSize))
-        ])
-        if configuration.multiselectionConfiguration.multiselectionPanGestureEdge == .leading {
-            panRegionView.leadingAnchor.constraint(equalTo: view.leadingAnchor).isActive = true
-        }
-        else {
-            panRegionView.trailingAnchor.constraint(equalTo: view.trailingAnchor).isActive = true
-        }
-        
-        // Add pan gesture
-        panGesture = .init(target: self, action: #selector(self.panGestureDidUpdate(_:)))
-        guard let panGesture = self.panGesture else { fatalError() }
-        panGesture.delegate = gestureRecognizerDelegate
-        panGesture.maximumNumberOfTouches = 1
-        panGesture.minimumNumberOfTouches = 1
-        panRegionView.addGestureRecognizer(panGesture)
-        
-        // Add tap gesture
-        tapGesture = .init(target: self, action: #selector(self.tapGestureDidUpdate(_:)))
-        guard let tapGesture = self.tapGesture else { fatalError() }
-        tapGesture.delegate = gestureRecognizerDelegate
-        tapGesture.numberOfTouchesRequired = 1
-        tapGesture.numberOfTapsRequired = 1
-        panRegionView.addGestureRecognizer(tapGesture)
-        
-        // touch gesture
-        /* Suspened until further dev. Needs advanced delegation to coordinate with taps.
-        touchGesture = .init(target: self, action: #selector(self.touchGestureDidUpdate(_:)))
-        guard let touchGesture = self.touchGesture else { fatalError() }
-        touchGesture.delegate = gestureRecognizerDelegate
-        panRegionView.addGestureRecognizer(touchGesture)
-         */
-    }
-    /// Removes and cleans up the pan gesture recognizer, if existing.
-    func removeMultiselectionInteraction() {
-        guard let panRegionView = self.panRegionView else { return }
-        panRegionView.removeFromSuperview()
-        self.panRegionView = nil
-        self.panGesture = nil
-        self.tapGesture = nil
-        self.touchGesture = nil
-    }
 }
 
 // MARK: - snapshot updates
