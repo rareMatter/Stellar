@@ -163,5 +163,5 @@ extension SListView {
     typealias SubsequentFirstResponderHandler = (_ currentResponder: ItemType) -> ItemType?
     
     public
-    typealias RowProvider = (_ section: Model.SectionType, _ item: Model.ItemType, _ listState: ListState<ItemType>, _ configurationState: UICellConfigurationState) -> SListRowData
+    typealias RowProvider = (_ section: Model.SectionType, _ item: Model.ItemType, _ listState: ListState<ItemType>, _ configurationState: UICellConfigurationState) -> SListRow
 }

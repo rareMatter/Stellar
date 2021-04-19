@@ -1,5 +1,5 @@
 //
-//  SListRowData.swift
+//  SListRow.swift
 //  
 //
 //  Created by Jesse Spencer on 3/8/21.
@@ -8,7 +8,7 @@
 import UIKit
 
 public
-struct SListRowData {
+struct SListRow {
     
     var contentConfiguration: SContentConfiguration?
     var backgroundConfiguration: UIBackgroundConfiguration?
@@ -22,7 +22,7 @@ struct SListRowData {
     }
 }
 public
-extension SListRowData {
+extension SListRow {
     /// A row which contains no content. Useful for recovering from errors.
     static var blank: Self {
         .init(contentConfiguration: nil)
