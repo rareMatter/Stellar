@@ -17,12 +17,16 @@ extension SListView: ListViewControllerConfiguration {
         tapHandler?(item, section)
     }
     
-    // MARK: - editing selection
+    // MARK: - selection
     func canSelect(item: ItemType, inSection section: SectionType) -> Bool {
         selectionHandler != nil
     }
     func didSelect(item: ItemType, inSection section: SectionType) {
         selectionHandler?(item, section)
+    }
+    
+    var multiselectionConfiguration: ListMultiselectionConfiguration {
+        .init()
     }
     
     // MARK: - reordering

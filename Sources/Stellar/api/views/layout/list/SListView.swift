@@ -20,7 +20,6 @@ struct SListView<Model>: SView where Model: SListModel {
     // -- selection
     /// A handler that is called when a selection is made during list editing.
     var selectionHandler: SelectionHandler?
-    var multiselectionConfiguration: ListMultiselectionConfiguration = .init()
     
     // -- reordering
     var canReorderItemHandler: CanReorderItemHandler?
