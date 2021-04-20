@@ -19,6 +19,14 @@ import Combine
 final
 class ConfigurableCollectionCell: UICollectionViewListCell, SDynamicContentContainer {
 	
+    // -- taps
+    /// A handler that is called when a tap is received by a list item (when not editing).
+    var tapHandler: Handler?
+    
+    // -- selection
+    /// A handler that is called when a selection is made during list editing.
+    var selectionHandler: Handler?
+    
 	/// Call this handler when a configuration update is requested.
     private
     var configurationUpdateHandler: ConfigurationUpdateHandler = { state in
@@ -140,4 +148,30 @@ extension ConfigurableCollectionCell {
         configurationUpdateHandler = handler
         return self
     }
+}
+
+// MARK: - behavior query api
+extension ConfigurableCollectionCell {
+    
+    // MARK: - taps
+    func canTap() -> Bool {
+        tapHandler != nil
+    }
+    func didTap() {
+        tapHandler?()
+    }
+    
+    // MARK: - selection
+    func canSelect() -> Bool {
+        selectionHandler != nil
+    }
+    func didSelect() {
+        selectionHandler?()
+    }
+}
+
+// MARK: - typealiases
+extension ConfigurableCollectionCell {
+    
+    typealias Handler = () -> Void
 }

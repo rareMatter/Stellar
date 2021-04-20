@@ -700,14 +700,16 @@ extension ListViewController {
             assertionFailure("Selection made during list reordering - this is  unexpected behavior.")
             return false
         }
-        let itemID = itemInSnapshot(with: indexPath)
-        let section = sectionInSnapshot(with: indexPath)
+        guard let cell = cellFor(indexPath) else {
+            assertionFailure("Could not retrieve cell.")
+            return false
+        }
         
         if mode == .editing {
-            return configuration.canSelect(item: itemID, inSection: section)
+            return cell.canSelect()
         }
         else {
-            return configuration.canTap(item: itemID, inSection: section)
+            return cell.canTap()
         }
     }
     
@@ -722,6 +724,10 @@ extension ListViewController {
         let item = itemInSnapshot(with: indexPath)
         let section = sectionInSnapshot(with: indexPath)
         let isSectionHeader = (snapshot.headerForSection(section) == item)
+        guard let cell = cellFor(indexPath) else {
+            assertionFailure("Could not retrieve cell.")
+            return
+        }
         
         // if editing, process as selection
         if mode == .editing {
@@ -748,7 +754,7 @@ extension ListViewController {
             }
             else {
                 editingSelections.toggle(item)
-                configuration.didSelect(item: item, inSection: section)
+                cell.didSelect()
             }
         }
         // if not editing, process as tap (normal mode)
@@ -774,7 +780,7 @@ extension ListViewController {
             }
             // otherwise process as regular tap
             else {
-                configuration.didTap(item: item, inSection: section)
+                cell.didTap()
             }
             collectionView.deselectItem(at: indexPath, animated: true)
         }
@@ -840,6 +846,18 @@ extension ListViewController {
 	func dataForSwipeAction(_ action: ListSwipeAction) -> (ListMode, ListSwipeAction.CompletionHandler) {
 		(mode, { actionPerformed in })
 	}
+    
+    /// Retrieves the cell instance for the index path from the collection view.
+    func cellFor(_ indexPath: IndexPath) -> CellType? {
+        if let cell = collectionView.cellForItem(at: indexPath) {
+            guard let cellType = cell as? CellType else {
+                assertionFailure("Unexpected cell type: \(cell)")
+                return nil
+            }
+            return cellType
+        }
+        else { return nil }
+    }
 }
 
 // MARK: - view updates
@@ -1055,8 +1073,7 @@ extension ListViewController {
     
     // collection
     typealias Snapshot = ListDataDiffableSnapshot<SectionID, ItemID>
-    
     typealias CollectionDataSource = UICollectionViewDiffableDataSource<SectionID, ItemID>
-    
+    typealias CellType = ConfigurableCollectionCell
     typealias State = ListState<ItemID>
 }

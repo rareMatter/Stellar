@@ -11,21 +11,6 @@ protocol ListViewControllerConfiguration {
     associatedtype SectionType: Hashable
     associatedtype ItemType: Hashable
     
-    // MARK: - taps
-    /** Determines whether the item responds to taps as a button.
-    */
-    func canTap(item: ItemType, inSection section: SectionType) -> Bool
-    func didTap(item: ItemType, inSection section: SectionType)
-    
-    // MARK: - editing selection
-    /** Determines whether the item can be set to a selected state during editing.
-     
-    The item can be a section header. If you want headers to be expandable/collapsable during editing, you must manually apply this behavior by responding here and updating the snapshot accordingly.
-     */
-    func canSelect(item: ItemType, inSection section: SectionType) -> Bool
-    /// Informs that the item has been set to a selected state.
-    func didSelect(item: ItemType, inSection section: SectionType)
-    
     /// Details for how multiselection should be configured, if at all.
     var multiselectionConfiguration: ListMultiselectionConfiguration { get }
     

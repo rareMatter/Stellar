@@ -12,33 +12,7 @@ import SwiftUI
 
 public
 struct SListView<Model>: SView where Model: SListModel {
-    
-    // -- taps
-    /// A handler that is called when a tap is received by a list item (when not editing).
-    var tapHandler: TapHandler?
-   
-    // -- selection
-    /// A handler that is called when a selection is made during list editing.
-    var selectionHandler: SelectionHandler?
-    
-    // -- reordering
-    var canReorderItemHandler: CanReorderItemHandler?
-    var didReorderHandler: DidReorderHandler?
-    
-    // -- section insertion
-    var canInsertItemIntoSectionHandler: CanInsertItemIntoSectionHandler?
-    var didInsertItemIntoSectionHandler: DidInsertItemIntoSectionHandler?
-    
-    // -- section expand/collapse
-    var canCollapseSectionHandler: CanCollapseSectionHandler?
-    var didCollapseSectionHandler: DidCollapseSectionHandler?
-    var canExpandSectionHandler: CanExpandSectionHandler?
-    var didExpandSectionHandler: DidExpandSectionHandler?
-    
-    // -- swipe actions
-    var leadingSwipeActionsHandler: SwipeActionsHandler?
-    var trailingSwipeActionsHandler: SwipeActionsHandler?
-    
+
     // -- first reponders
     var initialFirstResponderHandler: InitialFirstResponderHandler?
     var subsequentFirstResponderHandler: SubsequentFirstResponderHandler?
@@ -92,6 +66,10 @@ struct SListView<Model>: SView where Model: SListModel {
                 configurableCollectionCell.contentConfiguration = rowData.contentConfiguration
                 configurableCollectionCell.backgroundConfiguration = rowData.backgroundConfiguration
                 configurableCollectionCell.accessories = rowData.accessories
+                configurableCollectionCell.tapHandler = rowData.tapHandler
+                if rowData.isSelectable {
+                    configurableCollectionCell.selectionHandler = {}
+                }
                 
                 // -- updating for configuration state
                 configurableCollectionCell.onConfigurationStateChange { (configState) in
@@ -119,49 +97,16 @@ struct SListView<Model>: SView where Model: SListModel {
 }
 
 // MARK: - typealiases
+public
 extension SListView {
-    
-    public
     typealias SectionType = Model.SectionType
-    public
     typealias ItemType = Model.ItemType
     
-    typealias ViewController = ListViewController<Model, Self>
-    
-    public
-    typealias TapHandler = (_ item: ItemType, _ inSection: SectionType) -> Void
-    
-    public
-    typealias SelectionHandler = (_ item: ItemType, _ inSection: SectionType) -> Void
-    
-    public
-    typealias CanReorderItemHandler = (_ item: ItemType) -> Bool
-    public
-    typealias DidReorderHandler = (_ transaction: ListReorderingTransaction<SectionType, ItemType>) -> Void
-    
-    public
-    typealias CanInsertItemIntoSectionHandler = (_ item: ItemType, _ section: SectionType) -> Bool
-    public
-    typealias DidInsertItemIntoSectionHandler = (_ item: ItemType, _ section: SectionType) -> Void
-    
-    public
-    typealias CanCollapseSectionHandler = (_ section: SectionType, _ header: ItemType) -> Bool
-    public
-    typealias DidCollapseSectionHandler = (_ section: SectionType, _ header: ItemType) -> Void
-    
-    public
-    typealias CanExpandSectionHandler = (_ section: SectionType, _ header: ItemType) -> Bool
-    public
-    typealias DidExpandSectionHandler = (_ section: SectionType, _ header: ItemType) -> Void
-    
-    public
-    typealias SwipeActionsHandler = (_ item: ItemType) -> ListSwipeActionsConfiguration
-    
-    public
     typealias InitialFirstResponderHandler = () -> ItemType?
-    public
     typealias SubsequentFirstResponderHandler = (_ currentResponder: ItemType) -> ItemType?
     
-    public
     typealias RowProvider = (_ section: Model.SectionType, _ item: Model.ItemType, _ listState: ListState<ItemType>, _ configurationState: UICellConfigurationState) -> SListRow
+}
+extension SListView {
+    typealias ViewController = ListViewController<Model, Self>
 }
