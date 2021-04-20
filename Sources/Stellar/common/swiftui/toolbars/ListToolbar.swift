@@ -48,6 +48,7 @@ struct ListToolbar<ItemIdentifer: Hashable>: View {
 				HStack {
                     NLButton(.done {
                         self.listState.mode = .normal
+                        self.listState.editingSelections.removeAll()
                         self.configuration.doneHandler()
                     })
 

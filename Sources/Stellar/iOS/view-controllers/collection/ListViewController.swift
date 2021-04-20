@@ -884,6 +884,7 @@ extension ListViewController {
                 if configuration.multiselectionConfiguration.useMultiselectionPanGesture {
                     startMultiselectionGestureRecognizers()
                 }
+                updateSelections(from: .init(), to: listState.editingSelections)
                 
 			default:
 				removeMultiselectionGestureRecognizers()
