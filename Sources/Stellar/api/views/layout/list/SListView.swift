@@ -62,22 +62,13 @@ struct SListView<Model>: SView where Model: SListModel {
         { (section: SectionType, item: ItemType, listState: ViewController.State) in
             UICollectionView.CellRegistration<ConfigurableCollectionCell, ItemType> { (configurableCollectionCell: ConfigurableCollectionCell, indexPath, item) in
                 // -- first-time setup
-                let rowData = rowProvider(section, item, listState, configurableCollectionCell.configurationState)
-                configurableCollectionCell.contentConfiguration = rowData.contentConfiguration
-                configurableCollectionCell.backgroundConfiguration = rowData.backgroundConfiguration
-                configurableCollectionCell.accessories = rowData.accessories
-                configurableCollectionCell.tapHandler = rowData.tapHandler
-                if rowData.isSelectable {
-                    configurableCollectionCell.selectionHandler = {}
-                }
+                let listRow = rowProvider(section, item, listState, configurableCollectionCell.configurationState)
+                updateCell(configurableCollectionCell, listRow: listRow)
                 
                 // -- updating for configuration state
                 configurableCollectionCell.onConfigurationStateChange { (configState) in
-                    let rowData = rowProvider(section, item, listState, configState)
-                    let contentConfig = rowData.contentConfiguration
-                    let backgroundConfig = rowData.backgroundConfiguration
-                    return (contentConfig,
-                            backgroundConfig)
+                    let listRow = rowProvider(section, item, listState, configState)
+                    updateCell(configurableCollectionCell, listRow: listRow)
                 }
             }
         }
@@ -93,6 +84,18 @@ struct SListView<Model>: SView where Model: SListModel {
         return titleBarView != nil ?
             NLNavigationController(rootViewController: controller) :
             controller
+    }
+    
+    /// Applies updated configuration properties to the cell using the SListRow.
+    private
+    func updateCell(_ cell: ConfigurableCollectionCell, listRow: SListRow) {
+        cell.contentConfiguration = listRow.contentConfiguration
+        cell.backgroundConfiguration = listRow.backgroundConfiguration
+        cell.accessories = listRow.accessories
+        cell.tapHandler = listRow.tapHandler
+        if listRow.isSelectable {
+            cell.selectionHandler = {}
+        }
     }
 }
 

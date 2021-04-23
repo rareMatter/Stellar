@@ -10,8 +10,9 @@ import UIKit
 import SwiftUI
 import Combine
 
-/** A highly configurable list view controller with robust layout options.
-*/
+/// A highly configurable list view controller with robust layout options.
+///
+/// - Note: ListMode transition animations have been disabled due to unwanted inherent UIKit animations when custom cell accessories are changed.
 final
 class ListViewController<Model: SListModel, Configuration: ListViewControllerConfiguration>: NLViewController, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate where
     Model.SectionType == Configuration.SectionType,
@@ -177,7 +178,9 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
 			}
 			.receive(on: DispatchQueue.main)
 			.sink { [unowned self] (currentMode, newMode) in
-				self.updateFrom(currentMode, to: newMode)
+                UIView.performWithoutAnimation {
+                    self.updateFrom(currentMode, to: newMode)
+                }
 			}
 			.store(in: &cancellables)
 		
@@ -910,11 +913,11 @@ extension ListViewController {
     // -- cells and subviews
     
 	/// Updates views using the selections.
-	func updateSelections(from currentSelections: Set<ItemID>, to newSelections: Set<ItemID>) {
+    func updateSelections(from currentSelections: Set<ItemID>, to newSelections: Set<ItemID>, withAnimation animated: Bool = false) {
 		let removedSelections = currentSelections.subtracting(newSelections)
 		removedSelections.forEach { (item) in
 			if let indexPath = collectionDataSource.indexPath(for: item) {
-				collectionView.deselectItem(at: indexPath, animated: true)
+				collectionView.deselectItem(at: indexPath, animated: animated)
 			}
 			else {
 				assertionFailure("Cannot deselect, could not retrieve index path for item ID: \(item).")
@@ -923,7 +926,7 @@ extension ListViewController {
 		let addedSelections = newSelections.subtracting(currentSelections)
 		addedSelections.forEach { (item) in
 			if let indexPath = collectionDataSource.indexPath(for: item) {
-				collectionView.selectItem(at: indexPath, animated: true, scrollPosition: .init())
+				collectionView.selectItem(at: indexPath, animated: animated, scrollPosition: .init())
 			}
 			else {
 				assertionFailure("Cannot select, could not retrieve index path for item ID: \(item).")

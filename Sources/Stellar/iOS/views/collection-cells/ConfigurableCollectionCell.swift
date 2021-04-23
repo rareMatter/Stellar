@@ -31,8 +31,6 @@ class ConfigurableCollectionCell: UICollectionViewListCell, SDynamicContentConta
     private
     var configurationUpdateHandler: ConfigurationUpdateHandler = { state in
         debugPrint("Default cell configuration update handler called.")
-        return (UIListContentConfiguration.cell().updated(for: state),
-                UIBackgroundConfiguration.listGroupedCell())
 	}
     
     /// Call this closure from height-modifying code. This closure is set by the containing view and used to update for size changes.
@@ -59,18 +57,15 @@ class ConfigurableCollectionCell: UICollectionViewListCell, SDynamicContentConta
 	/// - Note: This method calls the configuration update handler.
     override
     func updateConfiguration(using state: UICellConfigurationState) {
-        var updatedConfigs = configurationUpdateHandler(state)
+        configurationUpdateHandler(state)
         
         // connect to SDynamicContentContainers
-        if var dynamicContentContainer = updatedConfigs.content as? SDynamicContentConfiguration {
+        if var dynamicContentContainer = contentConfiguration as? SDynamicContentConfiguration {
             dynamicContentContainer.sizeDidChange = { [unowned self] in
                 sizeDidChange()
             }
-            updatedConfigs.content = dynamicContentContainer
+            contentConfiguration = dynamicContentContainer
         }
-        
-        contentConfiguration = updatedConfigs.content
-        backgroundConfiguration = updatedConfigs.background
 	}
 	
 	// MARK: - first responder passthrough
@@ -101,7 +96,7 @@ class ConfigurableCollectionCell: UICollectionViewListCell, SDynamicContentConta
 // MARK: - typealiases
 extension ConfigurableCollectionCell {
     
-    typealias ConfigurationUpdateHandler = (UICellConfigurationState) -> (content: UIContentConfiguration?, background: UIBackgroundConfiguration?)
+    typealias ConfigurationUpdateHandler = (UICellConfigurationState) -> Void
 }
 
 // MARK: - responder notifier
