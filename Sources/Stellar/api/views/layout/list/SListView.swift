@@ -12,7 +12,10 @@ import SwiftUI
 
 public
 struct SListView<Model>: SView where Model: SListModel {
-
+    
+    // -- list state
+    var listState: State
+    
     // -- first reponders
     var initialFirstResponderHandler: InitialFirstResponderHandler?
     var subsequentFirstResponderHandler: SubsequentFirstResponderHandler?
@@ -30,22 +33,20 @@ struct SListView<Model>: SView where Model: SListModel {
     // -- title bar (nav bar)
     var titleBarView: STitleBarView?
     
-    // -- toolbar
-    var toolbarContent: ((ListState<ItemType>) -> AnyView)?
-    
     /// Creates the view with a model that drives updates.
     public
-    init(listModel: Model, layout: UICollectionViewLayout? = nil, rowProvider: @escaping RowProvider) {
+    init(listModel: Model, listState: State = .init(), layout: UICollectionViewLayout? = nil, rowProvider: @escaping RowProvider) {
         self.listModel = listModel
+        self.listState = listState
         self.layout = layout
         self.rowProvider = rowProvider
     }
     
     /// Creates the view using an unchanging snapshot.
     public
-    init(snapshot: Model.Snapshot, layout: UICollectionViewLayout? = nil, rowProvider: @escaping RowProvider) {
+    init(snapshot: Model.Snapshot, listState: State = .init(), layout: UICollectionViewLayout? = nil, rowProvider: @escaping RowProvider) {
         let model = SStaticListModel(staticSnapshot: snapshot)
-        self.init(listModel: model as! Model, layout: layout, rowProvider: rowProvider)
+        self.init(listModel: model as! Model, listState: listState, layout: layout, rowProvider: rowProvider)
     }
     
     public
@@ -56,7 +57,7 @@ struct SListView<Model>: SView where Model: SListModel {
         let controller = ViewController(
             configuration: self,
             listModel: listModel,
-            listState: ListState(),
+            listState: listState,
             layout: layout,
             backgroundColor: backgroundColor)
         { (section: SectionType, item: ItemType, listState: ViewController.State) in
@@ -71,9 +72,6 @@ struct SListView<Model>: SView where Model: SListModel {
                     updateCell(configurableCollectionCell, listRow: listRow)
                 }
             }
-        }
-        .toolbar { (listState) in
-            self.toolbarContent?(listState)
         }
         
         // -- nav bar setup
@@ -104,6 +102,8 @@ public
 extension SListView {
     typealias SectionType = Model.SectionType
     typealias ItemType = Model.ItemType
+    
+    typealias State = ListState<ItemType>
     
     typealias InitialFirstResponderHandler = () -> ItemType?
     typealias SubsequentFirstResponderHandler = (_ currentResponder: ItemType) -> ItemType?

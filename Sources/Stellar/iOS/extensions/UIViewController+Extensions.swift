@@ -10,8 +10,6 @@ import UIKit
 import SnapKit
 
 // MARK: - presentation
-#warning("TODO: this should probably be internal.")
-public
 extension UIViewController {
 	
 	/// Dismisses the view controller from the hierarchy regardless of how it was presented.
@@ -30,10 +28,9 @@ extension UIViewController {
 	}
 }
 
-// MARK: - Embedding views
-#warning("TODO: this should probably be internal.")
-public
+// MARK: - Embedding
 extension UIViewController {
+    
 	/// Adds a view as the root subview of the receiver.
 	func embedView(_ view: UIView) {
 		guard let rootView = viewIfLoaded else {
@@ -41,8 +38,17 @@ extension UIViewController {
 			return
 		}
 		rootView.addSubview(view)
+        view.translatesAutoresizingMaskIntoConstraints = false
 		view.snp.makeConstraints { (make) in
 			make.edges.equalToSuperview()
 		}
 	}
+    
+    /// Embeds the view controller as a child and adds its view using `embedView(:)`.
+    func embedChild(_ viewController: UIViewController) {
+        viewController.willMove(toParent: self)
+        addChild(viewController)
+        embedView(viewController.view)
+        viewController.didMove(toParent: self)
+    }
 }

@@ -67,9 +67,6 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
         }
     }
     
-	// -- toolbar
-	private var toolbar: UIViewController?
-	
     // -- configuration
 	/// Configuration used to control list behaviors and handle events.
 	private var configuration: Configuration
@@ -223,13 +220,6 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
 		fatalError("\(#function) has not been implemented")
 	}
 	
-	/// Embeds the content in toolbar-style at the bottom of the list.
-    func toolbar<Content: View>(@ViewBuilder content: (State) -> Content) -> Self {
-		assert(!isViewLoaded, "Attempt to set toolbar after view has been loaded. This is not supported.")
-		self.toolbar = UIHostingController(rootView: content(self.listState))
-        return self
-	}
-
 	// MARK: - view lifecycle
 	
     override func viewDidLoad() {
@@ -237,21 +227,6 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
 		
 		embedView(collectionView)
 		applySnapshot(self.snapshot)
-		
-		if let toolbar = self.toolbar {
-			toolbar.view.translatesAutoresizingMaskIntoConstraints = false
-			
-			toolbar.willMove(toParent: self)
-			addChild(toolbar)
-			view.addSubview(toolbar.view)
-			
-			toolbar.view.snp.makeConstraints { (make) in
-				make.leading.equalTo(view.snp.leadingMargin)
-				make.trailing.equalTo(view.snp.trailingMargin)
-				make.bottom.equalTo(view.safeAreaLayoutGuide)
-			}
-			toolbar.didMove(toParent: self)
-		}
 	}
 	
     override func viewWillAppear(_ animated: Bool) {
