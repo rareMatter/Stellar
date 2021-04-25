@@ -1,0 +1,392 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 52;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		88A8D70A26335A0400DA7AB5 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A8D70926335A0400DA7AB5 /* AppDelegate.swift */; };
+		88A8D70C26335A0400DA7AB5 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A8D70B26335A0400DA7AB5 /* SceneDelegate.swift */; };
+		88A8D70E26335A0400DA7AB5 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A8D70D26335A0400DA7AB5 /* ContentView.swift */; };
+		88A8D71026335A0500DA7AB5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88A8D70F26335A0500DA7AB5 /* Assets.xcassets */; };
+		88A8D71326335A0500DA7AB5 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 88A8D71226335A0500DA7AB5 /* Preview Assets.xcassets */; };
+		88A8D71626335A0500DA7AB5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 88A8D71426335A0500DA7AB5 /* LaunchScreen.storyboard */; };
+		88A8D72426335C5D00DA7AB5 /* Stellar in Frameworks */ = {isa = PBXBuildFile; productRef = 88A8D72326335C5D00DA7AB5 /* Stellar */; };
+		88A8D72826335D6D00DA7AB5 /* Stellar in Frameworks */ = {isa = PBXBuildFile; productRef = 88A8D72726335D6D00DA7AB5 /* Stellar */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		88A8D70626335A0400DA7AB5 /* StellarToolbar.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = StellarToolbar.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		88A8D70926335A0400DA7AB5 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		88A8D70B26335A0400DA7AB5 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		88A8D70D26335A0400DA7AB5 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		88A8D70F26335A0500DA7AB5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		88A8D71226335A0500DA7AB5 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		88A8D71526335A0500DA7AB5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		88A8D71726335A0500DA7AB5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		88A8D70326335A0400DA7AB5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				88A8D72826335D6D00DA7AB5 /* Stellar in Frameworks */,
+				88A8D72426335C5D00DA7AB5 /* Stellar in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		88A8D6FD26335A0400DA7AB5 = {
+			isa = PBXGroup;
+			children = (
+				88A8D70826335A0400DA7AB5 /* StellarToolbar */,
+				88A8D70726335A0400DA7AB5 /* Products */,
+				88A8D72226335C5D00DA7AB5 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		88A8D70726335A0400DA7AB5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				88A8D70626335A0400DA7AB5 /* StellarToolbar.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		88A8D70826335A0400DA7AB5 /* StellarToolbar */ = {
+			isa = PBXGroup;
+			children = (
+				88A8D70926335A0400DA7AB5 /* AppDelegate.swift */,
+				88A8D70B26335A0400DA7AB5 /* SceneDelegate.swift */,
+				88A8D70D26335A0400DA7AB5 /* ContentView.swift */,
+				88A8D70F26335A0500DA7AB5 /* Assets.xcassets */,
+				88A8D71426335A0500DA7AB5 /* LaunchScreen.storyboard */,
+				88A8D71726335A0500DA7AB5 /* Info.plist */,
+				88A8D71126335A0500DA7AB5 /* Preview Content */,
+			);
+			path = StellarToolbar;
+			sourceTree = "<group>";
+		};
+		88A8D71126335A0500DA7AB5 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				88A8D71226335A0500DA7AB5 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		88A8D72226335C5D00DA7AB5 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		88A8D70526335A0400DA7AB5 /* StellarToolbar */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 88A8D71A26335A0500DA7AB5 /* Build configuration list for PBXNativeTarget "StellarToolbar" */;
+			buildPhases = (
+				88A8D70226335A0400DA7AB5 /* Sources */,
+				88A8D70326335A0400DA7AB5 /* Frameworks */,
+				88A8D70426335A0400DA7AB5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = StellarToolbar;
+			packageProductDependencies = (
+				88A8D72326335C5D00DA7AB5 /* Stellar */,
+				88A8D72726335D6D00DA7AB5 /* Stellar */,
+			);
+			productName = StellarToolbar;
+			productReference = 88A8D70626335A0400DA7AB5 /* StellarToolbar.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		88A8D6FE26335A0400DA7AB5 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1240;
+				LastUpgradeCheck = 1240;
+				TargetAttributes = {
+					88A8D70526335A0400DA7AB5 = {
+						CreatedOnToolsVersion = 12.4;
+					};
+				};
+			};
+			buildConfigurationList = 88A8D70126335A0400DA7AB5 /* Build configuration list for PBXProject "StellarToolbar" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 88A8D6FD26335A0400DA7AB5;
+			packageReferences = (
+				88A8D72626335D6D00DA7AB5 /* XCRemoteSwiftPackageReference "stellar" */,
+			);
+			productRefGroup = 88A8D70726335A0400DA7AB5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				88A8D70526335A0400DA7AB5 /* StellarToolbar */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		88A8D70426335A0400DA7AB5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				88A8D71626335A0500DA7AB5 /* LaunchScreen.storyboard in Resources */,
+				88A8D71326335A0500DA7AB5 /* Preview Assets.xcassets in Resources */,
+				88A8D71026335A0500DA7AB5 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		88A8D70226335A0400DA7AB5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				88A8D70A26335A0400DA7AB5 /* AppDelegate.swift in Sources */,
+				88A8D70C26335A0400DA7AB5 /* SceneDelegate.swift in Sources */,
+				88A8D70E26335A0400DA7AB5 /* ContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		88A8D71426335A0500DA7AB5 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				88A8D71526335A0500DA7AB5 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		88A8D71826335A0500DA7AB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		88A8D71926335A0500DA7AB5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		88A8D71B26335A0500DA7AB5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"StellarToolbar/Preview Content\"";
+				DEVELOPMENT_TEAM = G6X5URK5FQ;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = StellarToolbar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = me.rarematter.StellarToolbar;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		88A8D71C26335A0500DA7AB5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"StellarToolbar/Preview Content\"";
+				DEVELOPMENT_TEAM = G6X5URK5FQ;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = StellarToolbar/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = me.rarematter.StellarToolbar;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		88A8D70126335A0400DA7AB5 /* Build configuration list for PBXProject "StellarToolbar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				88A8D71826335A0500DA7AB5 /* Debug */,
+				88A8D71926335A0500DA7AB5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		88A8D71A26335A0500DA7AB5 /* Build configuration list for PBXNativeTarget "StellarToolbar" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				88A8D71B26335A0500DA7AB5 /* Debug */,
+				88A8D71C26335A0500DA7AB5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		88A8D72626335D6D00DA7AB5 /* XCRemoteSwiftPackageReference "stellar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@gitlab.com:rareMatter/stellar.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		88A8D72326335C5D00DA7AB5 /* Stellar */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Stellar;
+		};
+		88A8D72726335D6D00DA7AB5 /* Stellar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 88A8D72626335D6D00DA7AB5 /* XCRemoteSwiftPackageReference "stellar" */;
+			productName = Stellar;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 88A8D6FE26335A0400DA7AB5 /* Project object */;
+}
