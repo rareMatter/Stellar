@@ -88,6 +88,8 @@ extension LeadingViewTextEditorContentConfiguration {
 			let textView = KMPlaceholderTextView(frame: .zero)
 			textView.translatesAutoresizingMaskIntoConstraints = false
 			textView.adjustsFontForContentSizeCategory = true
+            textView.textColor = .label
+            textView.backgroundColor = nil
 			return textView
 		}()
 		
