@@ -15,8 +15,8 @@
         "repositoryURL": "git@gitlab.com:rareMatter/stellar.git",
         "state": {
           "branch": null,
-          "revision": "8e290bd46c2ffeaa50e44a69dbfa5d742dac386b",
-          "version": "0.4.1"
+          "revision": "7c64d98d10e62bacf7b70c21593a99ed07e35470",
+          "version": "0.4.2"
         }
       },
       {
