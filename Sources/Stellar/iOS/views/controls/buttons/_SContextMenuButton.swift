@@ -1,5 +1,5 @@
 //
-//  ContextMenuButton.swift
+//  _SContextMenuButton.swift
 //  Stellar
 //
 //  Created by Jesse Spencer on 10/22/20.
@@ -11,8 +11,7 @@ import UIKit
 /// A button which displays a context menu when tapped.
 ///
 /// Configure the context menu by setting the menu property. Add animations by setting the corresponding menu appearance and disappearance closures.
-public
-class ContextMenuButton: UIButton {
+class _SContextMenuButton: UIButton {
 	
 	public typealias MenuTransitionHandler = (_ interaction: UIContextMenuInteraction, _ configuration: UIContextMenuConfiguration, _ animator: UIContextMenuInteractionAnimating?) -> Void
 	var menuWillAppear: MenuTransitionHandler = { _,_,_ in }

@@ -13,7 +13,7 @@ import UIKit
  Use this class as a starting point for creating custom content views, either by subclassing or adding subviews as needed.
  - Important: Instance and type equality are checked against updated configuration instances before committing an update and calling the update handler.
 */
-class ContentView<Configuration: UIContentConfiguration & Equatable>: UIView, UIContentView {
+class _SContentView<Configuration: UIContentConfiguration & Equatable>: UIView, UIContentView {
     
     typealias UpdateHandler = (_ from: Configuration, _ to: Configuration) -> Void
     
@@ -55,7 +55,7 @@ class ContentView<Configuration: UIContentConfiguration & Equatable>: UIView, UI
 }
 // MARK: - updates
 private
-extension ContentView {
+extension _SContentView {
     func updateForConfiguration(from oldConfig: Configuration, to newConfig: Configuration) {
         handleUpdate(oldConfig, newConfig)
     }
