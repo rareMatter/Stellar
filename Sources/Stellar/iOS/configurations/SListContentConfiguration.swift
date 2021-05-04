@@ -24,6 +24,6 @@ struct SListContentConfiguration: SContentConfiguration, Equatable {
     }
     
     public func updated(for state: UIConfigurationState) -> SListContentConfiguration {
-        Self(listContentConfiguration: listContentConfiguration.updated(for: state))
+        self
     }
 }
