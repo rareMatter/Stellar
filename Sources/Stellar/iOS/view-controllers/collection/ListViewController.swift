@@ -273,6 +273,10 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
 	// MARK: collection delegate
 
     // -- highlight
+    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+        shouldSelect(indexPath)
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
         
     }
