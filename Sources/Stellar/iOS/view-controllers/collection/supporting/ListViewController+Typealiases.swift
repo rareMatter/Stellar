@@ -16,6 +16,5 @@ extension ListViewController {
     // collection
     typealias Snapshot = ListDataDiffableSnapshot<SectionID, ItemID>
     typealias CollectionDataSource = UICollectionViewDiffableDataSource<SectionID, ItemID>
-    typealias CellType = ConfigurableCollectionCell
     typealias State = ListState<ItemID>
 }

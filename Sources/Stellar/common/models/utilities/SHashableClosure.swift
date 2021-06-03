@@ -25,6 +25,10 @@ struct SHashableClosure {
         self.uuid = uuid
         self.handler = handler
     }
+    
+    func callAsFunction() {
+        handler()
+    }
 }
 
 extension SHashableClosure: Hashable {

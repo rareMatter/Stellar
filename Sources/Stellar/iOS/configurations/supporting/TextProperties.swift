@@ -10,7 +10,8 @@ import UIKit
 
 public
 struct TextProperties: Hashable {
-	var font: UIFont
+	public
+    var font: UIFont
     
     public
     init(font: UIFont) {

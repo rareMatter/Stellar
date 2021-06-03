@@ -8,54 +8,45 @@
 
 import UIKit
 
-public
 struct ButtonContentConfiguration: SContentConfiguration, Hashable {
 
-    public
     var primaryAction: SHashableClosure = .init {}
 
-    public
     var title: String? = nil
-    public
+    
     var image: UIImage? = nil
-    public
-    var imageProperties: ImageProperties = .init(preferredSymbolConfiguration: .unspecified)
+    var imageProperties: ImageProperties = .init(preferredSymbolConfiguration: .init(textStyle: .title3))
 
-    public
     var backgroundColor: UIColor? = nil
 
-    public
     var isSelected = false
-    public
     var isDisabled = false
-    
-    public
-    init() {}
-    
-    // -- content configuration
-    public
-    func makeContentView() -> UIView & UIContentView {
-        Self.contentView(for: self)
-    }
-    
-    public
-    func updated(for state: UIConfigurationState) -> ButtonContentConfiguration {
-        self
-    }
 }
 
 // MARK: content view
 extension ButtonContentConfiguration {
     
-    static
-    func contentView(for configuration: Self) -> UIContentView & UIView {
+    func contentView() -> _SContentView<Self> {
+        
         let button: _SButton = {
             let button = _SButton()
             button.translatesAutoresizingMaskIntoConstraints = false
+            button.setTitleColor(.label, for: .normal)
             return button
         }()
         
-        return _SContentView<Self>(configuration: configuration) { oldConfig, updatedConfig, contentView in
+        return .init(configuration: self) { contentView in
+            contentView.addSubview(button)
+        } handleConstraintUpdate: { contentView, isFirstSetup in
+            guard isFirstSetup else { return }
+            button.snp.makeConstraints { make in
+                make.directionalEdges.equalTo(contentView.snp.directionalMargins)
+                make.top.equalTo(contentView.snp.topMargin)
+                make.bottom.equalTo(contentView.snp.bottomMargin)
+            }
+        } intrinsicContentSizeProvider: {
+            button.intrinsicContentSize
+        } handleConfigurationUpdate: { oldConfig, updatedConfig, contentView in
             button.onPrimaryAction(updatedConfig
                                     .primaryAction
                                     .handler)
@@ -73,14 +64,19 @@ extension ButtonContentConfiguration {
                 .isSelected
             button.isEnabled = !updatedConfig
                 .isDisabled
-        } configureViewHierarchy: { contentView in
-            contentView.addSubview(button)
-        } handleConstraintUpdate: { contentView, isFirstSetup in
-            guard isFirstSetup else { return }
-            button.snp.makeConstraints { make in
-                make.directionalEdges.equalToSuperview()
-            }
         }
+    }
+}
 
+// MARK: - SContent mapping
+extension SButton: SPrimitiveContentConfigurationRenderer {
+    
+    func makeContentConfiguration() -> UIContentConfiguration {
+        ButtonContentConfiguration(primaryAction: .init(actionHandler),
+                                   title: title,
+                                   image: image,
+                                   backgroundColor: backgroundColor,
+                                   isSelected: isSelected,
+                                   isDisabled: isDisabled)
     }
 }

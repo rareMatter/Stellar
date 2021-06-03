@@ -11,7 +11,7 @@ import UIKit
 import SwiftUI
 
 public
-struct SListView<Model>: SView where Model: SListModel {
+struct SListView<Model, Content>: SView where Model: SListModel, Content: SContent {
     
     // -- list state
     var listState: State
@@ -28,25 +28,36 @@ struct SListView<Model>: SView where Model: SListModel {
     
     // -- model and rows
     var listModel: Model
-    var rowProvider: RowProvider
+    
+    @SContentBuilder
+    var rowProvider: RowContentProvider
     
     // -- title bar (nav bar)
     var titleBarView: STitleBarView?
     
     /// Creates the view with a model that drives updates.
     public
-    init(listModel: Model, listState: State = .init(), layout: UICollectionViewLayout? = nil, rowProvider: @escaping RowProvider) {
+    init(listModel: Model,
+         listState: State = .init(),
+         layout: UICollectionViewLayout? = nil,
+         @SContentBuilder rowContentProvider: @escaping RowContentProvider) {
         self.listModel = listModel
         self.listState = listState
         self.layout = layout
-        self.rowProvider = rowProvider
+        self.rowProvider = rowContentProvider
     }
     
     /// Creates the view using an unchanging snapshot.
     public
-    init(snapshot: Model.Snapshot, listState: State = .init(), layout: UICollectionViewLayout? = nil, rowProvider: @escaping RowProvider) {
+    init(snapshot: Model.Snapshot,
+         listState: State = .init(),
+         layout: UICollectionViewLayout? = nil,
+         @SContentBuilder rowContentProvider: @escaping RowContentProvider) {
         let model = SStaticListModel(staticSnapshot: snapshot)
-        self.init(listModel: model as! Model, listState: listState, layout: layout, rowProvider: rowProvider)
+        self.init(listModel: model as! Model,
+                  listState: listState,
+                  layout: layout,
+                  rowContentProvider: rowContentProvider)
     }
     
     public
@@ -60,18 +71,23 @@ struct SListView<Model>: SView where Model: SListModel {
             listState: listState,
             layout: layout,
             backgroundColor: backgroundColor)
-        { (section: SectionType, item: ItemType, listState: ViewController.State) in
-            UICollectionView.CellRegistration<ConfigurableCollectionCell, ItemType> { (configurableCollectionCell: ConfigurableCollectionCell, indexPath, item) in
-                // -- first-time setup
-                let listRow = rowProvider(section, item, listState, configurableCollectionCell.configurationState)
-                updateCell(configurableCollectionCell, listRow: listRow)
-                
-                // -- updating for configuration state
-                configurableCollectionCell.onConfigurationStateChange { (configState) in
-                    let listRow = rowProvider(section, item, listState, configState)
-                    updateCell(configurableCollectionCell, listRow: listRow)
-                }
-            }
+        { [rowProvider] (section: SectionType,
+                         item: ItemType,
+                         listState: ViewController.State,
+                         cellConfigState: UICellConfigurationState) in
+            let rowContent = rowProvider(section,
+                                      item,
+                                      listState,
+                                      cellConfigState)
+            
+            #warning("TODO: Update properties with actual values.")
+            return .init(contentConfiguration: rowContent
+                            .renderContentConfiguration(),
+                         backgroundConfiguration: UIBackgroundConfiguration
+                            .listPlainCell(),
+                         accessories: [],
+                         tapHandler: nil,
+                         selectionHandler: nil)
         }
         
         // -- nav bar setup
@@ -82,18 +98,6 @@ struct SListView<Model>: SView where Model: SListModel {
         return titleBarView != nil ?
             NLNavigationController(rootViewController: controller) :
             controller
-    }
-    
-    /// Applies updated configuration properties to the cell using the SListRow.
-    private
-    func updateCell(_ cell: ConfigurableCollectionCell, listRow: SListRow) {
-        cell.contentConfiguration = listRow.contentConfiguration
-        cell.backgroundConfiguration = listRow.backgroundConfiguration
-        cell.accessories = listRow.accessories
-        cell.tapHandler = listRow.tapHandler
-        if listRow.isSelectable {
-            cell.selectionHandler = {}
-        }
     }
 }
 
@@ -108,7 +112,12 @@ extension SListView {
     typealias InitialFirstResponderHandler = () -> ItemType?
     typealias SubsequentFirstResponderHandler = (_ currentResponder: ItemType) -> ItemType?
     
-    typealias RowProvider = (_ section: Model.SectionType, _ item: Model.ItemType, _ listState: ListState<ItemType>, _ configurationState: UICellConfigurationState) -> SListRow
+    typealias RowContentProvider = (
+        _ section: Model.SectionType,
+        _ item: Model.ItemType,
+        _ listState: ListState<ItemType>,
+        _ configurationState: UICellConfigurationState
+    ) -> Content
 }
 extension SListView {
     typealias ViewController = ListViewController<Model, Self>

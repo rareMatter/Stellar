@@ -10,7 +10,9 @@ import UIKit
 
 public
 struct ImageProperties: Hashable {
-	public var preferredSymbolConfiguration: UIImage.SymbolConfiguration
+	public
+    var preferredSymbolConfiguration: UIImage.SymbolConfiguration
+    
     public
     init(preferredSymbolConfiguration: UIImage.SymbolConfiguration) {
         self.preferredSymbolConfiguration = preferredSymbolConfiguration

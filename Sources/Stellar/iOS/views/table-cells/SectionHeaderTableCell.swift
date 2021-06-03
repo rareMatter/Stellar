@@ -121,7 +121,4 @@ final class SectionHeaderTableCell: UITableViewCell {
 		assertionFailure("Callback not set")
 	}
 }
-extension SectionHeaderTableCell: ListCellUpdating {
-	func updateForState(_ configurationState: CellConfigurationState) {}
-}
 
