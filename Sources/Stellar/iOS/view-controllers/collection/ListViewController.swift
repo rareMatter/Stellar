@@ -110,20 +110,18 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
     private var panRegionView: UIView?
     
 	// -- observation
-	private var responderDidResignCancellables = Set<AnyCancellable>()
-	private var responderDidRespondCancellables = Set<AnyCancellable>()
-	private var cancellables = [AnyCancellable]()
+	private var cancellables = Set<AnyCancellable>()
 
 	// MARK: - init
 	
-	///
-	/// - Parameters:
-	///   - listModel: An object conforming to ListModeling which will drive the list.
-	///   - listState: The state to initially apply to the list.
-	///   - layout: A custom layout. If nil, a default list layout will be used which applies the provided list configuration. If a custom layout is provided, some components of the list configuration will not be applied and it is up to the user to handle them, such as row swipe configuration. In general, if the layout includes properties which are also part of the list configuration, this controller will yield to the provided layout properties.
-	///   - cellProvider: A closure for returning configured cells.
-    init<CellType>(configuration: Configuration, listModel: Model, listState: State = .init(), layout: UICollectionViewLayout? = nil, backgroundColor: UIColor = .systemGroupedBackground, cellRegistrationProvider: @escaping (SectionID, ItemID, State) -> UICollectionView.CellRegistration<CellType, ItemID>) where CellType: ConfigurableCollectionCell {
-		self.configuration = configuration
+    init(configuration: Configuration,
+         listModel: Model,
+         listState: State = .init(),
+         layout: UICollectionViewLayout? = nil,
+         backgroundColor: UIColor = .systemGroupedBackground,
+         rowContentProvider: @escaping (SectionID, ItemID, State, UICellConfigurationState) -> SContentCell.Content) {
+		
+        self.configuration = configuration
         self.listModel = listModel
 		self.listState = listState
         self.backgroundColor = backgroundColor
@@ -132,28 +130,38 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
         
         // create the collection view using the provided layout or default
 		if let layout = layout {
-			collectionView = makeCollectionView(with: layout)
+            collectionView = Self.makeCollectionView(with: layout, delegate: self, backgroundColor: backgroundColor)
 		}
 		else {
-			collectionView = makeCollectionView(with: defaultListLayout)
+            collectionView = Self.makeCollectionView(with: defaultListLayout, delegate: self, backgroundColor: backgroundColor)
 		}
         
-        self.collectionDataSource = .init(collectionView: collectionView, cellProvider: { (collectionView, indexPath, item) -> UICollectionViewCell? in
-            // -- get registation and create cell
-            let cellRegistration = cellRegistrationProvider(self.sectionInSnapshot(with: indexPath),
-                                                            item,
-                                                            self.listState)
-            let cell = collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+        self.collectionDataSource = .init(collectionView: collectionView, cellProvider: { [unowned self] (collectionView, indexPath, item) -> SContentCell? in
             
-            // -- prepare cell
-            cell.sizeDidChange = {
-                self.updateForCellSizeChanges(cell)
+            // create registration
+            let cellRegistration = UICollectionView.CellRegistration<SContentCell, ItemID> { cell, indexPath, item in
+                
+                // prepare cell to update itself with content when state changes
+                cell.onConfigurationStateChange { configState in
+                    // subscribe to special content types
+                    self.subscribeToDynamicSizeNotifier(cell)
+                    self.subscribeToResponderNotifier(cell)
+                    
+                    return rowContentProvider(self.sectionInSnapshot(with: indexPath),
+                                              item,
+                                              listState,
+                                              configState)
+                }
+                // tell cell to update for initial state
+                cell.setNeedsUpdateConfiguration()
             }
             
+            // dequeue cell
+            let cell = collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
             return cell
         })
-		
-		subscribeToStateChanges()
+        
+        subscribeToStateChanges()
         
         // connect snapshot pipeline
         self.listModel
@@ -164,62 +172,13 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
                 self?.applySnapshot(updatedSnapshot)
             }
             .store(in: &cancellables)
-	}
-	
-	private func subscribeToStateChanges() {
-		listState.$mode
-			.removeDuplicates()
-			// Get the current value on the publisher's thread before switching to the main thread.
-			.map { [unowned self] (newMode) -> (currentMode: ListMode, newMode: ListMode) in
-				(self.listState.mode, newMode)
-			}
-			.receive(on: DispatchQueue.main)
-			.sink { [unowned self] (currentMode, newMode) in
-                UIView.performWithoutAnimation {
-                    self.updateFrom(currentMode, to: newMode)
-                }
-			}
-			.store(in: &cancellables)
-		
-		listState.$editingSelections
-			.removeDuplicates()
-			.map { [unowned self] (newEditingSelections) -> (currentEditingSelections: Set<ItemID>, newEditingSelections: Set<ItemID>) in
-				(self.listState.editingSelections, newEditingSelections)
-			}
-			.receive(on: DispatchQueue.main)
-			.sink { [unowned self] (currentSelections, newSelections) in
-				self.updateSelections(from: currentSelections, to: newSelections)
-			}
-			.store(in: &cancellables)
-	}
-	
-	private func makeCollectionView(with layout: UICollectionViewLayout) -> UICollectionView {
-		let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-		
-		collectionView.translatesAutoresizingMaskIntoConstraints = false
-		
-		collectionView.isPrefetchingEnabled = false
-		
-		collectionView.allowsMultipleSelectionDuringEditing = true
-		
-		collectionView.keyboardDismissMode = .interactive
-		
-		collectionView.delegate = self
-		collectionView.dragDelegate = self
-		collectionView.dropDelegate = self
-		// support on iphone
-		collectionView.dragInteractionEnabled = true
-		
-        collectionView.backgroundColor = backgroundColor
-        
-		return collectionView
-	}
-	
-	@available(*, unavailable)
-	required init?(coder: NSCoder) {
-		fatalError("\(#function) has not been implemented")
-	}
-	
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("\(#function) has not been implemented")
+    }
+    
 	// MARK: - view lifecycle
 	
     override func viewDidLoad() {
@@ -231,48 +190,19 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
 	
     override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		
 		if !viewHasAppeared,
 		   let initialFirstResponderItem = configuration.initialFirstResponder() {
 			updateFirstResponderToItem(initialFirstResponderItem)
 		}
 	}
 	
-	/// Updates subscriptions with the ResponderNotifier if possible.
-	///
-	/// These subscriptions will be used for advanced responder chain behavior in combination with the list configuration.
-	private func subscribeToResponderNotifierIfNeeded(_ cell: UICollectionViewCell) {
-		if let responderNotifier = cell as? ResponderNotifier {
-			let _ = { [unowned self] in
-				responderNotifier.didResignFirstResponderPublisher
-					.receive(on: DispatchQueue.main)
-					.sink { responder in
-						guard let currentResponderItem = self.firstResponderItem else {
-							assertionFailure("Expected cached item id for first responder.")
-							return
-						}
-						if let nextResponderItem =
-                            self.configuration.subsequentFirstResponder(following: currentResponderItem) {
-							self.updateFirstResponderToItem(nextResponderItem)
-						}
-						else {
-							self.firstResponderItem = nil
-						}
-					}
-					.store(in: &responderDidResignCancellables)
-				
-				responderNotifier.didBecomeFirstResponderPublisher
-					.receive(on: DispatchQueue.main)
-					.map(itemForResponder)
-					.assign(to: \.firstResponderItem, on: self)
-					.store(in: &responderDidRespondCancellables)
-			}()
-		}
-	}
-	
 	// MARK: collection delegate
 
     // -- highlight
+    func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
+        shouldSelect(indexPath)
+    }
+    
     func collectionView(_ collectionView: UICollectionView, didHighlightItemAt indexPath: IndexPath) {
         
     }
@@ -667,6 +597,98 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
     }
 }
 
+// MARK: - init helpers
+private
+extension ListViewController {
+    
+    func subscribeToStateChanges() {
+        listState.$mode
+            .removeDuplicates()
+            // Get the current value on the publisher's thread before switching to the main thread.
+            .map { [unowned self] (newMode) -> (currentMode: ListMode, newMode: ListMode) in
+                (self.listState.mode, newMode)
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] (currentMode, newMode) in
+                UIView.performWithoutAnimation {
+                    self.updateFrom(currentMode, to: newMode)
+                }
+            }
+            .store(in: &cancellables)
+        
+        listState.$editingSelections
+            .removeDuplicates()
+            .map { [unowned self] (newEditingSelections) -> (currentEditingSelections: Set<ItemID>, newEditingSelections: Set<ItemID>) in
+                (self.listState.editingSelections, newEditingSelections)
+            }
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] (currentSelections, newSelections) in
+                self.updateSelections(from: currentSelections, to: newSelections)
+            }
+            .store(in: &cancellables)
+    }
+    
+    static
+    func makeCollectionView(with layout: UICollectionViewLayout, delegate: UICollectionViewDelegate & UICollectionViewDragDelegate & UICollectionViewDropDelegate, backgroundColor: UIColor) -> UICollectionView {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        
+        collectionView.isPrefetchingEnabled = false
+        
+        collectionView.allowsMultipleSelectionDuringEditing = true
+        
+        collectionView.keyboardDismissMode = .interactive
+        
+        collectionView.delegate = delegate
+        collectionView.dragDelegate = delegate
+        collectionView.dropDelegate = delegate
+        // support on iphone
+        collectionView.dragInteractionEnabled = true
+        
+        collectionView.backgroundColor = backgroundColor
+        
+        return collectionView
+    }
+    
+    func subscribeToResponderNotifier<Cell>(_ cell: Cell)
+    where Cell: SRespondable {
+        cell.responderStatusPublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] (responderNotifierState: ResponderState) in
+                switch responderNotifierState.status {
+                    case .responding:
+                        let nextRespondingItem = self.itemForResponder(responderNotifierState.sendingResponder)
+                        self.firstResponderItem = nextRespondingItem
+                    case .resigned:
+                        guard let currentResponderItem = self.firstResponderItem else {
+                            assertionFailure("Expected cached item id for first responder.")
+                            return
+                        }
+                        if let nextResponderItem =
+                            self.configuration.subsequentFirstResponder(following: currentResponderItem) {
+                            self.updateFirstResponderToItem(nextResponderItem)
+                        }
+                        else {
+                            self.firstResponderItem = nil
+                        }
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func subscribeToDynamicSizeNotifier<Cell>(_ cell: Cell)
+    where Cell: UICollectionViewCell, Cell: SDynamicSizeNotifier {
+        cell.sizeDidChangePublisher
+            .receive(on: DispatchQueue.main)
+            .map { $0 as! Cell }
+            .sink(receiveValue: { [unowned self] cell in
+                self.updateForCellSizeChanges(cell)
+            })
+            .store(in: &cancellables)
+    }
+}
+
 // MARK: - selection handlers
 private
 extension ListViewController {
@@ -732,7 +754,6 @@ extension ListViewController {
             }
             else {
                 editingSelections.toggle(item)
-                cell.didSelect()
             }
         }
         // if not editing, process as tap (normal mode)
@@ -781,9 +802,9 @@ extension ListViewController {
 	
 	/// Determines the item identifier corresponding to the responder. The responder must be a collection cell instance.
 	/// - Returns: The corresponding item ID or nil if it cannot be retrieved for some reason.
-	func itemForResponder(_ responder: UIResponder) -> ItemID? {
-		guard let cell = responder as? UICollectionViewCell else {
-			assertionFailure("Expected collection cell instance.")
+	func itemForResponder(_ sender: Any) -> ItemID? {
+		guard let cell = sender as? UICollectionViewCell else {
+            assertionFailure("Expected collection cell instance. Instead sender is \(sender.self).")
 			return nil
 		}
 		if let indexPath = collectionView.indexPath(for: cell) {
@@ -826,9 +847,9 @@ extension ListViewController {
 	}
     
     /// Retrieves the cell instance for the index path from the collection view.
-    func cellFor(_ indexPath: IndexPath) -> CellType? {
+    func cellFor(_ indexPath: IndexPath) -> SContentCell? {
         if let cell = collectionView.cellForItem(at: indexPath) {
-            guard let cellType = cell as? CellType else {
+            guard let cellType = cell as? SContentCell else {
                 assertionFailure("Unexpected cell type: \(cell)")
                 return nil
             }

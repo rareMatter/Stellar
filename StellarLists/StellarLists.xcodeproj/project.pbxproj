@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -13,7 +13,8 @@
 		880F21DF263886E60028B4BC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 880F21DE263886E60028B4BC /* Assets.xcassets */; };
 		880F21E2263886E60028B4BC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 880F21E1263886E60028B4BC /* Preview Assets.xcassets */; };
 		880F21E5263886E60028B4BC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 880F21E3263886E60028B4BC /* LaunchScreen.storyboard */; };
-		880F21ED263887140028B4BC /* AListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880F21EC263887140028B4BC /* AListView.swift */; };
+		880F21ED263887140028B4BC /* AList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880F21EC263887140028B4BC /* AList.swift */; };
+		880F21F0263B39340028B4BC /* Stellar in Frameworks */ = {isa = PBXBuildFile; productRef = 880F21EF263B39340028B4BC /* Stellar */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -25,7 +26,7 @@
 		880F21E1263886E60028B4BC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		880F21E4263886E60028B4BC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		880F21E6263886E60028B4BC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		880F21EC263887140028B4BC /* AListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AListView.swift; sourceTree = "<group>"; };
+		880F21EC263887140028B4BC /* AList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				880F21F0263B39340028B4BC /* Stellar in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,7 +67,7 @@
 				880F21E3263886E60028B4BC /* LaunchScreen.storyboard */,
 				880F21E6263886E60028B4BC /* Info.plist */,
 				880F21E0263886E60028B4BC /* Preview Content */,
-				880F21EC263887140028B4BC /* AListView.swift */,
+				880F21EC263887140028B4BC /* AList.swift */,
 			);
 			path = StellarLists;
 			sourceTree = "<group>";
@@ -94,6 +96,9 @@
 			dependencies = (
 			);
 			name = StellarLists;
+			packageProductDependencies = (
+				880F21EF263B39340028B4BC /* Stellar */,
+			);
 			productName = StellarLists;
 			productReference = 880F21D5263886E50028B4BC /* StellarLists.app */;
 			productType = "com.apple.product-type.application";
@@ -121,6 +126,9 @@
 				Base,
 			);
 			mainGroup = 880F21CC263886E50028B4BC;
+			packageReferences = (
+				880F21EE263B39340028B4BC /* XCRemoteSwiftPackageReference "stellar" */,
+			);
 			productRefGroup = 880F21D6263886E50028B4BC /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -150,7 +158,7 @@
 			files = (
 				880F21D9263886E50028B4BC /* AppDelegate.swift in Sources */,
 				880F21DB263886E50028B4BC /* SceneDelegate.swift in Sources */,
-				880F21ED263887140028B4BC /* AListView.swift in Sources */,
+				880F21ED263887140028B4BC /* AList.swift in Sources */,
 				880F21DD263886E50028B4BC /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -349,6 +357,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		880F21EE263B39340028B4BC /* XCRemoteSwiftPackageReference "stellar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "git@gitlab.com:rareMatter/stellar.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		880F21EF263B39340028B4BC /* Stellar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 880F21EE263B39340028B4BC /* XCRemoteSwiftPackageReference "stellar" */;
+			productName = Stellar;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 880F21CD263886E50028B4BC /* Project object */;
 }

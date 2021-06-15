@@ -16,6 +16,7 @@ class SStaticListModel<SectionType, ItemType>: SListModel where SectionType: Has
     public
     var snapshotSubject: CurrentValueSubject<ListDataDiffableSnapshot<SectionType, ItemType>, Never> = .init(.init())
     
+    public
     init(staticSnapshot: Snapshot) {
         self.snapshotSubject.value = staticSnapshot
     }
