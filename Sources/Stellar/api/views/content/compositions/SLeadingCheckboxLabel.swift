@@ -20,9 +20,6 @@ struct SLeadingCheckboxLabel: SPrimitiveContent {
     
     var checkboxBackgroundColor: UIColor?
     
-    var isChecked = false
-    var isDisabled = false
-    
     var trailingViews: [UIView] = []
     
     public
@@ -40,22 +37,5 @@ struct SLeadingCheckboxLabel: SPrimitiveContent {
         self.subtitleLeadingView = subtitleLeadingView
         self.trailingViews = trailingViews
         self.checkboxActionHandler = checkboxAction
-    }
-}
-
-// MARK: - modifiers
-public
-extension SLeadingCheckboxLabel {
-    
-    func selected(_ state: Bool) -> Self {
-        var modified = self
-        modified.isChecked = state
-        return modified
-    }
-    
-    func disabled(_ state: Bool) -> Self {
-        var modified = self
-        modified.isDisabled = state
-        return modified
     }
 }

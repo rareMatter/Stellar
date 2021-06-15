@@ -13,7 +13,7 @@ struct AList: SView {
     
     let model = SStaticListModel<Int, Int>(staticSnapshot: .snapshot()
                                             .appendingSection(0,
-                                                              withItems: Array(0...9)))
+                                                              withItems: Array(0...10)))
     
     var content: ViewHierarchyObject {
         SListView(listModel: model) { section, item, listState, configState in
@@ -21,11 +21,20 @@ struct AList: SView {
                 case 0:
                     SLeadingViewLabel(text: "Centered Leading view Centered Leading view Centered Leading view Centered Leading view",
                                       leadingView: UIImageView(image: UIImage(systemName: "circle")!))
+                        .editingSelectable()
+                        .accessories([UICellAccessory
+                                        .disclosureIndicator(displayed: .always)])
+                        .onTap {
+                            debugPrint("Tapped SLeadingViewLabel.")
+                        }
+                        .background(.orange)
                 case 1:
-                    SLeadingButtonLabel(title: "leading button label",
+                    SLeadingButtonLabel(text: "leading button label",
                                         buttonImage: UIImage(systemName: "square")!) {
-                        
+                        // button action
                     }
+                    .disabled()
+                    .background(.init(.systemTeal))
                 case 2:
                     SLeadingCheckboxLabel(title: "leading checkbox",
                                           checkboxImage: UIImage(systemName: "square"),

@@ -16,9 +16,11 @@ struct STextEditorContentConfiguration: SContentConfiguration, Equatable {
     
     var onTextChange: (String) -> Void
     
+    var inputAccessoryView: UIView?
+    
     var font: UIFont = .preferredFont(forTextStyle: .title1)
     
-    var inputAccessoryView: UIView?
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 }
 
 // MARK: - equatable
@@ -67,13 +69,14 @@ extension STextEditorContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension STextEditor: SPrimitiveContentConfigurationRenderer {
+extension STextEditor: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        STextEditorContentConfiguration(
-            text: text,
-            placeholderText: placeholderText,
-            onTextChange: onTextChange,
-            inputAccessoryView: inputAccessoryView)
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration =
+            STextEditorContentConfiguration(
+                text: text,
+                placeholderText: placeholderText,
+                onTextChange: onTextChange,
+                inputAccessoryView: inputAccessoryView)
     }
 }

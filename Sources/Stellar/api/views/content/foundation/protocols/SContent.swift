@@ -14,12 +14,3 @@ protocol SContent {
     
     @SContentBuilder var body: Self.Body { get }
 }
-
-// MARK: - modifier
-public
-extension SContent {
-    
-    func modifier<T>(_ modifier: T) -> SModifiedContent<Self, T> {
-        .init(content: self, modifier: modifier)
-    }
-}

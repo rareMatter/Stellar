@@ -18,6 +18,21 @@ struct LeadingButtonLabelContentConfiguration: SContentConfiguration, Equatable 
     var padding = 8
     
     var labelProperties: TextProperties = .init(font: .preferredFont(forTextStyle: .title1))
+    
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
+    
+    func updated(for state: UIConfigurationState) -> LeadingButtonLabelContentConfiguration {
+        var mutated = self
+        
+        if let cellState = state as? UICellConfigurationState {
+            mutated.configurationState = cellState
+        }
+        
+        mutated.buttonConfiguration = buttonConfiguration
+            .updated(for: state)
+        
+        return mutated
+    }
 }
 // MARK: - content view
 extension LeadingButtonLabelContentConfiguration {
@@ -80,18 +95,17 @@ extension LeadingButtonLabelContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension SLeadingButtonLabel: SPrimitiveContentConfigurationRenderer {
+extension SLeadingButtonLabel: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
+    func mountContent(on target: UIKitRenderableContent) {
         let buttonContentConfig = ButtonContentConfiguration(
             primaryAction: .init(actionHandler),
             image: buttonImage,
-            backgroundColor: buttonBackgroundColor,
-            isSelected: isSelected,
-            isDisabled: isDisabled)
+            backgroundColor: buttonBackgroundColor)
         
-        return LeadingButtonLabelContentConfiguration(
-            title: text,
-            buttonConfiguration: buttonContentConfig)
+        target.contentConfiguration =
+            LeadingButtonLabelContentConfiguration(
+                title: text,
+                buttonConfiguration: buttonContentConfig)
     }
 }

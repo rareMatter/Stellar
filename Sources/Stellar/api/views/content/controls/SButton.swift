@@ -10,19 +10,16 @@ import UIKit
 public
 struct SButton: SPrimitiveContent {
     
-    var actionHandler: () -> Void
-    
     var title: String
     var image: UIImage?
     
-    var backgroundColor: UIColor?
+    var actionHandler: () -> Void
     
-    var isSelected = false
-    var isDisabled = false
+    var backgroundColor: UIColor?
     
     public
     init(title: String,
-         backgroundColor: UIColor? = nil,
+         backgroundColor: UIColor?,
          action: @escaping () -> Void) {
         self.title = title
         self.backgroundColor = backgroundColor
@@ -31,24 +28,11 @@ struct SButton: SPrimitiveContent {
     
     public
     init(image: UIImage,
+         backgroundColor: UIColor? = nil,
          action: @escaping () -> Void) {
-        self.init(title: "", action: action)
-    }
-}
-
-// MARK: - modifiers
-public
-extension SButton {
-    
-    func selected(_ state: Bool) -> Self {
-        var modified = self
-        modified.isSelected = state
-        return modified
-    }
-    
-    func disabled(_ state: Bool) -> Self {
-        var modified = self
-        modified.isDisabled = state
-        return modified
+        self.init(title: "",
+                  backgroundColor: backgroundColor,
+                  action: action)
+        self.image = image
     }
 }

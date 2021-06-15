@@ -29,7 +29,8 @@ struct AnySContent: SPrimitiveContent {
     let bodyProvider: (Any) -> AnySContent
     
     public
-    init<Content>(_ content: Content) where Content : SContent {
+    init<Content>(_ content: Content)
+    where Content : SContent {
         if let anyContent = content as? AnySContent {
             self = anyContent
         }

@@ -19,14 +19,8 @@ struct LeadingViewLabelContentConfiguration: SContentConfiguration, Equatable {
     var padding = 8
     
     var labelProperties: TextProperties = .init(font: .preferredFont(forTextStyle: .title1))
-}
-
-#warning("TODO: Move this.")
-public
-enum SHorizontalAlignment {
-    case center,
-         leading,
-         trailing
+    
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 }
 
 // MARK: - content view
@@ -110,12 +104,13 @@ extension LeadingViewLabelContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension SLeadingViewLabel: SPrimitiveContentConfigurationRenderer {
+extension SLeadingViewLabel: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        LeadingViewLabelContentConfiguration(
-            title: text,
-            leadingView: leadingView,
-            horizontalAlignment: horizontalAlignment)
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration =
+            LeadingViewLabelContentConfiguration(
+                title: text,
+                leadingView: leadingView,
+                horizontalAlignment: horizontalAlignment)
     }
 }

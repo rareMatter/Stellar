@@ -13,35 +13,26 @@ struct SContextMenuButton: SPrimitiveContent {
     var title: String
     var image: UIImage?
     
-    var menuItems: [UIMenuElement]
+    var backgroundColor: UIColor?
     
-    var isDisabled = false
+    var menuItems: [UIMenuElement]
     
     public
     init(title: String,
-         image: UIImage? = nil,
+         backgroundColor: UIColor?,
          menuItems: [UIMenuElement]) {
         self.title = title
-        self.image = image
+        self.backgroundColor = backgroundColor
         self.menuItems = menuItems
     }
     
     public
     init(image: UIImage,
+         backgroundColor: UIColor? = nil,
          menuItems: [UIMenuElement]) {
         self.init(title: "",
-                  image: image,
+                  backgroundColor: backgroundColor,
                   menuItems: menuItems)
-    }
-}
-
-// MARK: - modifiers
-public
-extension SContextMenuButton {
-    
-    func disabled(_ state: Bool) -> Self {
-        var modified = self
-        modified.isDisabled = state
-        return modified
+        self.image = image
     }
 }

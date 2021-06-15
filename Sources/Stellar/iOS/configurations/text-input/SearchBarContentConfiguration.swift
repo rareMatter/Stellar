@@ -18,6 +18,8 @@ struct SearchBarContentConfiguration: SContentConfiguration, Hashable {
     let onSearchEnded: () -> Void
     
     var style: UISearchBar.Style
+    
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 }
 
 // MARK: hashable
@@ -86,13 +88,14 @@ extension SearchBarContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension SSearchBar: SPrimitiveContentConfigurationRenderer {
+extension SSearchBar: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        SearchBarContentConfiguration(text: text,
-                                      placeholderText: placeholderText,
-                                      onSearch: onSearch,
-                                      onSearchEnded: onSearchEnded,
-                                      style: style)
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration = 
+            SearchBarContentConfiguration(text: text,
+                                          placeholderText: placeholderText,
+                                          onSearch: onSearch,
+                                          onSearchEnded: onSearchEnded,
+                                          style: style)
     }
 }

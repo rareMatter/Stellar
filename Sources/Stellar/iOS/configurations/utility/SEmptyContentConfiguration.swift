@@ -15,6 +15,8 @@ struct SEmptyContentConfiguration: SContentConfiguration, Equatable {
     private
     var intrinsicContentSize: CGSize = .init(width: 1, height: 1)
     
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
+    
     func updated(for state: UIConfigurationState) -> SEmptyContentConfiguration {
         if state is UICellConfigurationState {
             var modified = self
@@ -37,9 +39,10 @@ extension SEmptyContentConfiguration {
 }
 
 // MARK: - SContent rendering
-extension SEmptyContent: SPrimitiveContentConfigurationRenderer {
+extension SEmptyContent: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        SEmptyContentConfiguration()
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration =
+            SEmptyContentConfiguration()
     }
 }

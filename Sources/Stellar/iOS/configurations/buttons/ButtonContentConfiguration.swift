@@ -12,15 +12,14 @@ struct ButtonContentConfiguration: SContentConfiguration, Hashable {
 
     var primaryAction: SHashableClosure = .init {}
 
-    var title: String? = nil
+    var title: String?
     
-    var image: UIImage? = nil
+    var image: UIImage?
     var imageProperties: ImageProperties = .init(preferredSymbolConfiguration: .init(textStyle: .title3))
 
-    var backgroundColor: UIColor? = nil
+    var backgroundColor: UIColor?
 
-    var isSelected = false
-    var isDisabled = false
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 }
 
 // MARK: content view
@@ -61,22 +60,23 @@ extension ButtonContentConfiguration {
             button.backgroundColor = updatedConfig
                 .backgroundColor
             button.isSelected = updatedConfig
+                .configurationState
                 .isSelected
             button.isEnabled = !updatedConfig
+                .configurationState
                 .isDisabled
         }
     }
 }
 
 // MARK: - SContent mapping
-extension SButton: SPrimitiveContentConfigurationRenderer {
+extension SButton: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        ButtonContentConfiguration(primaryAction: .init(actionHandler),
-                                   title: title,
-                                   image: image,
-                                   backgroundColor: backgroundColor,
-                                   isSelected: isSelected,
-                                   isDisabled: isDisabled)
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration =
+            ButtonContentConfiguration(primaryAction: .init(actionHandler),
+                                       title: title,
+                                       image: image,
+                                       backgroundColor: backgroundColor)
     }
 }

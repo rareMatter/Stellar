@@ -10,57 +10,21 @@ import UIKit
 public
 struct SLeadingButtonLabel: SPrimitiveContent {
     
-    var text: String = ""
-    
-    var actionHandler: () -> Void = {}
+    var text: String
     
     var buttonImage: UIImage
     var buttonBackgroundColor: UIColor?
     
-    var accessories = [UICellAccessory]()
-    
-    var backgroundColor: UIColor?
-    
-    var isSelected = false
-    var isDisabled = false
+    var actionHandler: () -> Void
     
     public
-    init(title: String,
+    init(text: String,
          buttonImage: UIImage,
          buttonBackgroundColor: UIColor? = nil,
          action: @escaping () -> Void) {
-        self.text = title
+        self.text = text
         self.buttonImage = buttonImage
         self.buttonBackgroundColor = buttonBackgroundColor
         self.actionHandler = action
-    }
-}
-
-// MARK: - modifiers
-public
-extension SLeadingButtonLabel {
-    
-    func selected(_ state: Bool) -> Self {
-        var modified = self
-        modified.isSelected = state
-        return modified
-    }
-    
-    func background(_ color: UIColor) -> Self {
-        var modified = self
-        modified.backgroundColor = color
-        return modified
-    }
-    
-    func disabled(_ state: Bool) -> Self {
-        var modified = self
-        modified.isDisabled = state
-        return modified
-    }
-    
-    func accessories(_ accessories: [UICellAccessory]) -> Self {
-        var modified = self
-        modified.accessories = accessories
-        return modified
     }
 }

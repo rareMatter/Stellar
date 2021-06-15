@@ -8,12 +8,12 @@
 
 import UIKit
 import SnapKit
-import Combine
 
 /// Displays a leading view before a text editor view.
 struct LeadingViewTextEditorContentConfiguration: SContentConfiguration, Equatable {
-    var leadingView = UIView()
+    var leadingView: UIView
     var textEditorConfiguration: STextEditorContentConfiguration
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 }
 
 // MARK: - content view
@@ -70,16 +70,17 @@ extension LeadingViewTextEditorContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension SLeadingViewTextEditor: SPrimitiveContentConfigurationRenderer {
+extension SLeadingViewTextEditor: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        LeadingViewTextEditorContentConfiguration(
-            leadingView: leadingView,
-            textEditorConfiguration: .init(
-                text: text,
-                placeholderText: placeholderText,
-                onTextChange: textChangeHandler,
-                inputAccessoryView: inputAccessoryView))
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration =
+            LeadingViewTextEditorContentConfiguration(
+                leadingView: leadingView,
+                textEditorConfiguration: .init(
+                    text: text,
+                    placeholderText: placeholderText,
+                    onTextChange: textChangeHandler,
+                    inputAccessoryView: inputAccessoryView))
     }
 }
 

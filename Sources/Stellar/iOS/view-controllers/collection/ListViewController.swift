@@ -754,7 +754,6 @@ extension ListViewController {
             }
             else {
                 editingSelections.toggle(item)
-                cell.didSelect()
             }
         }
         // if not editing, process as tap (normal mode)

@@ -16,14 +16,16 @@ struct ContextMenuButtonContentConfiguration: SContentConfiguration, Equatable {
     
     var image: UIImage?
     
+    var backgroundColor: UIColor?
+    
 	var menu: UIMenu?
     
     var menuWillAppear: MenuTransitionHandler  = {_,_,_ in}
     var menuWillDisappear: MenuTransitionHandler  = {_,_,_ in}
     
-    var isDisabled = false
-    
     var contentHorizontalAlignment: UIControl.ContentHorizontalAlignment = .center
+    
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 }
 
 // MARK: - equatable
@@ -65,8 +67,10 @@ extension ContextMenuButtonContentConfiguration {
                 .titleProperties
                 .font
             button.setImage(updatedConfig.image, for: .normal)
+            button.backgroundColor = backgroundColor
             button.menu = updatedConfig.menu
             button.isEnabled = !updatedConfig
+                .configurationState
                 .isDisabled
             button.contentHorizontalAlignment = updatedConfig.contentHorizontalAlignment
         }
@@ -79,14 +83,15 @@ extension ContextMenuButtonContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension SContextMenuButton: SPrimitiveContentConfigurationRenderer {
+extension SContextMenuButton: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
-        ContextMenuButtonContentConfiguration(title: title,
-                                              image: image,
-                                              menu: .init(title: title,
-                                                          image: image,
-                                                          children: menuItems),
-                                              isDisabled: isDisabled)
+    func mountContent(on target: UIKitRenderableContent) {
+        target.contentConfiguration =
+            ContextMenuButtonContentConfiguration(title: title,
+                                                  image: image,
+                                                  backgroundColor: backgroundColor,
+                                                  menu: .init(title: title,
+                                                              image: image,
+                                                              children: menuItems))
     }
 }

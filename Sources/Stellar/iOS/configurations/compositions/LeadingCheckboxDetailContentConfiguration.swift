@@ -17,17 +17,19 @@ struct LeadingCheckboxDetailContentConfiguration: SContentConfiguration, Equatab
 	
     var trailingViews: [UIView] = []
 
-    var isUserInteractionEnabled = true
+    var configurationState: UICellConfigurationState = .init(traitCollection: .current)
 
     func updated(for state: UIConfigurationState) -> LeadingCheckboxDetailContentConfiguration {
 		var updatedContentConfiguration = self
 		
         if let cellState = state as? UICellConfigurationState {
-			updatedContentConfiguration.isUserInteractionEnabled = !cellState.isEditing
+            updatedContentConfiguration.configurationState = cellState
 		}
         
-        updatedContentConfiguration.titleTextContent = titleTextContent.updated(for: state)
-        updatedContentConfiguration.secondaryTextContent = secondaryTextContent.updated(for: state)
+        updatedContentConfiguration.titleTextContent = titleTextContent
+            .updated(for: state)
+        updatedContentConfiguration.secondaryTextContent = secondaryTextContent
+            .updated(for: state)
 		
         return updatedContentConfiguration
 	}
@@ -133,27 +135,25 @@ extension LeadingCheckboxDetailContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
-extension SLeadingCheckboxLabel: SPrimitiveContentConfigurationRenderer {
+extension SLeadingCheckboxLabel: UIKitContentRenderer {
     
-    func makeContentConfiguration() -> UIContentConfiguration {
+    func mountContent(on target: UIKitRenderableContent) {
         let buttonContentConfig = ButtonContentConfiguration(
             primaryAction: .init(self.checkboxActionHandler),
             image: self.checkboxImage,
-            backgroundColor: self.checkboxBackgroundColor,
-            isSelected: self.isChecked,
-            isDisabled: self.isDisabled)
+            backgroundColor: self.checkboxBackgroundColor)
         
         let leadingViewLabelContentConfig: LeadingViewLabelContentConfiguration =
             .init(title: self.subtitle,
                   leadingView: self.subtitleLeadingView,
                   horizontalAlignment: .leading)
         
-        return LeadingCheckboxDetailContentConfiguration(
-            titleTextContent: .init(title: self.title,
-                                    buttonConfiguration: buttonContentConfig),
-            secondaryTextContent: leadingViewLabelContentConfig,
-            trailingViews: self.trailingViews,
-            isUserInteractionEnabled: !self.isDisabled)
+        target.contentConfiguration =
+            LeadingCheckboxDetailContentConfiguration(
+                titleTextContent: .init(title: self.title,
+                                        buttonConfiguration: buttonContentConfig),
+                secondaryTextContent: leadingViewLabelContentConfig,
+                trailingViews: self.trailingViews)
     }
 }
 

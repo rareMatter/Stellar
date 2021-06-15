@@ -24,3 +24,12 @@ where Modifier : SContentModifier {
         content
     }
 }
+
+// MARK: - default primitive body
+extension SContentModifier
+where Body == Never {
+
+    func body(content: Content) -> Self.Body {
+        primitiveBodyFailure(withType: String(reflecting: Self.self))
+    }
+}

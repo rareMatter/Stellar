@@ -118,17 +118,9 @@ extension SContentCell {
     }
     
     // -- selection
-    /// A handler that is called when a selection is made during list editing.
-    var selectionHandler: SHashableClosure? {
-        get { content.selectionHandler }
-        set { content.selectionHandler = newValue }
-    }
     
     func canSelect() -> Bool {
-        content.selectionHandler != nil
-    }
-    func didSelect() {
-        content.selectionHandler?()
+        content.isEditingSelectable
     }
 }
 
@@ -185,37 +177,8 @@ extension SContentCell {
     }
 }
 
-// MARK: - Content
-extension SContentCell {
-    
-    /// A container for all the properties which determine the configuration of an `SContentCell`.
-    struct Content {
-        var contentConfiguration: UIContentConfiguration
-        var backgroundConfiguration: UIBackgroundConfiguration
-        var accessories: [UICellAccessory] = []
-        var tapHandler: SHashableClosure?
-        var selectionHandler: SHashableClosure?
-        
-        /// Returns an updated instance using the state.
-        func updated(for configurationState: UICellConfigurationState) -> Self {
-            .init(contentConfiguration: contentConfiguration
-                    .updated(for: configurationState),
-                  backgroundConfiguration: backgroundConfiguration
-                    .updated(for: configurationState),
-                  accessories: accessories,
-                  tapHandler: tapHandler,
-                  selectionHandler: selectionHandler)
-        }
-        
-        static
-        func makeDefaultState() -> Self {
-            .init(contentConfiguration: UIListContentConfiguration.cell(),
-                  backgroundConfiguration: UIBackgroundConfiguration.listPlainCell())
-        }
-    }
-}
-
 // MARK: - typealiases
 extension SContentCell {
     typealias CellStateUpdateHandler = (UICellConfigurationState) -> Content
+    typealias Content = UIKitRenderableContent
 }

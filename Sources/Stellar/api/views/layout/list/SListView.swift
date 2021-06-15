@@ -79,15 +79,7 @@ struct SListView<Model, Content>: SView where Model: SListModel, Content: SConte
                                       item,
                                       listState,
                                       cellConfigState)
-            
-            #warning("TODO: Update properties with actual values.")
-            return .init(contentConfiguration: rowContent
-                            .renderContentConfiguration(),
-                         backgroundConfiguration: UIBackgroundConfiguration
-                            .listPlainCell(),
-                         accessories: [],
-                         tapHandler: nil,
-                         selectionHandler: nil)
+            return rowContent.renderContent()
         }
         
         // -- nav bar setup
