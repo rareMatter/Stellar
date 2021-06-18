@@ -2,14 +2,24 @@ import XCTest
 @testable import Stellar
 
 final class StellarTests: XCTestCase {
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct
-        // results.
-        XCTAssertEqual(Stellar().text, "Hello, World!")
+    
+    /// Creates a composite `SContent` instance and attempts to render it.
+    /// If rendering fails a timeout should occur.
+    func testCreateCompositeSContent() {
+        let composite = TestCompositeContent()
+        let _ = composite.renderContent()
     }
 
     static var allTests = [
-        ("testExample", testExample),
+        ("testCreateCompositeSContent", testCreateCompositeSContent),
     ]
+}
+
+// MARK: - test types
+
+struct TestCompositeContent: SContent {
+    
+    var body: some SContent {
+        SEmptyContent()
+    }
 }

@@ -13,7 +13,7 @@ struct AList: SView {
     
     let model = SStaticListModel<Int, Int>(staticSnapshot: .snapshot()
                                             .appendingSection(0,
-                                                              withItems: Array(0...10)))
+                                                              withItems: Array(0...9)))
     
     var content: ViewHierarchyObject {
         SListView(listModel: model) { section, item, listState, configState in
@@ -76,14 +76,23 @@ struct AList: SView {
                                 placeholderText: "Edit...") { text in
                         // update storage
                     }
-                /*
                 case 9:
-                    SEmptyContent()
-                 */
+                    CompositeContent(title: "This is a composite.")
+//                    SEmptyContent()
                 default:
                     SEmptyContent()
             }
         }
         .content
+    }
+}
+
+struct CompositeContent: SContent {
+    
+    var title: String
+    
+    var body: some SContent {
+        SLeadingViewLabel(text: title,
+                          leadingView: UIView())
     }
 }

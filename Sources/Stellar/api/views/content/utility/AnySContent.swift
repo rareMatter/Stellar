@@ -43,7 +43,7 @@ struct AnySContent: SPrimitiveContent {
                 guard let content = content as? Content else {
                     fatalError()
                 }
-                return AnySContent(content)
+                return AnySContent(content.body)
             }
         }
     }
