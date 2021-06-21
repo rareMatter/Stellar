@@ -31,6 +31,8 @@ struct NLButtonConfiguration: Identifiable {
     public var font: Font
 	public var padding: EdgeInsets
     
+    public var isDisabled = false
+    
     public init(id: NLButtonIdentifier, title: String = "", imageView: @escaping () -> AnyView = { AnyView(EmptyView()) }, handler: @escaping Handler = {}, showsContextMenuAsPrimaryAction: Bool = false, contextMenuItems: [NLButtonConfiguration] = [], imageScale: Image.Scale = .medium, font: Font = .title, padding: EdgeInsets = .init(top: 8, leading: 8, bottom: 8, trailing: 8)) {
         self.id = id
         self.title = title

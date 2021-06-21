@@ -140,24 +140,32 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
             
             // create registration
             let cellRegistration = UICollectionView.CellRegistration<SContentCell, ItemID> { cell, indexPath, item in
-                
+                /// initial cell setup
+                let initialContent = rowContentProvider(self.sectionInSnapshot(with: indexPath),
+                                                        item,
+                                                        listState,
+                                                        cell.configurationState)
+                cell.content = initialContent
+
                 // prepare cell to update itself with content when state changes
                 cell.onConfigurationStateChange { configState in
-                    // subscribe to special content types
-                    self.subscribeToDynamicSizeNotifier(cell)
-                    self.subscribeToResponderNotifier(cell)
-                    
-                    return rowContentProvider(self.sectionInSnapshot(with: indexPath),
-                                              item,
-                                              listState,
-                                              configState)
+                    rowContentProvider(self.sectionInSnapshot(with: indexPath),
+                                       item,
+                                       listState,
+                                       configState)
                 }
+                
                 // tell cell to update for initial state
                 cell.setNeedsUpdateConfiguration()
             }
             
             // dequeue cell
             let cell = collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
+            
+            // subscribe to special content types
+            self.subscribeToDynamicSizeNotifier(cell)
+            self.subscribeToResponderNotifier(cell)
+            
             return cell
         })
         

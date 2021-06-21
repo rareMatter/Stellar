@@ -45,29 +45,8 @@ extension SearchBarContentConfiguration {
         let searchBar: SSearchBarView = {
             let searchBar = SSearchBarView()
             searchBar.translatesAutoresizingMaskIntoConstraints = false
-            
-            // search bar interactions
-            searchBar.didBeginEditing = { searchBar in
-                searchBar.setShowsCancelButton(true, animated: true)
-                self.onSearch(searchBar.text ?? "")
-            }
-            searchBar.onTextChange = { searchBar in
-                self.onSearch(searchBar.text ?? "")
-            }
-            searchBar.onSearchClicked = { searchBar in
-                searchBar.endEditing(true)
-            }
-            searchBar.didEndEditing = { searchBar in
-                searchBar.setShowsCancelButton(false, animated: true)
-                self.onSearch(searchBar.searchTextField.text ?? "")
-            }
-            searchBar.onCancel = { searchBar in
-                searchBar.searchTextField.text = nil
-                searchBar.setShowsCancelButton(false, animated: true)
-                searchBar.endEditing(true)
-                self.onSearchEnded()
-            }
-            
+            updateSearchBarState(searchBar,
+                                 with: self)
             return searchBar
         }()
         
@@ -81,8 +60,36 @@ extension SearchBarContentConfiguration {
                 make.bottom.equalTo(contentView.snp.bottomMargin)
             }
         } handleConfigurationUpdate: { oldConfig, updatedConfig, contentView in
-            searchBar.searchBarStyle = updatedConfig.style
-            searchBar.placeholder = updatedConfig.placeholderText
+            updateSearchBarState(searchBar,
+                                 with: updatedConfig)
+        }
+    }
+    
+    private
+    func updateSearchBarState(_ searchBar: SSearchBarView, with configuration: SearchBarContentConfiguration) {
+        searchBar.searchBarStyle = configuration.style
+        searchBar.placeholder = configuration.placeholderText
+        
+        // search bar interactions
+        searchBar.didBeginEditing = { searchBar in
+            searchBar.setShowsCancelButton(true, animated: true)
+            configuration.onSearch(searchBar.text ?? "")
+        }
+        searchBar.onTextChange = { searchBar in
+            configuration.onSearch(searchBar.text ?? "")
+        }
+        searchBar.onSearchClicked = { searchBar in
+            searchBar.endEditing(true)
+        }
+        searchBar.didEndEditing = { searchBar in
+            searchBar.setShowsCancelButton(false, animated: true)
+            configuration.onSearch(searchBar.searchTextField.text ?? "")
+        }
+        searchBar.onCancel = { searchBar in
+            searchBar.searchTextField.text = nil
+            searchBar.setShowsCancelButton(false, animated: true)
+            searchBar.endEditing(true)
+            configuration.onSearchEnded()
         }
     }
 }

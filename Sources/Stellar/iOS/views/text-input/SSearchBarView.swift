@@ -37,6 +37,7 @@ class SSearchBarView: UISearchBar, UISearchBarDelegate, SRespondable {
     override
     init(frame: CGRect) {
         super.init(frame: .zero)
+        delegate = self
     }
     
     convenience

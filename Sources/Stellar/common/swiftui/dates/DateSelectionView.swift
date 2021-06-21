@@ -13,6 +13,8 @@ import SwiftDate
 public
 struct DateSelectionView: View {
 	
+    @Environment(\.presentationMode) var presentation
+    
 	@Binding public var date: Date
 	@Binding public var hasTime: Bool
 	@Binding public var duration: TimeInterval
@@ -33,9 +35,26 @@ struct DateSelectionView: View {
     }
     
     public var body: some View {
-        Text("This view needs to be replaced.")
+        VStack(alignment: .center) {
+            Group {
+                Text("Under construction.")
+                Text("🔧")
+                Text(" ...coming soon!")
+            }
+            .font(.title)
+            Spacer()
+                .fixedSize()
+                .frame(height: 88, alignment: .center)
+            Button {
+                presentation.wrappedValue.dismiss()
+            } label: {
+                Text("Go back")
+            }
+            .buttonStyle(DefaultButtonStyle())
+        }
+        
         /* Dependencies archived.
-		VStack {
+         VStack {
 			DatePicker(selection: self.$date, in: PartialRangeFrom<Date>(Date()), displayedComponents: DatePickerComponents.date) {
 				Text("Date Picker")
 			}

@@ -37,9 +37,9 @@ class SContentCell: UICollectionViewListCell, SDynamicSizeNotifier, SRespondable
     ///
     /// Setting this property will cause the cell to update its content.
     private
-    var content = Content.makeDefaultState() {
+    var _content = Content.makeDefaultState() {
         didSet {
-            updateWithState(content)
+            updateWithState(_content)
         }
     }
     
@@ -76,7 +76,7 @@ class SContentCell: UICollectionViewListCell, SDynamicSizeNotifier, SRespondable
     override
     func updateConfiguration(using state: UICellConfigurationState) {
         let updatedCellState = configurationUpdateHandler(state)
-        content = updatedCellState
+        _content = updatedCellState
             .updated(for: configurationState)
     }
 }
@@ -96,6 +96,13 @@ extension SContentCell {
 // MARK: - api
 extension SContentCell {
     
+    // -- cell content
+    /// Set this property to immediately update the cell's content. The value of the property is the content that is currently applied to the cell.
+    var content: Content {
+        get { _content }
+        set { _content = newValue }
+    }
+    
     /// Handle state changes by updating your configuration.
     @discardableResult
     func onConfigurationStateChange(_ handler: @escaping CellStateUpdateHandler) -> Self {
@@ -106,21 +113,21 @@ extension SContentCell {
     // -- taps
     /// A handler that is called when a tap is received by a list item (when not editing).
     var tapHandler: SHashableClosure? {
-        get { content.tapHandler }
-        set { content.tapHandler = newValue }
+        get { _content.tapHandler }
+        set { _content.tapHandler = newValue }
     }
     
     func canTap() -> Bool {
-        content.tapHandler != nil
+        _content.tapHandler != nil
     }
     func didTap() {
-        content.tapHandler?()
+        _content.tapHandler?()
     }
     
     // -- selection
     
     func canSelect() -> Bool {
-        content.isEditingSelectable
+        _content.isEditingSelectable
     }
 }
 

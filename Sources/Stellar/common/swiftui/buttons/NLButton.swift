@@ -60,5 +60,6 @@ extension View {
             .imageScale(buttonConfiguration.imageScale)
             .font(buttonConfiguration.font)
             .padding(buttonConfiguration.padding)
+            .disabled(buttonConfiguration.isDisabled)
     }
 }

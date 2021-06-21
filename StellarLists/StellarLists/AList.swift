@@ -14,6 +14,7 @@ struct AList: SView {
     let model = SStaticListModel<Int, Int>(staticSnapshot: .snapshot()
                                             .appendingSection(0,
                                                               withItems: Array(0...9)))
+    let searchTextModel = SearchTextStorage()
     
     var content: ViewHierarchyObject {
         SListView(listModel: model) { section, item, listState, configState in
@@ -67,6 +68,7 @@ struct AList: SView {
                     SSearchBar(text: "search bar",
                                placeholderText: "Search something...") { searchText in
                         // search entered action
+                        searchTextModel.searchText = searchText
                     } onSearchEnded: {
                         // search ended action
                     }
@@ -94,5 +96,14 @@ struct CompositeContent: SContent {
     var body: some SContent {
         SLeadingViewLabel(text: title,
                           leadingView: UIView())
+    }
+}
+
+final
+class SearchTextStorage {
+    var searchText = "" {
+        didSet {
+            debugPrint("Search bar text did update: \(searchText)")
+        }
     }
 }
