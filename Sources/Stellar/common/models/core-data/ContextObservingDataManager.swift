@@ -88,8 +88,9 @@ extension ContextObservingDataManager {
 		changesSubject.eraseToAnyPublisher()
 	}
 	
+    /// Returns an updated collection of data retrieved from storage.
 	var data: [DataType] {
-		fetchedResultsController.fetchedObjects ?? []
+        performFetchWith(controller: fetchedResultsController)
 	}
 	
 	/// Updates the results using the new predicate.

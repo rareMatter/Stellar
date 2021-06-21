@@ -63,6 +63,9 @@ extension STextEditorContentConfiguration {
             textView.placeholder = updatedConfig.placeholderText
             textView.font = updatedConfig.font
             textView.placeholderFont = updatedConfig.font
+            textView.didChange = { textView in
+                updatedConfig.onTextChange(textView.text)
+            }
             textView.inputAccessoryView = updatedConfig.inputAccessoryView
         }
     }
