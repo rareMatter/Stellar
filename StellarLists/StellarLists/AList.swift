@@ -16,6 +16,8 @@ struct AList: SView {
                                                               withItems: Array(0...9)))
     let searchTextModel = SearchTextStorage()
     
+    let theme = Theme()
+    
     var content: ViewHierarchyObject {
         SListView(listModel: model) { section, item, listState, configState in
             switch item {
@@ -28,7 +30,7 @@ struct AList: SView {
                         .onTap {
                             debugPrint("Tapped SLeadingViewLabel.")
                         }
-                        .background(.orange)
+                        .background(.init(theme.backgroundColor))
                 case 1:
                     SLeadingButtonLabel(text: "leading button label",
                                         buttonImage: UIImage(systemName: "square")!) {
@@ -104,6 +106,25 @@ class SearchTextStorage {
     var searchText = "" {
         didSet {
             debugPrint("Search bar text did update: \(searchText)")
+        }
+    }
+}
+
+struct Theme {
+    
+    private var isDark: Bool {
+        if STraitCollection.currentUITraitCollection.userInterfaceStyle == .dark {
+            return true
+        }
+        else { return false }
+    }
+    
+    var backgroundColor: UIColor {
+        if isDark {
+            return .darkGray
+        }
+        else {
+            return .lightGray
         }
     }
 }
