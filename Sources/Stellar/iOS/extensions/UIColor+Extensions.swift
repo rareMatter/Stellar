@@ -9,6 +9,7 @@ import UIKit
 
 extension UIColor {
     
+    public
     convenience
     init(sColor: SColor) {
         // convert SColor hue range [0, 359] to UIColor hue range [0, 1].
