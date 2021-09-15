@@ -17,12 +17,23 @@ extension SAccessoriesModifier: UIKitRenderableContentModifier {
     }
 }
 
-extension SBackgroundContentModifier: UIKitRenderableContentModifier {
+extension SColorBackgroundContentModifier: UIKitRenderableContentModifier {
     
     func applyTo(_ target: UIKitRenderableContent) {
         var backgroundConfig = target.backgroundConfiguration
         
-        backgroundConfig.backgroundColor = UIColor(self.backgroundColor)
+        backgroundConfig.backgroundColor = UIColor(sColor: backgroundColor)
+        
+        target.backgroundConfiguration = backgroundConfig
+    }
+}
+
+extension SDynamicColorBackgroundContentModifier: UIKitRenderableContentModifier {
+    
+    func applyTo(_ target: UIKitRenderableContent) {
+        var backgroundConfig = target.backgroundConfiguration
+        
+        backgroundConfig.backgroundColor = UIColor(sDynamicColor: backgroundDynamicColor)
         
         target.backgroundConfiguration = backgroundConfig
     }

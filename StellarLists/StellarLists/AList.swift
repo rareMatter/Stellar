@@ -16,7 +16,7 @@ struct AList: SView {
                                                               withItems: Array(0...9)))
     let searchTextModel = SearchTextStorage()
     
-    let theme = Theme()
+    let theme = ColorTheme()
     
     var content: ViewHierarchyObject {
         SListView(listModel: model) { section, item, listState, configState in
@@ -30,14 +30,14 @@ struct AList: SView {
                         .onTap {
                             debugPrint("Tapped SLeadingViewLabel.")
                         }
-                        .background(.init(theme.backgroundColor))
+                        .background(theme.baseColors.baseBackground)
                 case 1:
                     SLeadingButtonLabel(text: "leading button label",
                                         buttonImage: UIImage(systemName: "square")!) {
                         // button action
                     }
                     .disabled()
-                    .background(.init(.systemTeal))
+                    .background(.blue)
                 case 2:
                     SLeadingCheckboxLabel(title: "leading checkbox",
                                           checkboxImage: UIImage(systemName: "square"),
@@ -110,21 +110,51 @@ class SearchTextStorage {
     }
 }
 
-struct Theme {
+/// A description of a theme. This type allows you to provide your own type for arbitrary special colors. A theme allows dynamic color selection using environmental properties.
+struct BaseColorTheme {
     
-    private var isDark: Bool {
-        if STraitCollection.currentUITraitCollection.userInterfaceStyle == .dark {
-            return true
-        }
-        else { return false }
+    //    focus colors
+    /// Applied to surfaces which should stand out and match other stand-out surfaces, such as buttons.
+    var accentColor: SDynamicColor = .init { scheme in
+        .orange
+    }
+    /// Applied to surfaces in combination with the accent color. Use this color to add more interest to particular aspects of a surface while coordinating with the accent color.
+    var highlightColor: SDynamicColor = .init { scheme in
+        .orange
+    }
+    /// Applied to surfaces which are in the foreground (or uppermost context). This should be things such as text or symbols within buttons.
+    var foregroundColor: SDynamicColor = .init { scheme in
+        scheme == .light ? .white : .black
+    }
+    /// Applied to surfaces which currently have focus. Only one surface should have this color applied at a time.
+    /// - Note: If this color is the same as accent color, the focus effect may be lost.
+    var focusedColor: SDynamicColor = .init { scheme in
+        .orange
     }
     
-    var backgroundColor: UIColor {
-        if isDark {
-            return .darkGray
-        }
-        else {
-            return .lightGray
-        }
+    //    backgrounds
+    var baseBackground: SDynamicColor = .init { scheme in
+        scheme == .light ? .black : .white
     }
+    var secondaryBackground: SDynamicColor = .init { scheme in
+        scheme == .light ? .black : .white
+    }
+    var tertiaryBackground: SDynamicColor = .init { scheme in
+        scheme == .light ? .black : .white
+    }
+    var quaternaryBackground: SDynamicColor = .init { scheme in
+        scheme == .light ? .black : .white
+    }
+}
+
+struct ListsColorTheme {
+    var schedule: SColor = .orange
+    var history: SColor = .purple
+    var labels: SColor = .blue
+    var unsorted: SColor = .yellow
+}
+
+struct ColorTheme {
+    let baseColors: BaseColorTheme = .init()
+    let listColors: ListsColorTheme = .init()
 }
