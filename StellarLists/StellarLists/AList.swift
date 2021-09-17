@@ -30,7 +30,7 @@ struct AList: SView {
                         .onTap {
                             debugPrint("Tapped SLeadingViewLabel.")
                         }
-                        .background(theme.baseColors.baseBackground)
+                        .background(theme.baseColors.accentColor)
                 case 1:
                     SLeadingButtonLabel(text: "leading button label",
                                         buttonImage: UIImage(systemName: "square")!) {
@@ -116,7 +116,7 @@ struct BaseColorTheme {
     //    focus colors
     /// Applied to surfaces which should stand out and match other stand-out surfaces, such as buttons.
     var accentColor: SDynamicColor = .init { scheme in
-        .orange
+        .init(red: 225, green: 97, blue: 60, colorSpace: .displayP3)
     }
     /// Applied to surfaces in combination with the accent color. Use this color to add more interest to particular aspects of a surface while coordinating with the accent color.
     var highlightColor: SDynamicColor = .init { scheme in
