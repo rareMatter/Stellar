@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "Stellar",
+        "repositoryURL": "git@gitlab.com:rareMatter/stellar.git",
+        "state": {
+          "branch": null,
+          "revision": "9316f14bdf8782251cb3fed4e47b62e2743e4dd0",
+          "version": "0.5.0"
+        }
+      },
+      {
         "package": "SwiftDate",
         "repositoryURL": "https://github.com/malcommac/SwiftDate.git",
         "state": {
