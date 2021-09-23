@@ -8,7 +8,6 @@
 
 import UIKit
 import Combine
-import SwiftUI
 
 /// Content is provided using a `UIContentConfiguration`. Content views are checked for dynamic size changes through `SDynamicSizeNotifier` and responders through `SRespondable`.
 ///
