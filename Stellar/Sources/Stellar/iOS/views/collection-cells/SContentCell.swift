@@ -8,6 +8,7 @@
 
 import UIKit
 import Combine
+import SwiftUI
 
 /// Content is provided using a `UIContentConfiguration`. Content views are checked for dynamic size changes through `SDynamicSizeNotifier` and responders through `SRespondable`.
 ///
@@ -29,7 +30,7 @@ class SContentCell: UICollectionViewListCell, SDynamicSizeNotifier, SRespondable
     /// Call this handler when a configuration update is requested.
     /// The handler returns an updated `CellState` instance which will be applied to the cell during updates.
     private
-    lazy var configurationUpdateHandler: CellStateUpdateHandler = { state in
+    lazy var _configurationUpdateHandler: CellStateUpdateHandler = { state in
         .makeDefaultState()
     }
     
@@ -65,7 +66,7 @@ class SContentCell: UICollectionViewListCell, SDynamicSizeNotifier, SRespondable
         super.prepareForReuse()
         
         /// Reset to base state in case clients do not update properties.
-        configurationUpdateHandler = { state in
+        _configurationUpdateHandler = { state in
             .makeDefaultState()
         }
         setNeedsUpdateConfiguration()
@@ -75,7 +76,7 @@ class SContentCell: UICollectionViewListCell, SDynamicSizeNotifier, SRespondable
     /// - Note: This method calls the configuration update handler.
     override
     func updateConfiguration(using state: UICellConfigurationState) {
-        let updatedCellState = configurationUpdateHandler(state)
+        let updatedCellState = _configurationUpdateHandler(state)
         _content = updatedCellState
             .updated(for: configurationState)
     }
@@ -106,7 +107,7 @@ extension SContentCell {
     /// Handle state changes by updating your configuration.
     @discardableResult
     func onConfigurationStateChange(_ handler: @escaping CellStateUpdateHandler) -> Self {
-        configurationUpdateHandler = handler
+        _configurationUpdateHandler = handler
         return self
     }
     
