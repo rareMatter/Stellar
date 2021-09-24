@@ -54,7 +54,7 @@ extension SContent {
                                  anyContent: modifiedBody)
                 }
                 else {
-                    assertionFailure("Unhandled Modified Content type. Rendering could be incorrect or fail.")
+                    assertionFailure("Modified Content type unhandled by renderer. Rendering could be incorrect or fail.")
                 }
             }
             // content is a container

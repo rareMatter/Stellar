@@ -19,7 +19,7 @@ struct AList: SView {
     let theme = ColorTheme()
     
     var content: ViewHierarchyObject {
-        SListView(listModel: model) { section, item, listState, configState in
+        SListView(listModel: model, layout: UICollectionViewCompositionalLayout.list(using: UICollectionLayoutListConfiguration(appearance: .plain))) { section, item, listState, configState in
             switch item {
                 case 0:
                     SLeadingViewLabel(text: "Centered Leading view Centered Leading view Centered Leading view Centered Leading view",
@@ -51,6 +51,8 @@ struct AList: SView {
                 case 3:
                     SLeadingViewLabel(text: "leading view label",
                                       leadingView: UIImageView(image: UIImage(systemName: "circle.fill")))
+                        .background(.green)
+                        .cornerRadius(25)
                 case 4:
                     SLeadingViewTextEditor(text: "leading view text editor",
                                            placeholderText: "Type something...",
@@ -82,7 +84,8 @@ struct AList: SView {
                     }
                 case 9:
                     CompositeContent(title: "This is a composite.")
-//                    SEmptyContent()
+                        .background(.yellow)
+                        .cornerRadius(12)
                 default:
                     SEmptyContent()
             }

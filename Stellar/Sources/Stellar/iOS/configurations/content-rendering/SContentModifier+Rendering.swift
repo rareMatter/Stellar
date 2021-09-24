@@ -59,3 +59,14 @@ extension STapHandlerModifier: UIKitRenderableContentModifier {
         target.tapHandler = .init(self.tapHandler)
     }
 }
+
+extension SCornerRadiusModifier: UIKitRenderableContentModifier {
+    
+    func applyTo(_ target: UIKitRenderableContent) {
+        var backgroundConfig = target.backgroundConfiguration
+        
+        backgroundConfig.cornerRadius = cornerRadius
+        
+        target.backgroundConfiguration = backgroundConfig
+    }
+}
