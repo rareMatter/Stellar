@@ -2,12 +2,12 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:StellarToolbar/StellarToolbar.xcodeproj">
+      location = "group:">
    </FileRef>
    <FileRef
-      location = "group:StellarLists/StellarLists.xcodeproj">
+      location = "group:StellarLists.xcodeproj">
    </FileRef>
    <FileRef
-      location = "group:Stellar">
+      location = "group:StellarToolbar.xcodeproj">
    </FileRef>
 </Workspace>
