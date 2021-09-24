@@ -136,29 +136,28 @@ class ListViewController<Model: SListModel, Configuration: ListViewControllerCon
             collectionView = Self.makeCollectionView(with: defaultListLayout, delegate: self, backgroundColor: backgroundColor)
 		}
         
-        self.collectionDataSource = .init(collectionView: collectionView, cellProvider: { [unowned self] (collectionView, indexPath, item) -> SContentCell? in
+        // create registration
+        let cellRegistration = UICollectionView.CellRegistration<SContentCell, ItemID> { cell, indexPath, item in
+            /// initial cell setup
+            let initialContent = rowContentProvider(self.sectionInSnapshot(with: indexPath),
+                                                    item,
+                                                    listState,
+                                                    cell.configurationState)
+            cell.content = initialContent
             
-            // create registration
-            let cellRegistration = UICollectionView.CellRegistration<SContentCell, ItemID> { cell, indexPath, item in
-                /// initial cell setup
-                let initialContent = rowContentProvider(self.sectionInSnapshot(with: indexPath),
-                                                        item,
-                                                        listState,
-                                                        cell.configurationState)
-                cell.content = initialContent
-
-                // prepare cell to update itself with content when state changes
-                cell.onConfigurationStateChange { configState in
-                    rowContentProvider(self.sectionInSnapshot(with: indexPath),
-                                       item,
-                                       listState,
-                                       configState)
-                }
-                
-                // tell cell to update for initial state
-                cell.setNeedsUpdateConfiguration()
+            // prepare cell to update itself with content when state changes
+            cell.onConfigurationStateChange { configState in
+                rowContentProvider(self.sectionInSnapshot(with: indexPath),
+                                   item,
+                                   listState,
+                                   configState)
             }
             
+            // tell cell to update for initial state
+            cell.setNeedsUpdateConfiguration()
+        }
+        
+        self.collectionDataSource = .init(collectionView: collectionView, cellProvider: { [unowned self] (collectionView, indexPath, item) -> SContentCell? in
             // dequeue cell
             let cell = collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: item)
             
