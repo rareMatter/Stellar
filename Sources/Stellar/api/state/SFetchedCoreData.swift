@@ -24,6 +24,8 @@ where Result : NSFetchRequestResult {
     let fetchedResultsControllerDelegate: FetchedResultsControllerDelegate
     
     /// Notifies that changes have ocurred in the context to the dataset.
+    // TODO: This is public until the framework takes control of view tree updating. This temporarily allows clients to imperatively interface with updates.
+    public
     let didChangePublisher = PassthroughSubject<Void, Never>()
     
     public
@@ -32,7 +34,8 @@ where Result : NSFetchRequestResult {
     }
     
     public
-    init(fetchRequest: NSFetchRequest<Result>, context: NSManagedObjectContext)
+    init(fetchRequest: NSFetchRequest<Result>,
+         context: NSManagedObjectContext)
     where Result : NSFetchRequestResult {
         self.fetchRequest = fetchRequest
         self.fetchedResultsController = .init(fetchRequest: fetchRequest,
