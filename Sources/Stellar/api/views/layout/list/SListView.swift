@@ -11,14 +11,26 @@ import UIKit
 import SwiftUI
 
 public
-struct SListView<Model, Content>: SView where Model: SListModel, Content: SContent {
+struct SListView<Content, Data>: SView
+where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable, Data.Element : Identifiable {
     
-    // -- list state
-    var listState: State
+    // -- content
+    let contentProvider: (Data.Element, UICellConfigurationState) -> Content
+
+    // -- data
+    let data: CurrentValueSubject<Data, Never>
+    let children: KeyPath<Data.Element, Data?>?
+    
+    // -- state
+    let selections: CurrentValueSubject<Set<Data.Element>, Never>
+    let mode: CurrentValueSubject<ListMode, Never>
+    
+    // -- title bar (nav bar)
+    var titleBarView: STitleBarView?
     
     // -- first reponders
-    var initialFirstResponderHandler: InitialFirstResponderHandler?
-    var subsequentFirstResponderHandler: SubsequentFirstResponderHandler?
+//    var initialFirstResponderHandler: (() -> AnyHashable?)?
+//    var subsequentFirstResponderHandler: ((AnyHashable) -> AnyHashable?)?
     
     // -- layout
     var layout: UICollectionViewLayout?
@@ -26,61 +38,20 @@ struct SListView<Model, Content>: SView where Model: SListModel, Content: SConte
     // -- color
     var backgroundColor: UIColor = .systemGroupedBackground
     
-    // -- model and rows
-    var listModel: Model
-    
-    @SContentBuilder
-    var rowProvider: RowContentProvider
-    
-    // -- title bar (nav bar)
-    var titleBarView: STitleBarView?
-    
-    /// Creates the view with a model that drives updates.
-    public
-    init(listModel: Model,
-         listState: State = .init(),
-         layout: UICollectionViewLayout? = nil,
-         @SContentBuilder rowContentProvider: @escaping RowContentProvider) {
-        self.listModel = listModel
-        self.listState = listState
-        self.layout = layout
-        self.rowProvider = rowContentProvider
-    }
-    
-    /// Creates the view using an unchanging snapshot.
-    public
-    init(snapshot: Model.Snapshot,
-         listState: State = .init(),
-         layout: UICollectionViewLayout? = nil,
-         @SContentBuilder rowContentProvider: @escaping RowContentProvider) {
-        let model = SStaticListModel(staticSnapshot: snapshot)
-        self.init(listModel: model as! Model,
-                  listState: listState,
-                  layout: layout,
-                  rowContentProvider: rowContentProvider)
-    }
-    
     public
     var id: UUID = .init()
     
     public
     var content: ViewHierarchyObject {
-        let controller = ViewController(
-            configuration: self,
-            listModel: listModel,
-            listState: listState,
+        let controller = ListViewController<Content, Data>(
+            data,
+            children: children,
+            selections: selections,
+            mode: mode,
+            configuration: .init(),
             layout: layout,
-            backgroundColor: backgroundColor)
-        { [rowProvider] (section: SectionType,
-                         item: ItemType,
-                         listState: ViewController.State,
-                         cellConfigState: UICellConfigurationState) in
-            let rowContent = rowProvider(section,
-                                      item,
-                                      listState,
-                                      cellConfigState)
-            return rowContent.renderContent()
-        }
+            backgroundColor: backgroundColor,
+            rowContent: contentProvider)
         
         // -- nav bar setup
         if let titleBarView = titleBarView {
@@ -93,24 +64,29 @@ struct SListView<Model, Content>: SView where Model: SListModel, Content: SConte
     }
 }
 
-// MARK: - typealiases
+// MARK: - Create a list with identifiable, hierarchical data.
 public
 extension SListView {
-    typealias SectionType = Model.SectionType
-    typealias ItemType = Model.ItemType
     
-    typealias State = ListState<ItemType>
-    
-    typealias InitialFirstResponderHandler = () -> ItemType?
-    typealias SubsequentFirstResponderHandler = (_ currentResponder: ItemType) -> ItemType?
-    
-    typealias RowContentProvider = (
-        _ section: Model.SectionType,
-        _ item: Model.ItemType,
-        _ listState: ListState<ItemType>,
-        _ configurationState: UICellConfigurationState
-    ) -> Content
+    init(_ dataSubject: CurrentValueSubject<Data, Never>,
+         children: KeyPath<Data.Element, Data?>? = nil,
+         selections: CurrentValueSubject<Set<Data.Element>, Never>? = nil,
+         mode: CurrentValueSubject<ListMode, Never>? = nil,
+         @SContentBuilder rowContent: @escaping (Data.Element, UICellConfigurationState) -> Content) {
+        self.data = dataSubject
+        self.children = children
+        self.selections = selections ?? .init(.init())
+        self.mode = mode ?? .init(.normal)
+        self.contentProvider = rowContent
+    }
 }
+
+public
 extension SListView {
-    typealias ViewController = ListViewController<Model, Self>
+    
+    func titleBar(_ titleBarViewProvider: () -> STitleBarView) -> Self {
+        var modified = self
+        modified.titleBarView = titleBarView
+        return modified
+    }
 }
