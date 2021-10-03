@@ -6,53 +6,49 @@
 //
 
 import Foundation
+import UIKit
 
-protocol ListViewControllerConfiguration {
-    associatedtype SectionType: Hashable
-    associatedtype ItemType: Hashable
+extension ListViewController {
+    struct ListViewControllerConfiguration {
+        
+        /// Details for how multiselection should be configured, if at all.
+        var multiselectionConfiguration: ListMultiselectionConfiguration = .init()
+        
+        // MARK: - sections
+        var canCollapse: (_ item: Data.Element) -> Bool = { _ in false }
+        var didCollapse: (_ item: Data.Element) -> Void = { _ in }
+        
+        /// Determines whether the section can be expanded when the header is tapped.
+        ///
+        /// This method is only called during normal mode. If you want expansion/collapse behavior during editing mode you must respond in the `canSelect(item: inSection:).` For more detail, see the docs for that method.
+        var canExpand: (_ item: Data.Element) -> Bool = { _ in false }
+        var didExpand: (_ item: Data.Element) -> Void = { _ in }
+        
+        // MARK: - reordering
+        /// Determines whether the item can be reordered.
+        var canReorder: (_ item: Data.Element) -> Bool = { _ in false }
+        /// Informs that reordering has completed with the provided transaction which provides the changes.
+        var didReorder: (_ transaction: NSDiffableDataSourceTransaction<SectionType, Data.Element>) -> Void = { _ in }
+        
+        // MARK: - swipe actions
+        var leadingSwipeActions: (_ item: Data.Element) -> UISwipeActionsConfiguration? = { _ in nil }
+        var trailingSwipeActions: (_ item: Data.Element) -> UISwipeActionsConfiguration? = { _ in nil }
+        
+        // MARK: - responding
+        var initialFirstResponder: () -> Data.Element? = { nil }
+        var subsequentFirstResponder: (_ responder: Data.Element) -> Data.Element? = { _ in nil }
+    }
     
-    /// Details for how multiselection should be configured, if at all.
-    var multiselectionConfiguration: ListMultiselectionConfiguration { get }
-    
-    // MARK: - sections
-    func canCollapse(section: SectionType, withHeader header: ItemType) -> Bool
-    func didCollapse(section: SectionType, withHeader header: ItemType)
-    
-    /// Determines whether the section can be expanded when the header is tapped.
-    ///
-    /// This method is only called during normal mode. If you want expansion/collapse behavior during editing mode you must respond in the `canSelect(item: inSection:).` For more detail, see the docs for that method.
-    func canExpand(section: SectionType, withHeader header: ItemType) -> Bool
-    func didExpand(section: SectionType, withHeader header: ItemType)
-    
-    // MARK: - reordering
-    /// Determines whether the item can be reordered.
-    func canReorder(item: ItemType) -> Bool
-    /// Informs that reordering has completed with the provided transaction which provides the changes.
-    func didReorder(with transaction: ListReorderingTransaction<SectionType, ItemType>)
-    
-    /// Determines whether the item is allowed to be inserted into the section.
-    func canInsertItemIntoSection(item: ItemType, section: SectionType) -> Bool
-    /// Informs that the item was inserted into the section.
-    func didInsertItemIntoSection(item: ItemType, section: SectionType)
-    
-    // MARK: - swipe actions
-    func leadingSwipeActions(for item: ItemType) -> ListSwipeActionsConfiguration?
-    func trailingSwipeActions(for item: ItemType) -> ListSwipeActionsConfiguration?
-    
-    // MARK: - responding
-    func initialFirstResponder() -> ItemType?
-    func subsequentFirstResponder(following responder: ItemType) -> ItemType?
-}
-
-struct ListMultiselectionConfiguration {
-    /// Whether the list controller should install a mutliselection pan gesture when in editing mode, to allow for quick batch selection.
-    var useMultiselectionPanGesture = true
-    /// The size of the pan gesture area.
-    var multiselectionPanGestureRegionSize = 65
-    /// The side of the screen the gesture region will be installed.
-    var multiselectionPanGestureEdge: Edge = .trailing
-    
-    enum Edge {
-        case leading, trailing
+    struct ListMultiselectionConfiguration {
+        /// Whether the list controller should install a mutliselection pan gesture when in editing mode, to allow for quick batch selection.
+        var useMultiselectionPanGesture = true
+        /// The size of the pan gesture area.
+        var multiselectionPanGestureRegionSize = 65
+        /// The side of the screen the gesture region will be installed.
+        var multiselectionPanGestureEdge: Edge = .trailing
+        
+        enum Edge {
+            case leading, trailing
+        }
     }
 }

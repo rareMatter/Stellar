@@ -9,6 +9,10 @@ import UIKit
 import SwiftUI
 import Stellar
 
+extension Int: Identifiable {
+    public var id: Self { self }
+}
+
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
@@ -18,12 +22,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
 
-        // Create the SwiftUI view that provides the window contents.
-        let contentView = ContentView()
-
-        let snapshot: SStaticListModel<String, Int>.Snapshot = .snapshot()
-        let listView = SListView<SStaticListModel<String, Int>>(snapshot: snapshot) { (section, item, listState, cellConfigState) -> SListRow in
-            .blank
+        let listView = SListView(.init(Array<Int>()),
+                                 children: nil,
+                                 selections: nil,
+                                 mode: nil) { _, _  in
+            SEmptyContent()
         }
         .toolbar {
             RoundedRectangle(cornerRadius: 25.0, style: .continuous)

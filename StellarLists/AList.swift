@@ -7,19 +7,27 @@
 
 import UIKit
 import Stellar
+import SwiftUI
+import Combine
+
+extension Int: Identifiable {
+    public var id: Self { self }
+}
 
 struct AList: SView {
     var id: UUID = .init()
     
-    let model = SStaticListModel<Int, Int>(staticSnapshot: .snapshot()
-                                            .appendingSection(0,
-                                                              withItems: Array(0...9)))
+    let dataSubject = CurrentValueSubject<[Int], Never>(Array(0...9))
+    
     let searchTextModel = SearchTextStorage()
     
     let theme = ColorTheme()
     
     var content: ViewHierarchyObject {
-        SListView(listModel: model, layout: UICollectionViewCompositionalLayout.list(using: UICollectionLayoutListConfiguration(appearance: .plain))) { section, item, listState, configState in
+        SListView(dataSubject,
+                  children: nil,
+                  selections: nil,
+                  mode: nil) { item, configState in
             switch item {
                 case 0:
                     SLeadingViewLabel(text: "Centered Leading view Centered Leading view Centered Leading view Centered Leading view",
@@ -36,8 +44,8 @@ struct AList: SView {
                                         buttonImage: UIImage(systemName: "square")!) {
                         // button action
                     }
-                    .disabled()
-                    .background(.blue)
+                                        .disabled()
+                                        .background(.blue)
                 case 2:
                     SLeadingCheckboxLabel(title: "leading checkbox",
                                           checkboxImage: UIImage(systemName: "square"),
@@ -64,7 +72,7 @@ struct AList: SView {
                             backgroundColor: nil) {
                         // Button action
                     }
-                    .disabled(false)
+                            .disabled(false)
                 case 6:
                     SContextMenuButton(image: UIImage(systemName: "eyes.inverse")!,
                                        menuItems: [UIAction(title: "Do something", handler: { _ in } )])

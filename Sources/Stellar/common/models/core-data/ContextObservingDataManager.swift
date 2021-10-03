@@ -10,6 +10,7 @@ import CoreData
 import Combine
 
 /// Observes a context for changes to a data set determined by a predicate.
+@available(*, deprecated, message: "Use @SFetchedCoreData property wrapper instead.")
 public
 final class ContextObservingDataManager<DataType: NSManagedObject>: NSObject, NSFetchedResultsControllerDelegate {
 	
