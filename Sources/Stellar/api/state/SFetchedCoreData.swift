@@ -24,6 +24,8 @@ where Result : NSFetchRequestResult {
     let fetchedResultsControllerDelegate: FetchedResultsControllerDelegate
     
     /// Notifies that changes have ocurred in the context to the dataset.
+    // TODO: This is public until the framework takes control of view tree updating. This temporarily allows clients to imperatively interface with updates.
+    public
     let didChangePublisher = PassthroughSubject<Void, Never>()
     
     public
@@ -32,7 +34,8 @@ where Result : NSFetchRequestResult {
     }
     
     public
-    init(fetchRequest: NSFetchRequest<Result>, context: NSManagedObjectContext)
+    init(fetchRequest: NSFetchRequest<Result>,
+         context: NSManagedObjectContext)
     where Result : NSFetchRequestResult {
         self.fetchRequest = fetchRequest
         self.fetchedResultsController = .init(fetchRequest: fetchRequest,
@@ -41,6 +44,27 @@ where Result : NSFetchRequestResult {
                                               cacheName: nil)
         fetchedResultsControllerDelegate = .init(didChangePublisher: didChangePublisher)
         fetchedResultsController.delegate = fetchedResultsControllerDelegate
+        
+        // TODO: Remove this call when the framework handles updating of SDynamicProperty.
+        update()
+    }
+}
+
+// MARK: - Create fetched core data with sort descriptors and a predicate.
+public
+extension SFetchedCoreData {
+    
+    init(sortDescriptors: [SortDescriptor<Result>],
+         context: NSManagedObjectContext,
+         predicate: NSPredicate? = nil) {
+        
+        let fetchRequest = NSFetchRequest<Result>()
+        fetchRequest.sortDescriptors = sortDescriptors
+            .map { NSSortDescriptor($0) }
+        fetchRequest.predicate = predicate
+        
+        self.init(fetchRequest: fetchRequest,
+                  context: context)
     }
 }
 
