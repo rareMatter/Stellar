@@ -61,7 +61,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
     // -- list state
     /// The current state of the list.
     private
-    let selectionsSubject: CurrentValueSubject<Set<Data.Element>, Never>
+    let selectionsSubject: CurrentValueSubject<[Data.Element], Never>
     private
     let modeSubject: CurrentValueSubject<ListMode, Never>
     
@@ -71,7 +71,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
         set { modeSubject.value = newValue }
     }
     private
-    var editingSelections: Set<Data.Element> {
+    var editingSelections: [Data.Element] {
         get { selectionsSubject.value }
         set { selectionsSubject.value = newValue }
     }
@@ -102,7 +102,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
     
     init<Content>(_ dataSubject: CurrentValueSubject<Data, Never>,
                   children: KeyPath<Data.Element, Data?>? = nil,
-                  selections: CurrentValueSubject<Set<Data.Element>, Never>,
+                  selections: CurrentValueSubject<[Data.Element], Never>,
                   mode: CurrentValueSubject<ListMode, Never>,
                   configuration: ListViewControllerConfiguration = .init(),
                   layout: UICollectionViewLayout? = nil,
@@ -213,7 +213,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if mode == .editing {
             let item = itemInSnapshot(with: indexPath)
-            editingSelections.remove(item)
+            editingSelections.removeAll(where: { $0 == item })
         }
     }
     
@@ -734,10 +734,10 @@ extension ListViewController {
                 
                 // update selections
                 if sessionData.isSelecting {
-                    editingSelections.insert(item)
+                    editingSelections.append(item)
                 }
                 else {
-                    editingSelections.remove(item)
+                    editingSelections.removeAll(where: { $0 == item })
                 }
                 
                 self.multiselectSessionData?.updatedItems.insert(item)
@@ -873,28 +873,38 @@ extension ListViewController {
     // -- cells and subviews
     
     /// Updates views using the selections.
-    func updateSelections(to newSelections: Set<Data.Element>, withAnimation animated: Bool) {
-        let currentSelections = Set(collectionView.indexPathsForSelectedItems?
+    func updateSelections(to newSelections: [Data.Element], withAnimation animated: Bool) {
+        let currentSelections = collectionView
+            .indexPathsForSelectedItems?
             .compactMap { [unowned self] selectedIndexPath in
                 collectionDataSource.itemIdentifier(for: selectedIndexPath)
-            } ?? [])
+            } ?? []
         
-        let removedSelections = currentSelections.subtracting(newSelections)
-        removedSelections.forEach { (item) in
-            if let indexPath = collectionDataSource.indexPath(for: item) {
-                collectionView.deselectItem(at: indexPath, animated: animated)
-            }
-            else {
-                assertionFailure("Cannot deselect, could not retrieve index path for item ID: \(item).")
-            }
-        }
-        let addedSelections = newSelections.subtracting(currentSelections)
-        addedSelections.forEach { (item) in
-            if let indexPath = collectionDataSource.indexPath(for: item) {
-                collectionView.selectItem(at: indexPath, animated: animated, scrollPosition: .init())
-            }
-            else {
-                assertionFailure("Cannot select, could not retrieve index path for item ID: \(item).")
+        let diff = currentSelections
+            .difference(from: newSelections)
+        
+        diff.forEach { change in
+            switch change {
+                case let .insert(_, element, _):
+                    // Select
+                    if let indexPath = collectionDataSource.indexPath(for: element) {
+                        collectionView.selectItem(at: indexPath,
+                                                  animated: animated,
+                                                  scrollPosition: .init())
+                    }
+                    else {
+                        assertionFailure("Cannot select, could not retrieve index path for item ID: \(element).")
+                    }
+                    
+                case let .remove(_, element, _):
+                    // Deselect
+                    if let indexPath = collectionDataSource.indexPath(for: element) {
+                        collectionView.deselectItem(at: indexPath,
+                                                    animated: animated)
+                    }
+                    else {
+                        assertionFailure("Cannot deselect, could not retrieve index path for item ID: \(element).")
+                    }
             }
         }
     }
