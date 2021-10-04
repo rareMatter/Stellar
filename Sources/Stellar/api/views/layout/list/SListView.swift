@@ -22,7 +22,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
     let children: KeyPath<Data.Element, Data?>?
     
     // -- state
-    let selections: CurrentValueSubject<Set<Data.Element>, Never>
+    let selections: CurrentValueSubject<[Data.Element], Never>
     let mode: CurrentValueSubject<ListMode, Never>
     
     // -- title bar (nav bar)
@@ -70,7 +70,7 @@ extension SListView {
     
     init(_ dataSubject: CurrentValueSubject<Data, Never>,
          children: KeyPath<Data.Element, Data?>? = nil,
-         selections: CurrentValueSubject<Set<Data.Element>, Never>? = nil,
+         selections: CurrentValueSubject<[Data.Element], Never>? = nil,
          mode: CurrentValueSubject<ListMode, Never>? = nil,
          @SContentBuilder rowContent: @escaping (Data.Element, UICellConfigurationState) -> Content) {
         self.data = dataSubject
