@@ -47,6 +47,24 @@ where Result : NSFetchRequestResult {
     }
 }
 
+// MARK: - Create fetched core data with sort descriptors and a predicate.
+public
+extension SFetchedCoreData {
+    
+    init(sortDescriptors: [SortDescriptor<Result>],
+         context: NSManagedObjectContext,
+         predicate: NSPredicate? = nil) {
+        
+        let fetchRequest = NSFetchRequest<Result>()
+        fetchRequest.sortDescriptors = sortDescriptors
+            .map { NSSortDescriptor($0) }
+        fetchRequest.predicate = predicate
+        
+        self.init(fetchRequest: fetchRequest,
+                  context: context)
+    }
+}
+
 // MARK: - conformance
 extension SFetchedCoreData: SDynamicProperty
 where Result : NSFetchRequestResult {
