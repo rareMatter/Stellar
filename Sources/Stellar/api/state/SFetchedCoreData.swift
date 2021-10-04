@@ -44,6 +44,9 @@ where Result : NSFetchRequestResult {
                                               cacheName: nil)
         fetchedResultsControllerDelegate = .init(didChangePublisher: didChangePublisher)
         fetchedResultsController.delegate = fetchedResultsControllerDelegate
+        
+        // TODO: Remove this call when the framework handles updating of SDynamicProperty.
+        update()
     }
 }
 
