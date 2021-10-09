@@ -46,7 +46,7 @@ public
 extension SListView {
     
     init<Data, RowContent>(_ dataSubject: CurrentValueSubject<Data, Never>,
-                           children: KeyPath<Data.Element, Data?>,
+                           children: KeyPath<Data.Element, Data?>?,
                            selections: CurrentValueSubject<[Data.Element], Never>? = nil,
                            mode: CurrentValueSubject<ListMode, Never>? = nil,
                            @SContentBuilder rowContentProvider: @escaping (Data.Element) -> RowContent)
