@@ -15,28 +15,28 @@ extension ListViewController {
         var multiselectionConfiguration: ListMultiselectionConfiguration = .init()
         
         // MARK: - sections
-        var canCollapse: (_ item: Data.Element) -> Bool = { _ in false }
-        var didCollapse: (_ item: Data.Element) -> Void = { _ in }
+        var canCollapse: (_ item: RowType) -> Bool = { _ in false }
+        var didCollapse: (_ item: RowType) -> Void = { _ in }
         
         /// Determines whether the section can be expanded when the header is tapped.
         ///
         /// This method is only called during normal mode. If you want expansion/collapse behavior during editing mode you must respond in the `canSelect(item: inSection:).` For more detail, see the docs for that method.
-        var canExpand: (_ item: Data.Element) -> Bool = { _ in false }
-        var didExpand: (_ item: Data.Element) -> Void = { _ in }
+        var canExpand: (_ item: RowType) -> Bool = { _ in false }
+        var didExpand: (_ item: RowType) -> Void = { _ in }
         
         // MARK: - reordering
         /// Determines whether the item can be reordered.
-        var canReorder: (_ item: Data.Element) -> Bool = { _ in false }
+        var canReorder: (_ item: RowType) -> Bool = { _ in false }
         /// Informs that reordering has completed with the provided transaction which provides the changes.
-        var didReorder: (_ transaction: NSDiffableDataSourceTransaction<SectionType, Data.Element>) -> Void = { _ in }
+        var didReorder: (_ transaction: NSDiffableDataSourceTransaction<SectionType, RowType>) -> Void = { _ in }
         
         // MARK: - swipe actions
-        var leadingSwipeActions: (_ item: Data.Element) -> UISwipeActionsConfiguration? = { _ in nil }
-        var trailingSwipeActions: (_ item: Data.Element) -> UISwipeActionsConfiguration? = { _ in nil }
+        var leadingSwipeActions: (_ item: RowType) -> UISwipeActionsConfiguration? = { _ in nil }
+        var trailingSwipeActions: (_ item: RowType) -> UISwipeActionsConfiguration? = { _ in nil }
         
         // MARK: - responding
-        var initialFirstResponder: () -> Data.Element? = { nil }
-        var subsequentFirstResponder: (_ responder: Data.Element) -> Data.Element? = { _ in nil }
+        var initialFirstResponder: () -> RowType? = { nil }
+        var subsequentFirstResponder: (_ responder: RowType) -> RowType? = { _ in nil }
     }
     
     struct ListMultiselectionConfiguration {

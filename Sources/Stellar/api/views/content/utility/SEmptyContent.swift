@@ -9,5 +9,6 @@ import Foundation
 
 public
 struct SEmptyContent: SPrimitiveContent {
+    @inlinable
     public init() {}
 }

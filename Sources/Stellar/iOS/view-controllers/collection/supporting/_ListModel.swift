@@ -13,63 +13,181 @@ extension ListViewController {
     /// A model object which maps a provided Data type into snapshots which are then applied to the provided collection diffable data source.
     final
     class _ListModel {
-        
+
         enum SnapshotType {
             case single(Snapshot)
-            case sections((snapshot: Snapshot, sectionSnapshots: [SectionType : NSDiffableDataSourceSectionSnapshot<Data.Element>]))
+            case sections((snapshot: Snapshot, sectionSnapshots: [SectionType : SectionSnapshot]))
         }
-        typealias Snapshot = NSDiffableDataSourceSnapshot<SectionType, Data.Element>
         
-        /// The data to map into section snapshots, depending on its stucture.
-        let dataSubject: CurrentValueSubject<Data, Never>
-        let children: KeyPath<Data.Element, Data?>?
+        // The children of a row element.
+        private
+        let children: KeyPath<RowType, [RowType]?>?
         
-        let collectionDataSource: UICollectionViewDiffableDataSource<SectionType, Data.Element>
-        
-        var snapshot: Snapshot {
-            collectionDataSource.snapshot()
-        }
+        // The data source to update with snapshots as data changes.
+        let collectionDataSource: CollectionDataSource
         
         private
         var cancellables: Set<AnyCancellable> = .init()
         
-        init(dataSubject: CurrentValueSubject<Data, Never>,
-             children: KeyPath<Data.Element, Data?>?,
-             collectionDataSource: UICollectionViewDiffableDataSource<SectionType, Data.Element>) {
-            self.dataSubject = dataSubject
+        init(sectionSubject: CurrentValueSubject<[SectionType], Never>,
+             children: KeyPath<RowType, [RowType]?>?,
+             collectionDataSource: CollectionDataSource) {
             self.children = children
             self.collectionDataSource = collectionDataSource
             
-            // TODO: connect data subject to snapshot subject via mapping.
-            dataSubject
+            // Connect data subject to snapshot subject via mapping.
+            sectionSubject
                 .receive(on: DispatchQueue.main)
-                .map { data -> SnapshotType in
-                    if let children = children {
-                        return Self.makeHierarchicalSnapshot(from: data,
-                                                             childrenKeypath: children,
-                                                             withDataSource: collectionDataSource)
-                    }
-                    else {
-                        return Self.makeSnapshot(from: data,
-                                          children: children)
-                    }
+                .map { listSections -> (SnapshotType, [ListSection]) in
+                    (Self.makeSnapshot(from: listSections,
+                                       children: children),
+                     listSections)
                 }
-                .sink { snapshotType in
-                    switch snapshotType {
-                        case let .single(snapshot):
-                            collectionDataSource.apply(snapshot)
-                        case let .sections((snapshot, sections)):
-                            collectionDataSource.apply(snapshot)
-                            sections.forEach { (section, sectionSnapshot) in
-                                collectionDataSource.apply(sectionSnapshot,
-                                                           to: section)
-                            }
-                    }
+                .sink { [unowned self] (snapshotType, listSections) in
+                    // update snapshot
+                    updateSnapshot(with: snapshotType)
+                    
+                    // update section subscriptions
+                    listSections
+                        .forEach { [unowned self] listSection in
+                            listSection.dataSubject
+                                .map { sectionRows -> NSDiffableDataSourceSectionSnapshot<RowType> in
+                                    var snapshot = NSDiffableDataSourceSectionSnapshot<RowType>()
+                                    Self.populateSectionSnapshot(&snapshot,
+                                                                 rows: sectionRows,
+                                                                 childrenKeypath: children)
+                                    return snapshot
+                                }
+                                .sink { sectionSnapshot in
+                                    collectionDataSource.apply(sectionSnapshot,
+                                                               to: listSection,
+                                                               animatingDifferences: true)
+                                }
+                                .store(in: &cancellables)
+                        }
                 }
                 .store(in: &cancellables)
+            
+            // Create initial snapshot, before subscriptions are received.
+            updateSnapshot(with: Self.makeSnapshot(from: sectionSubject.value,
+                                                   children: children))
         }
         
-        /// If nil, the data source snapshot will be applied.
+        // MARK: Snapshot creation
+        
+        /// Updates the collection data source with a new snapshot.
+        private
+        func updateSnapshot(with snapshotType: SnapshotType) {
+            
+            switch snapshotType {
+                case let .single(snapshot):
+                    collectionDataSource.apply(snapshot)
+                
+                case let .sections((snapshot, sections)):
+                    collectionDataSource.apply(snapshot)
+                    sections.forEach { (section, sectionSnapshot) in
+                        collectionDataSource.apply(sectionSnapshot,
+                                                   to: section,
+                                                   animatingDifferences: true)
+                    }
+            }
+        }
+        
+        private
+        static
+        func makeSnapshot(from sections: [ListSection],
+                          children: KeyPath<RowType, [RowType]?>?) -> SnapshotType {
+            
+            func makeLinearSnapshot(from sections: [ListSection]) -> SnapshotType {
+                // Create snapshot and append sections
+                var snapshot = Snapshot()
+                snapshot.appendSections(sections)
+                
+                // Append items to respective sections
+                snapshot.sectionIdentifiers.forEach { section in
+                    snapshot.appendItems(section.dataSubject.value,
+                                         toSection: section)
+                }
+                
+                return .single(snapshot)
+            }
+            func makeHierarchicalSnapshot(from sections: [ListSection],
+                                          childrenKeypath: KeyPath<RowType, [RowType]?>) -> SnapshotType {
+                var snapshot = Snapshot()
+                snapshot.appendSections(sections)
+                // Use section snapshots for hierarchical support. They must be applied to an existing section.
+                var sectionSnapshots = [SectionType : NSDiffableDataSourceSectionSnapshot<RowType>]()
+                // populate each section.
+                sections.forEach { section in
+                    var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<RowType>()
+                    populateSectionSnapshot(&sectionSnapshot,
+                                            rows: section.dataSubject.value,
+                                            childrenKeypath: childrenKeypath)
+                    sectionSnapshots[section] = sectionSnapshot
+                }
+                
+                return .sections((snapshot, sectionSnapshots))
+            }
+            
+            if let children = children {
+                return makeHierarchicalSnapshot(from: sections,
+                                                childrenKeypath: children)
+            }
+            else {
+                return makeSnapshot(from: sections,
+                                    children: children)
+            }
+        }
+        
+        /// Recursively populates the section snapshot using the provided data and a keypath to any children it may have.
+        private
+        static
+        func populateSectionSnapshot(_ sectionSnapshot: inout NSDiffableDataSourceSectionSnapshot<RowType>,
+                                     rows: [RowType],
+                                     childrenKeypath: KeyPath<RowType, [RowType]?>?) {
+            // Populates a non-hierarchical section snapshot.
+            func populateRegularSectionSnapshot(_ sectionSnapshot: inout NSDiffableDataSourceSectionSnapshot<RowType>,
+                                                rows: [RowType]) {
+                sectionSnapshot.append(rows,
+                                       to: nil)
+            }
+            // Populates a hierarchical section snapshot.
+            func populateHierarchicalSectionSnapshot(_ sectionSnapshot: inout NSDiffableDataSourceSectionSnapshot<RowType>,
+                                                     withParent parent: RowType?,
+                                                     children: [RowType]?,
+                                                     childrenKeypath: KeyPath<RowType, [RowType]?>) {
+                sectionSnapshot.append(children ?? [],
+                                       to: parent)
+                
+                // Recurse with children
+                children?.forEach({ child in
+                    populateHierarchicalSectionSnapshot(&sectionSnapshot,
+                                                        withParent: child,
+                                                        children: child[keyPath: childrenKeypath],
+                                                        childrenKeypath: childrenKeypath)
+                })
+            }
+            
+            if let childrenKeypath = childrenKeypath {
+                populateHierarchicalSectionSnapshot(&sectionSnapshot,
+                                                    withParent: nil,
+                                                    children: rows,
+                                                    childrenKeypath: childrenKeypath)
+            }
+            else {
+                populateRegularSectionSnapshot(&sectionSnapshot,
+                                               rows: rows)
+            }
+        }
+        
+        // MARK: API
+        
+        /// The current snapshot applied to the collection data source.
+        var snapshot: Snapshot {
+            collectionDataSource.snapshot()
+        }
+        
+        /// If nil, the data source snapshot will be reapplied.
         func applyTemporarySnapshot(_ snapshot: Snapshot?) {
             if let tempSnap = snapshot {
                 collectionDataSource.apply(tempSnap)
@@ -77,102 +195,6 @@ extension ListViewController {
             else {
                 collectionDataSource.apply(self.snapshot)
             }
-        }
-        
-        private
-        static
-        func makeSnapshot(from data: Data,
-                          children: KeyPath<Data.Element, Data?>?) -> SnapshotType {
-            
-            var snapshot = populateSnapshotWithSections(.init(), data: data)
-            
-            /* A single section is being used until SContent sections are implemented.
-            // populate sections with data
-            snapshot.sectionIdentifiers.forEach { identifiableSection in
-                snapshot.appendItems(Array(identifiableSection.section.contents),
-                                     toSection: identifiableSection)
-            }
-             */
-            snapshot.sectionIdentifiers.forEach { section in
-                snapshot.appendItems(Array(data),
-                                     toSection: section)
-            }
-            
-            return .single(snapshot)
-        }
-        
-        private
-        static
-        func makeHierarchicalSnapshot(from data: Data,
-                                      childrenKeypath: KeyPath<Data.Element, Data?>,
-                                      withDataSource collectionDataSource: UICollectionViewDiffableDataSource<SectionType, Data.Element>) -> SnapshotType {
-            
-            /// Recursively populates the section snapshot using the provided data and a keypath to any children it may have.
-            func populateSectionSnapshot(_ sectionSnapshot: inout NSDiffableDataSourceSectionSnapshot<Data.Element>,
-                                         withParent parent: Data.Element,
-                                         childrenKeypath: KeyPath<Data.Element, Data?>) {
-                
-                // Recursively populate the snapshot using the hierarchical data.
-                if let children = parent[keyPath: childrenKeypath] {
-                    sectionSnapshot.append(Array(children), to: parent)
-                    
-                    // recurse with each child
-                    children.forEach { child in
-                        populateSectionSnapshot(&sectionSnapshot,
-                                                withParent: child,
-                                                childrenKeypath: childrenKeypath)
-                    }
-                }
-            }
-            
-            let snapshot = populateSnapshotWithSections(.init(), data: data)
-            var sections = [SectionType : NSDiffableDataSourceSectionSnapshot<Data.Element>]()
-            
-            snapshot.sectionIdentifiers.forEach { section in
-                var sectionSnapshot = NSDiffableDataSourceSectionSnapshot<Data.Element>()
-                
-                let sectionContents = snapshot.itemIdentifiers(inSection: section)
-                sectionContents
-                    .forEach { item in
-                        populateSectionSnapshot(&sectionSnapshot,
-                                                withParent: item,
-                                                childrenKeypath: childrenKeypath)
-                    }
-                
-                sections[section] = sectionSnapshot
-            }
-            
-            return .sections((snapshot, sections))
-        }
-        
-        /// Returns a snapshot which has been populated with one or many `SIdentifiableSections` based on the data provided.
-        private
-        static
-        func populateSnapshotWithSections(_ snapshot: NSDiffableDataSourceSnapshot<SectionType, Data.Element>,
-                                          data: Data) -> NSDiffableDataSourceSnapshot<SectionType, Data.Element> {
-            var snapshot = snapshot
-            
-            /* A single section is being used until SContent sections are implemented.
-            if Data.Element.self is SSection<Data>.Type {
-                // map user-provided sections into identifiable sections.
-                var index = 0
-                snapshot.appendSections(data.compactMap { $0 as? SSection<Data> }
-                                            .map { section in
-                    let section = SIdentifiableSection(id: index,
-                                                       section: section)
-                    index += 1
-                    return section
-                })
-            }
-            else {
-                // create a single identifiable section.
-                snapshot.appendSections([.init(id: 0, section: .init(contents: data))])
-            }
-             */
-            
-            snapshot.appendSections([0])
-            
-            return snapshot
         }
     }
 }

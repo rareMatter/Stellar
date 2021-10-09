@@ -26,3 +26,18 @@ where Content: SContent, ID: Hashable {
             // .environment(\.id, AnyHashable(id))
     }
 }
+
+// MARK: Conditional _SSectionContainer conformance
+extension SIdentifiableContent: _SSectionContainer
+where Content : _SSectionContainer {
+    
+    var anyContentProvider: () -> AnySContent {
+        content.anyContentProvider
+    }
+    var anyHeaderProvider: () -> AnySContent {
+        content.anyHeaderProvider
+    }
+    var anyFooterProvider: () -> AnySContent {
+        content.anyFooterProvider
+    }
+}

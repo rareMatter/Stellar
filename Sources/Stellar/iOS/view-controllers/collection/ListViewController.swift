@@ -14,10 +14,13 @@ import Combine
 ///
 /// - Note: ListMode transition animations have been disabled due to unwanted inherent UIKit animations when custom cell accessories are changed.
 final
-class ListViewController<Content, Data>: NLViewController, UICollectionViewDelegate
-where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable, Data.Element : Identifiable {
+class ListViewController: NLViewController, UICollectionViewDelegate {
     
-    typealias SectionType = Int
+    typealias SectionType = ListSection
+    typealias RowType = AnyHashable
+    typealias Snapshot = NSDiffableDataSourceSnapshot<SectionType, RowType>
+    typealias SectionSnapshot = NSDiffableDataSourceSectionSnapshot<RowType>
+    typealias CollectionDataSource = UICollectionViewDiffableDataSource<SectionType, RowType>
     
     // -- collection view
     // default list layout
@@ -39,7 +42,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
         UICollectionViewCompositionalLayout.list(using: defaultListLayoutConfiguration)
     }
     private var collectionView: UICollectionView!
-    private var collectionDataSource: UICollectionViewDiffableDataSource<SectionType, Data.Element>!
+    private var collectionDataSource: CollectionDataSource!
     
     // -- appearance defaults
     var backgroundColor: UIColor {
@@ -54,14 +57,14 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
     
     // -- model
     private var listModel: _ListModel!
-    private var snapshot: NSDiffableDataSourceSnapshot<SectionType, Data.Element> {
+    private var snapshot: Snapshot {
         listModel.snapshot
     }
     
     // -- list state
     /// The current state of the list.
     private
-    let selectionsSubject: CurrentValueSubject<[Data.Element], Never>
+    let selectionsSubject: CurrentValueSubject<[RowType], Never>
     private
     let modeSubject: CurrentValueSubject<ListMode, Never>
     
@@ -71,15 +74,15 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
         set { modeSubject.value = newValue }
     }
     private
-    var editingSelections: [Data.Element] {
+    var editingSelections: [RowType] {
         get { selectionsSubject.value }
         set { selectionsSubject.value = newValue }
     }
     
     // ephemeral state
     private var dragItems = DragItems()
-    private var swipedItem: Data.Element? = nil
-    private var firstResponderItem: Data.Element? = nil
+    private var swipedItem: RowType? = nil
+    private var firstResponderItem: RowType? = nil
     
     // interaction
     /// Data which is used to coordinate between interaction inputs during a discrete multiselection session.
@@ -100,15 +103,14 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
     
     // MARK: - init
     
-    init<Content>(_ dataSubject: CurrentValueSubject<Data, Never>,
-                  children: KeyPath<Data.Element, Data?>? = nil,
-                  selections: CurrentValueSubject<[Data.Element], Never>,
+    init(_ sectionSubject: CurrentValueSubject<[ListSection], Never>,
+                  children: KeyPath<RowType, [RowType]?>? = nil,
+                  selections: CurrentValueSubject<[RowType], Never>,
                   mode: CurrentValueSubject<ListMode, Never>,
                   configuration: ListViewControllerConfiguration = .init(),
                   layout: UICollectionViewLayout? = nil,
                   backgroundColor: UIColor = .systemGroupedBackground,
-                  @SContentBuilder rowContent: @escaping (Data.Element, UICellConfigurationState) -> Content)
-    where Content : SContent {
+                  @SContentBuilder rowContent: @escaping (SectionType, RowType, UICellConfigurationState) -> UIKitRenderableContent) {
         
         self.selectionsSubject = selections
         self.modeSubject = mode
@@ -132,14 +134,18 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
         }
         
         // create registration
-        let cellRegistration = UICollectionView.CellRegistration<SContentCell, Data.Element> { cell, indexPath, item in
+        let cellRegistration = UICollectionView.CellRegistration<SContentCell, RowType> { [unowned self] cell, indexPath, item in
+            let section = sectionInSnapshot(with: indexPath)
+            
             /// initial cell setup
-            cell.content = rowContent(item,
-                                      cell.configurationState).renderContent()
+            cell.content = rowContent(section,
+                                      item,
+                                      cell.configurationState)
             
             // prepare cell to update itself with content when state changes
-            cell.onConfigurationStateChange { rowContent(item,
-                                                         $0).renderContent()}
+            cell.onConfigurationStateChange { rowContent(section,
+                                                         item,
+                                                         $0)}
             
             // tell cell to update for initial state
             cell.setNeedsUpdateConfiguration()
@@ -155,7 +161,7 @@ where Content: SContent, Data : RandomAccessCollection, Data.Element : Hashable,
             
             return cell
         })
-        self.listModel = .init(dataSubject: dataSubject,
+        self.listModel = .init(sectionSubject: sectionSubject,
                                children: children,
                                collectionDataSource: collectionDataSource)
         
@@ -787,7 +793,7 @@ extension ListViewController {
 private
 extension ListViewController {
     
-    func itemInSnapshot(with indexPath: IndexPath) -> Data.Element {
+    func itemInSnapshot(with indexPath: IndexPath) -> RowType {
         guard let itemID = collectionDataSource.itemIdentifier(for: indexPath) else {
             debugPrint("Item identifier does not exist in collection view for index path: \(indexPath),")
             debugPrint("collection view: \(collectionView.debugDescription)")
@@ -799,7 +805,7 @@ extension ListViewController {
     
     /// Determines the item identifier corresponding to the responder. The responder must be a collection cell instance.
     /// - Returns: The corresponding item ID or nil if it cannot be retrieved for some reason.
-    func itemForResponder(_ sender: Any) -> Data.Element? {
+    func itemForResponder(_ sender: Any) -> RowType? {
         guard let cell = sender as? UICollectionViewCell else {
             assertionFailure("Expected collection cell instance. Instead sender is \(sender.self).")
             return nil
@@ -825,7 +831,7 @@ extension ListViewController {
         return collectionDataSource.snapshot().sectionIdentifiers[indexPath.section]
     }
     
-    func indexPath(for item: Data.Element) -> IndexPath {
+    func indexPath(for item: RowType) -> IndexPath {
         guard let indexPath = collectionDataSource.indexPath(for: item) else {
             debugPrint("The item identifier does not exist in the collection view snapshot: \(item)")
             debugPrint("snapshot: \(collectionDataSource.snapshot())")
@@ -873,7 +879,7 @@ extension ListViewController {
     // -- cells and subviews
     
     /// Updates views using the selections.
-    func updateSelections(to newSelections: [Data.Element], withAnimation animated: Bool) {
+    func updateSelections(to newSelections: [RowType], withAnimation animated: Bool) {
         let currentSelections = collectionView
             .indexPathsForSelectedItems?
             .compactMap { [unowned self] selectedIndexPath in
@@ -919,7 +925,7 @@ extension ListViewController {
     
     /// Makes the cell corresponding to the item identifier the first responder.
     /// - Note: If the cell is not currently visible this method will quietly fail.
-    func updateFirstResponderToItem(_ respondingItem: Data.Element) {
+    func updateFirstResponderToItem(_ respondingItem: RowType) {
         if let cell = collectionView.cellForItem(at: indexPath(for: respondingItem)) {
             guard cell.canBecomeFirstResponder else {
                 debugPrint("\(self):")
@@ -943,7 +949,7 @@ extension ListViewController {
     
     /** Applies the provided snapshot to the table data source which updates the table.
      */
-    func applySnapshot(_ snapshot: NSDiffableDataSourceSnapshot<SectionType, Data.Element>, animated: Bool, onCompletion: @escaping () -> Void = {}) {
+    func applySnapshot(_ snapshot: Snapshot, animated: Bool, onCompletion: @escaping () -> Void = {}) {
         collectionDataSource.apply(
             snapshot,
             animatingDifferences: animated,

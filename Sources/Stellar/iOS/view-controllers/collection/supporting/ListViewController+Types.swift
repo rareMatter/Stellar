@@ -11,7 +11,7 @@ extension ListViewController {
     
     struct DragItems {
         var sections: [SectionType] = []
-        var items: [Data.Element] = []
+        var items: [RowType] = []
         
         var containsSection: Bool {
             !sections.isEmpty
@@ -22,7 +22,7 @@ extension ListViewController {
     struct MultiselectTransaction {
         /// A property used to track the initial multiselection button selection state change during a single pan gesture. This allows the gesture to set the following buttons to the same selection state.
         let isSelecting: Bool
-        var updatedItems = Set<Data.Element>()
+        var updatedItems = Set<RowType>()
     }
     
     /// A proxy class to delegate for gesture recognizers.
