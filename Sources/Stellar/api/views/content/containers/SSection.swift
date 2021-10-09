@@ -55,6 +55,7 @@ extension SSection: _SSectionContainer {
 }
 
 // MARK: Create a section without a header or footer.
+public
 extension SSection
 where Header == SEmptyContent, Footer == SEmptyContent {
     
@@ -66,10 +67,10 @@ where Header == SEmptyContent, Footer == SEmptyContent {
 }
 
 // MARK: Create a section with no header.
+public
 extension SSection
 where Header == SEmptyContent {
     
-    public
     init(@SContentBuilder content: @escaping () -> Content,
          @SContentBuilder footer: @escaping () -> Footer) {
         self.init(content: content,
@@ -79,10 +80,10 @@ where Header == SEmptyContent {
 }
 
 // MARK: Create a section with no footer.
+public
 extension SSection
 where Footer == SEmptyContent {
     
-    public
     init(@SContentBuilder content: @escaping () -> Content,
          @SContentBuilder header: @escaping () -> Header) {
         self.init(content: content,
