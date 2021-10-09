@@ -31,7 +31,11 @@ struct SHashableClosure {
     }
 }
 
-extension SHashableClosure: Hashable {
+extension SHashableClosure: Hashable, Identifiable {
+    
+    public var id: UUID {
+        uuid
+    }
     
     public
     static
