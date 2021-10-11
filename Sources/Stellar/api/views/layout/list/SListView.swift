@@ -106,12 +106,10 @@ extension SListView {
                 return sections
             }
             
-            let listSections = decomposeContent(content)
-            
             // Connect data subject to sections subject.
             cancellable = dataSubject.map { _ in
                 // Use the data as contained by the content provider.
-                listSections
+                decomposeContent(content)
             }
             .assign(to: \.value, on: sectionsSubject)
             
