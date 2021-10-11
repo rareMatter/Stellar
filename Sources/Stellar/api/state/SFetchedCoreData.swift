@@ -59,7 +59,8 @@ extension SFetchedCoreData {
     
     init(sortDescriptors: [SortDescriptor<Result>],
          context: NSManagedObjectContext,
-         predicate: NSPredicate? = nil) {
+         predicate: NSPredicate? = nil)
+    where Result : NSManagedObject {
         
         let fetchRequest = NSFetchRequest<Result>()
         fetchRequest.sortDescriptors = sortDescriptors
