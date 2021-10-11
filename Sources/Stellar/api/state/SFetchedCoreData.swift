@@ -63,6 +63,7 @@ extension SFetchedCoreData {
     where Result : NSManagedObject {
         
         let fetchRequest = NSFetchRequest<Result>()
+        fetchRequest.entity = Result.entity()
         fetchRequest.sortDescriptors = sortDescriptors
             .map { NSSortDescriptor($0) }
         fetchRequest.predicate = predicate
