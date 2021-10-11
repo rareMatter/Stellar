@@ -34,7 +34,7 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
 // MARK: Identifiable data
 public
 extension SForEach
-where Data.Element: Identifiable, ID == Data.Element.ID {
+where Data.Element : Identifiable, ID == Data.Element.ID {
     
     init(_ data: Data,
          @SContentBuilder content: @escaping (Data.Element) -> Content) {

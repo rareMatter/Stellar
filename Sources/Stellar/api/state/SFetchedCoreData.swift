@@ -27,6 +27,8 @@ where Result : NSFetchRequestResult {
     // TODO: This is public until the framework takes control of view tree updating. This temporarily allows clients to imperatively interface with updates.
     public
     let didChangePublisher = PassthroughSubject<Void, Never>()
+    public
+    let currentValueSubject = CurrentValueSubject<[Result], Never>([])
     
     public
     var wrappedValue: [Result] {
@@ -42,7 +44,8 @@ where Result : NSFetchRequestResult {
                                               managedObjectContext: context,
                                               sectionNameKeyPath: nil,
                                               cacheName: nil)
-        fetchedResultsControllerDelegate = .init(didChangePublisher: didChangePublisher)
+        fetchedResultsControllerDelegate = .init(didChangePublisher: didChangePublisher,
+                                                 currentValueSubject: currentValueSubject)
         fetchedResultsController.delegate = fetchedResultsControllerDelegate
         
         // TODO: Remove this call when the framework handles updating of SDynamicProperty.
@@ -62,6 +65,8 @@ extension SFetchedCoreData {
         fetchRequest.sortDescriptors = sortDescriptors
             .map { NSSortDescriptor($0) }
         fetchRequest.predicate = predicate
+        fetchRequest.includesPendingChanges = true
+        fetchRequest.returnsObjectsAsFaults = false
         
         self.init(fetchRequest: fetchRequest,
                   context: context)
@@ -90,12 +95,16 @@ extension SFetchedCoreData {
     class FetchedResultsControllerDelegate: NSObject, NSFetchedResultsControllerDelegate {
         
         let didChangePublisher: PassthroughSubject<Void, Never>
+        let currentValueSubject: CurrentValueSubject<[Result], Never>
         
-        init(didChangePublisher: PassthroughSubject<Void, Never>) {
+        init(didChangePublisher: PassthroughSubject<Void, Never>,
+             currentValueSubject: CurrentValueSubject<[Result], Never>) {
             self.didChangePublisher = didChangePublisher
+            self.currentValueSubject = currentValueSubject
         }
         
         func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+            currentValueSubject.value = controller.fetchedObjects as! [Result]
             didChangePublisher.send()
         }
     }
