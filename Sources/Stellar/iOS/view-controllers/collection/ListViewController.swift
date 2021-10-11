@@ -104,11 +104,11 @@ class ListViewController: NLViewController, UICollectionViewDelegate {
     // MARK: - init
     
     init(_ sectionSubject: CurrentValueSubject<[ListSection], Never>,
-                  children: KeyPath<RowType, [RowType]?>? = nil,
+                  children: KeyPath<RowType, [RowType]?>?,
                   selections: CurrentValueSubject<[RowType], Never>,
                   mode: CurrentValueSubject<ListMode, Never>,
-                  configuration: ListViewControllerConfiguration = .init(),
-                  layout: UICollectionViewLayout? = nil,
+                  configuration: ListViewControllerConfiguration,
+                  layout: UICollectionViewLayout?,
                   backgroundColor: UIColor = .systemGroupedBackground,
                   @SContentBuilder rowContent: @escaping (SectionType, RowType, UICellConfigurationState) -> UIKitRenderableContent) {
         
