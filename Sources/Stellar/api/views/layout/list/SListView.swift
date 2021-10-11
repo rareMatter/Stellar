@@ -49,6 +49,8 @@ extension SListView {
                            children: KeyPath<Data.Element, Data?>?,
                            selections: CurrentValueSubject<[Selection], Never>? = nil,
                            mode: CurrentValueSubject<ListMode, Never>? = nil,
+                           layout: UICollectionViewLayout? = nil,
+                           backgroundColor: UIColor = .systemGroupedBackground,
                            @SContentBuilder rowContentProvider: @escaping (Data.Element) -> RowContent)
     where Data : RandomAccessCollection,
     Data.Element : Hashable,
@@ -118,8 +120,8 @@ extension SListView {
                                                 selections: (selections as! CurrentValueSubject<[AnyHashable], Never>),
                                                 mode: mode ?? .init(.normal),
                                                 configuration: .init(),
-                                                layout: nil,
-                                                backgroundColor: .secondarySystemBackground) { section, row, cellConfigState in
+                                                layout: layout,
+                                                backgroundColor: backgroundColor) { section, row, cellConfigState in
                 section.rowProvider()
             }
             
