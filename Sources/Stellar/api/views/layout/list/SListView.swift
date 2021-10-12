@@ -43,12 +43,31 @@ where Content : SContent {
 
 // MARK: - Create a list with identifiable, hierarchical data.
 public
+extension SListView
+where Selection == Never {
+    
+    init<Data, RowContent>(_ dataSubject: CurrentValueSubject<Data, Never>,
+         children: KeyPath<Data.Element, Data?>?,
+         mode: CurrentValueSubject<ListMode, Never>? = nil,
+         layout: UICollectionViewLayout? = nil,
+         backgroundColor: UIColor = .systemGroupedBackground,
+         @SContentBuilder rowContentProvider: @escaping (Data.Element) -> RowContent) where Data : RandomAccessCollection,
+    Data.Element : Hashable,
+    Data.Element : Identifiable,
+    RowContent : SContent,
+    Content == SForEach<Data, Data.Element.ID, RowContent> {
+        self.init(dataSubject, children: children, selections: .init([]), mode: mode, layout: layout, backgroundColor: backgroundColor, rowContentProvider: rowContentProvider)
+    }
+}
+
+// MARK: - Create a list with identifiable, hierarchical data and selections.
+public
 extension SListView {
     
     init<Data, RowContent>(_ dataSubject: CurrentValueSubject<Data, Never>,
                            children: KeyPath<Data.Element, Data?>?,
-                           selections: CurrentValueSubject<[Selection], Never>? = nil,
-                           mode: CurrentValueSubject<ListMode, Never>? = nil,
+                           selections: CurrentValueSubject<[Selection], Never>,
+                           mode: CurrentValueSubject<ListMode, Never>?,
                            layout: UICollectionViewLayout? = nil,
                            backgroundColor: UIColor = .systemGroupedBackground,
                            @SContentBuilder rowContentProvider: @escaping (Data.Element) -> RowContent)
