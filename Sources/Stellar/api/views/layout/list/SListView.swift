@@ -133,7 +133,7 @@ extension SListView {
             .assign(to: \.value, on: sectionsSubject)
             
             let controller = ListViewController(sectionsSubject,
-                                                children: (children as! KeyPath<AnyHashable, [AnyHashable]?>),
+                                                children: children as? KeyPath<AnyHashable, [AnyHashable]?>,
                                                 selections: (selections as! CurrentValueSubject<[AnyHashable], Never>),
                                                 mode: mode ?? .init(.normal),
                                                 configuration: .init(),
