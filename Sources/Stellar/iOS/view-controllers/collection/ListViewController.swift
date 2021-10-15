@@ -64,19 +64,19 @@ class ListViewController: NLViewController, UICollectionViewDelegate {
     // -- list state
     /// The current state of the list.
     private
-    let selectionsSubject: CurrentValueSubject<[RowType], Never>
+    let selectionsSubject: CurrentValueSubject<[RowType], Never>?
     private
-    let modeSubject: CurrentValueSubject<ListMode, Never>
+    let modeSubject: CurrentValueSubject<ListMode, Never>?
     
     private
     var mode: ListMode {
-        get { modeSubject.value }
-        set { modeSubject.value = newValue }
+        get { modeSubject?.value ?? .normal }
+//        set { modeSubject?.value = newValue }
     }
     private
     var editingSelections: [RowType] {
-        get { selectionsSubject.value }
-        set { selectionsSubject.value = newValue }
+        get { selectionsSubject?.value ?? [] }
+//        set { selectionsSubject?.value = newValue }
     }
     
     // ephemeral state
@@ -105,8 +105,8 @@ class ListViewController: NLViewController, UICollectionViewDelegate {
     
     init(_ sectionSubject: CurrentValueSubject<[ListSection], Never>,
                   children: KeyPath<RowType, [RowType]?>?,
-                  selections: CurrentValueSubject<[RowType], Never>,
-                  mode: CurrentValueSubject<ListMode, Never>,
+                  selections: CurrentValueSubject<[RowType], Never>?,
+                  mode: CurrentValueSubject<ListMode, Never>?,
                   configuration: ListViewControllerConfiguration,
                   layout: UICollectionViewLayout?,
                   backgroundColor: UIColor = .systemGroupedBackground,
@@ -219,7 +219,7 @@ class ListViewController: NLViewController, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
         if mode == .editing {
             let item = itemInSnapshot(with: indexPath)
-            editingSelections.removeAll(where: { $0 == item })
+            selectionsSubject?.value.removeAll(where: { $0 == item })
         }
     }
     
@@ -514,7 +514,7 @@ class ListViewController: NLViewController, UICollectionViewDelegate {
         panRegionView.addGestureRecognizer(tapGesture)
         
         // touch gesture
-        /* Suspened until further dev. Needs advanced delegation to coordinate with taps.
+        /* TODO: Suspened until further dev. Needs advanced delegation to coordinate with taps.
          touchGesture = .init(target: self, action: #selector(self.multiselectionTouchGestureDidUpdate(_:)))
          guard let touchGesture = self.touchGesture else { fatalError() }
          touchGesture.delegate = gestureRecognizerDelegate
@@ -600,7 +600,7 @@ private
 extension ListViewController {
     
     func subscribeToStateChanges() {
-        modeSubject
+        modeSubject?
             .receive(on: DispatchQueue.main)
             .removeDuplicates()
             .sink { [unowned self] newMode in
@@ -610,7 +610,7 @@ extension ListViewController {
             }
             .store(in: &cancellables)
         
-        selectionsSubject
+        selectionsSubject?
             .receive(on: DispatchQueue.main)
             .removeDuplicates()
             .sink { [unowned self] newSelections in
@@ -740,16 +740,16 @@ extension ListViewController {
                 
                 // update selections
                 if sessionData.isSelecting {
-                    editingSelections.append(item)
+                    selectionsSubject?.value.append(item)
                 }
                 else {
-                    editingSelections.removeAll(where: { $0 == item })
+                    selectionsSubject?.value.removeAll(where: { $0 == item })
                 }
                 
                 self.multiselectSessionData?.updatedItems.insert(item)
             }
             else {
-                editingSelections.toggle(item)
+                selectionsSubject?.value.toggle(item)
             }
         }
         // if not editing, process as tap (normal mode)
