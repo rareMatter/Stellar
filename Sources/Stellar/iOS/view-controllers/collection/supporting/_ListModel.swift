@@ -134,8 +134,7 @@ extension ListViewController {
                                                 childrenKeypath: children)
             }
             else {
-                return makeSnapshot(from: sections,
-                                    children: children)
+                return makeLinearSnapshot(from: sections)
             }
         }
         
