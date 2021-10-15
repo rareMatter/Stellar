@@ -134,7 +134,7 @@ extension SListView {
             
             let controller = ListViewController(sectionsSubject,
                                                 children: children as? KeyPath<AnyHashable, [AnyHashable]?>,
-                                                selections: (selections as! CurrentValueSubject<[AnyHashable], Never>),
+                                                selections: selections as? CurrentValueSubject<[AnyHashable], Never>,
                                                 mode: mode ?? .init(.normal),
                                                 configuration: .init(),
                                                 layout: layout,
