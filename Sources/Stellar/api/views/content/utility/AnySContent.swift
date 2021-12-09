@@ -17,7 +17,7 @@ struct AnySContent: SPrimitiveContent {
     let typeConstructorName: String
     
     /// The wrapped `SContent`.
-    let content: Any
+    var content: Any
     
     /// The type of the `body` of the wrapped `SContent`.
     let bodyType: Any.Type

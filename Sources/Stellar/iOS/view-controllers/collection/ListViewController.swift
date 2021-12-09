@@ -104,13 +104,13 @@ class ListViewController: NLViewController, UICollectionViewDelegate {
     // MARK: - init
     
     init(_ sectionSubject: CurrentValueSubject<[ListSection], Never>,
-                  children: KeyPath<RowType, [RowType]?>?,
-                  selections: CurrentValueSubject<[RowType], Never>?,
-                  mode: CurrentValueSubject<ListMode, Never>?,
-                  configuration: ListViewControllerConfiguration,
-                  layout: UICollectionViewLayout?,
-                  backgroundColor: UIColor = .systemGroupedBackground,
-                  @SContentBuilder rowContent: @escaping (SectionType, RowType, UICellConfigurationState) -> UIKitRenderableContent) {
+         children: KeyPath<RowType, [RowType]?>?,
+         selections: CurrentValueSubject<[RowType], Never>?,
+         mode: CurrentValueSubject<ListMode, Never>?,
+         configuration: ListViewControllerConfiguration,
+         layout: UICollectionViewLayout?,
+         backgroundColor: UIColor = .systemGroupedBackground,
+         @SContentBuilder rowContent: @escaping (SectionType, RowType, UICellConfigurationState) -> UIKitRenderableContent) {
         
         self.selectionsSubject = selections
         self.modeSubject = mode

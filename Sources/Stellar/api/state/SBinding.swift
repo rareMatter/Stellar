@@ -52,3 +52,64 @@ extension SBinding {
         .init(get: { value }, set: { _ in })
     }
 }
+
+// MARK: transactions
+public
+extension SBinding {
+    // TODO:
+}
+
+// MARK: conditional conformances
+
+extension SBinding: Identifiable
+where Value : Identifiable {
+    public var id: some Hashable { wrappedValue.id }
+}
+
+extension SBinding: Sequence
+where Value : MutableCollection {
+    public typealias Element = SBinding<Value.Element>
+    public typealias Iterator = IndexingIterator<SBinding<Value>>
+    public typealias SubSequence = Slice<SBinding<Value>>
+}
+
+extension SBinding: Collection
+where Value : MutableCollection {
+    public typealias Index = Value.Index
+    public typealias Indices = Value.Indices
+    public var startIndex: SBinding<Value>.Index { wrappedValue.startIndex }
+    public var endIndex: SBinding<Value>.Index { wrappedValue.endIndex }
+    public var indices: Value.Indices { wrappedValue.indices }
+    
+    public func index(after i: SBinding<Value>.Index) -> SBinding<Value>.Index {
+        wrappedValue.index(after: i)
+    }
+    
+    public func formIndex(after i: inout SBinding<Value>.Index) {
+        wrappedValue.formIndex(after: &i)
+    }
+    
+    public subscript(position: SBinding<Value>.Index) -> SBinding<Value>.Element {
+        SBinding<Value.Element> {
+            wrappedValue[position]
+        } set: {
+            wrappedValue[position] = $0
+        }
+    }
+}
+
+extension SBinding: BidirectionalCollection
+where Value : BidirectionalCollection,
+Value : MutableCollection {
+    public func index(before i: SBinding<Value>.Index) -> SBinding<Value>.Index {
+        wrappedValue.index(before: i)
+    }
+    
+    public func formIndex(before i: inout SBinding<Value>.Index) {
+        wrappedValue.formIndex(before: &i)
+    }
+}
+
+extension SBinding: RandomAccessCollection
+where Value : MutableCollection,
+Value : RandomAccessCollection {}

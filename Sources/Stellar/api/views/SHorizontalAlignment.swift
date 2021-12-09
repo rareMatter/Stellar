@@ -8,7 +8,7 @@
 import Foundation
 
 public
-enum SHorizontalAlignment {
+enum SHorizontalAlignment: Hashable {
     case center,
          leading,
          trailing

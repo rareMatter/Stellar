@@ -58,6 +58,21 @@ where Data.Element : Identifiable, ID == Data.Element.ID {
     }
 }
 
+// MARK: Ranges
+
+public
+extension SForEach
+where Data == Range<Int>,
+      ID == Int {
+    init(_ data: Range<Int>,
+         @SContentBuilder content: @escaping (Data.Element) -> Content) {
+        self.data = data
+        id = \.self
+        self.content = content
+        self.dataSubject = nil
+    }
+}
+
 // MARK: - protocol conformance
 
 extension SForEach: _SContentContainer {
@@ -66,15 +81,28 @@ extension SForEach: _SContentContainer {
     }
 }
 
+// MARK: Internal recognition
+protocol SForEachProtocol: _SContentContainer {
+    var elementType: Any.Type { get }
+    func element(at: Int) -> Any
+}
+extension SForEach: SForEachProtocol
+where Data.Index == Int {
+    
+    var elementType: Any.Type { Data.Element.self }
+    
+    func element(at index: Int) -> Any {
+        data[index]
+    }
+}
+
 // MARK: - temporary flag for data updating content container
 // TODO: Remove this when the framework is handling updates.
 protocol DataPublisher {
-    var _dataIDSubject: CurrentValueSubject<[AnyHashable], Never> { get }
+    var _dataSubject: CurrentValueSubject<[AnyHashable], Never>? { get }
 }
 extension SForEach: DataPublisher {
-    var _dataIDSubject: CurrentValueSubject<[AnyHashable], Never> {
-        .init([data.map({ element in
-            AnyHashable(element[keyPath: id])
-        })])
+    var _dataSubject: CurrentValueSubject<[AnyHashable], Never>? {
+        dataSubject as? CurrentValueSubject<[AnyHashable], Never>
     }
 }

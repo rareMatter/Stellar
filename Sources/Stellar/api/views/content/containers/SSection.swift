@@ -35,22 +35,17 @@ where Content : SContent, Header : SContent, Footer : SContent {
 
 // MARK: internal recognition
 protocol _SSectionContainer {
-    var anyContentProvider: () -> AnySContent { get }
-    var anyHeaderProvider: () -> AnySContent { get }
-    var anyFooterProvider: () -> AnySContent { get }
+    func makeListRow() -> AnySContent
 }
 extension SSection: _SSectionContainer {
     
-    var anyContentProvider: () -> AnySContent {
-        { .init(contentProvider()) }
-    }
-    
-    var anyHeaderProvider: () -> AnySContent {
-        { .init(headerProvider()) }
-    }
-    
-    var anyFooterProvider: () -> AnySContent {
-        { .init(footerProvider()) }
+    func makeListRow() -> AnySContent {
+        AnySContent(SVStack(alignment: .leading,
+                            spacing: 0) {
+            headerProvider()
+            contentProvider()
+            footerProvider()
+        })
     }
 }
 

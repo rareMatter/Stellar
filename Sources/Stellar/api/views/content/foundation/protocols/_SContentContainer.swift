@@ -7,7 +7,10 @@
 
 import Foundation
 
-/// Content which acts only as a container of other content and has no appearance of its own.
+/// A content container which renders with children.
 protocol _SContentContainer {
     var children: [AnySContent] { get }
 }
+
+/// A content container which renders its children but has no appearance of its own.
+protocol GroupedContent: _SContentContainer {}
