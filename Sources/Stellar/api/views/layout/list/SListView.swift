@@ -11,138 +11,116 @@ import UIKit
 import SwiftUI
 
 public
-struct SListView<Content, Selection>: SView
+struct SListView<Content, Selection>: SView, SContent
 where Content : SContent {
     
-    let contentProvider: () -> Content
+    let contentProvider: Content
+    let selection: _Selection?
     
-    typealias HierarchyObjectProvider = (Content, SectionsSubject) -> ViewHierarchyObject
-    let hierarchyObjectProvider: HierarchyObjectProvider
+    let renderer: UIKitRenderer
     
-    typealias SectionsSubject = CurrentValueSubject<[ListSection], Never>
-    let sectionsSubject = SectionsSubject([])
-    
-    var cancellable: AnyCancellable?
+    enum _Selection {
+        case one(SBinding<Selection?>?)
+        case many(SBinding<[Selection]>?)
+    }
     
     public
     var id: UUID = .init()
     
-    init(cancellable: inout AnyCancellable?,
-         contentProvider: @escaping () -> Content,
-         hierarchyObjectProvider: @escaping (Content, CurrentValueSubject<[ListSection], Never>) -> ViewHierarchyObject) {
-        self.cancellable = cancellable
-        self.contentProvider = contentProvider
-        self.hierarchyObjectProvider = hierarchyObjectProvider
+    public
+    var content: ViewHierarchyObject {
+        renderer.rootViewController
     }
     
     public
-    var content: ViewHierarchyObject {
-        hierarchyObjectProvider(contentProvider(), sectionsSubject)
-    }
-}
-
-// MARK: - Create a list with identifiable, hierarchical data.
-public
-extension SListView
-where Selection == Never {
-    
-    init<Data, RowContent>(_ dataSubject: CurrentValueSubject<Data, Never>,
-         children: KeyPath<Data.Element, Data?>?,
-         mode: CurrentValueSubject<ListMode, Never>? = nil,
-         layout: UICollectionViewLayout? = nil,
-         backgroundColor: UIColor = .systemGroupedBackground,
-         @SContentBuilder rowContentProvider: @escaping (Data.Element) -> RowContent) where Data : RandomAccessCollection,
-    Data.Element : Hashable,
-    Data.Element : Identifiable,
-    RowContent : SContent,
-    Content == SForEach<Data, Data.Element.ID, RowContent> {
-        self.init(dataSubject, children: children, selections: .init([]), mode: mode, layout: layout, backgroundColor: backgroundColor, rowContentProvider: rowContentProvider)
-    }
-}
-
-// MARK: - Create a list with identifiable, hierarchical data and selections.
-public
-extension SListView {
-    
-    init<Data, RowContent>(_ dataSubject: CurrentValueSubject<Data, Never>,
-                           children: KeyPath<Data.Element, Data?>?,
-                           selections: CurrentValueSubject<[Selection], Never>,
-                           mode: CurrentValueSubject<ListMode, Never>?,
-                           layout: UICollectionViewLayout? = nil,
-                           backgroundColor: UIColor = .systemGroupedBackground,
-                           @SContentBuilder rowContentProvider: @escaping (Data.Element) -> RowContent)
-    where Data : RandomAccessCollection,
-    Data.Element : Hashable,
-    Data.Element : Identifiable,
-    RowContent : SContent,
-    Content == SForEach<Data, Data.Element.ID, RowContent> {
-        
-        var cancellable: AnyCancellable?
-        
-        self.init(cancellable: &cancellable) {
-            SForEach(dataSubject) { item in
-                rowContentProvider(item)
-            }
-        } hierarchyObjectProvider: { content, sectionsSubject in
+    var body: some SContent {
+        // check content for any contents which are not in a section
+        // normalize by placing any loose contents into implicit sections, while finding explicit sections.
+        if let contentContainer = content as? _SContentContainer {
             
-            // Decompose content.
-            // Check for content containers...are children sections?
-            // Map sections to ListSections.
-            // If not content container, use for all rows.
-            func decomposeContent(_ content: Content) -> [ListSection] {
-                guard let contentContainer = content as? _SContentContainer else {
-                    assertionFailure("Unexpected content type.")
-                    return []
+            // Content has children. Check for SSections and other content.
+            var sections = [AnySContent]()
+            var otherContents = [AnySContent]()
+            
+            for child in contentContainer.children {
+                if child.content is _SSectionContainer {
+                    if !otherContents.isEmpty {
+                        // if other contents has been found, create a section for it
+                        sections.append(.init(SSection(content: {
+                            SForEach(Array(otherContents.enumerated()),
+                                     id: \.offset,
+                                     dataSubject: nil) { _, content in content }
+                        })))
+                        otherContents = []
+                    }
+                    sections.append(child)
                 }
-                
-                var sections: [ListSection] = []
-                
-                // If content is a container, check it for sections.
-                // Check content containers for SSections.
-                for (index, child) in contentContainer.children.enumerated() {
-                    // Extract sections.
-                    if let sectionContainer = child.content as? _SSectionContainer {
-                        
-                        sections.append(.init(id: index,
-                                              dataSubject: (sectionContainer.anyContentProvider().content as? DataPublisher)?._dataIDSubject ?? .init([]),
-                                              rowProvider: { sectionContainer.anyContentProvider().renderContent() },
-                                              headerProvider: { sectionContainer.anyHeaderProvider().renderContent() },
-                                              footerProvider: { sectionContainer.anyFooterProvider().renderContent() }))
+                else {
+                    // non-sectioned content: add it to otherContents to be implicitly sectioned
+                    if !child.children.isEmpty {
+                        // the child is another content container: add its children to otherContents
+                        otherContents.append(contentsOf: child.children)
+                    }
+                    else {
+                        // add the child to otherContents
+                        otherContents.append(child)
                     }
                 }
-                
-                // If no sections were found in the top level list content,
-                // create one.
-                if sections.isEmpty {
-                    let emptyRenderableContent = { SEmptyContent().renderContent() }
-                    sections.append(.init(id: 0,
-                                          dataSubject: dataSubject,
-                                          rowProvider: { content.renderContent() },
-                                          headerProvider: emptyRenderableContent,
-                                          footerProvider: emptyRenderableContent))
+            }
+            // if any other contents remain, create a section for it
+            if !otherContents.isEmpty {
+                sections.append(.init(SSection(content: {
+                    SForEach(Array(otherContents.enumerated()),
+                             id: \.offset,
+                             dataSubject: nil) { _, content in content }
+                })))
+            }
+            
+            return AnySContent(SForEach(Array(sections.enumerated()),
+                            id: \.offset) { _, content in
+                if let section = content as? _SSectionContainer {
+                    section.makeListRow()
                 }
-                
-                return sections
-            }
-            
-            // Connect data subject to sections subject.
-            cancellable = dataSubject.map { _ in
-                // Use the data as contained by the content provider.
-                decomposeContent(content)
-            }
-            .assign(to: \.value, on: sectionsSubject)
-            
-            let controller = ListViewController(sectionsSubject,
-                                                children: children as? KeyPath<AnyHashable, [AnyHashable]?>,
-                                                selections: selections as? CurrentValueSubject<[AnyHashable], Never>,
-                                                mode: mode ?? .init(.normal),
-                                                configuration: .init(),
-                                                layout: layout,
-                                                backgroundColor: backgroundColor) { section, row, cellConfigState in
-                section.rowProvider()
-            }
-            
-            return controller
+                else {
+                    content
+                }
+            })
+        }
+        else {
+            // Content has no children
+           return AnySContent(contentProvider)
         }
     }
+    
+    /*
+     guard let contentContainer = content as? _SContentContainer else {
+     assertionFailure("Unexpected content type.")
+     return .init([])
+     }
+     var sections = [ListSection]()
+     
+     // Check content containers for SSections.
+     for (index, child) in contentContainer.children.enumerated() {
+     if let sectionContainer = child.content as? _SSectionContainer {
+     sections.append(.init(id: index,
+     dataSubject: (sectionContainer.anyContentProvider().content as? DataPublisher)?._dataSubject ?? .init([]),
+     rowProvider: { sectionContainer.anyContentProvider().renderContent() },
+     headerProvider: { sectionContainer.anyHeaderProvider().renderContent() },
+     footerProvider: { sectionContainer.anyFooterProvider().renderContent() }))
+     }
+     }
+     
+     // If no sections were found in the top level list content,
+     // create one.
+     if sections.isEmpty {
+     let emptyRenderableContent = { SEmptyContent().renderContent() }
+     sections.append(.init(id: 0,
+     dataSubject: dataSubject,
+     rowProvider: { content.renderContent() },
+     headerProvider: emptyRenderableContent,
+     footerProvider: emptyRenderableContent))
+     }
+     
+     return sections
+     */
 }

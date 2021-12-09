@@ -8,7 +8,7 @@
 import Foundation
 
 public
-struct SDisclosureGroup<Label, Content>: SPrimitiveContent
+struct SDisclosureGroup<Label, Content>: SContent
 where Label : SContent, Content : SContent {
     
     @SState
@@ -35,5 +35,18 @@ where Label : SContent, Content : SContent {
         isExpandedBinding = isExpanded
         self.label = label()
         self.content = content
+    }
+    
+    public var body: some SContent {
+        label
+        
+        // display the content if the provided binding is true, or internal state is true.
+        if let isExpandedBinding = isExpandedBinding,
+           isExpandedBinding.wrappedValue {
+            content()
+        }
+        else if isExpanded {
+            content()
+        }
     }
 }

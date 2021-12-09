@@ -7,6 +7,7 @@
 
 import Foundation
 
+/* TODO: Implement. This won't work until the Environment is implemented.
 public
 extension SContent {
     
@@ -15,3 +16,4 @@ extension SContent {
         SIdentifiableContent(self, id: id)
     }
 }
+*/

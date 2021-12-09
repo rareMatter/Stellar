@@ -7,7 +7,7 @@
 
 import UIKit
 
-/// A type which can represent `SPrimitiveContent` as a `UIContentConfiguration`.
+/// A type which can represent `SPrimitiveContent` in UIKit.
 protocol UIKitContentRenderer {
     func mountContent(on target: UIKitRenderableContent)
 }

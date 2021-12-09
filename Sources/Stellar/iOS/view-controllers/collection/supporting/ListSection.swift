@@ -7,10 +7,10 @@
 
 import Foundation
 import Combine
-
+// TODO: This is likely not needed anymore.
 struct ListSection: Hashable, Identifiable {
     
-    var id: Int
+    var id: AnyHashable
     
     let rowProvider: () -> UIKitRenderableContent
     let headerProvider: () -> UIKitRenderableContent

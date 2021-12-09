@@ -8,8 +8,6 @@
 import UIKit
 
 /// Content that can be rendered and updated by UIKit in an efficient way.
-///
-/// This class is used to render SContent instances on UIKit.
 class UIKitRenderableContent {
     
     /// The content.

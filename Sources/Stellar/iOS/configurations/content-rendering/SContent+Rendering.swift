@@ -29,7 +29,6 @@ extension SContent {
             if let renderablePrimitiveContent = anyContent.content as? UIKitContentRenderer {
                 renderablePrimitiveContent
                     .mountContent(on: parent)
-                #warning("is this always an endpoint for recursion?")
             }
             // content is a modifier
             else if let anyModifiedContent = anyContent.content as? AnySModifiedContent {

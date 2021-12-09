@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+// TODO: Obsoleted. Remove this.
 struct SColorBackgroundContentModifier: SContentModifier {
     typealias Body = Never
     let backgroundColor: SColor

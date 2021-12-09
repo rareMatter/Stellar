@@ -15,20 +15,14 @@ extension Int: Identifiable {
 }
 
 struct AList: SView {
+
     var id: UUID = .init()
-    
-    let dataSubject = CurrentValueSubject<[Int], Never>(Array(0...9))
-    
     let searchTextModel = SearchTextStorage()
-    
     let theme = ColorTheme()
     
     var content: ViewHierarchyObject {
-        SListView(dataSubject,
-                  children: nil,
-                  selections: nil,
-                  mode: nil) { item, configState in
-            switch item {
+        SListView(0...9) { row in
+            switch row {
                 case 0:
                     SLeadingViewLabel(text: "Centered Leading view Centered Leading view Centered Leading view Centered Leading view",
                                       leadingView: UIImageView(image: UIImage(systemName: "circle")!))

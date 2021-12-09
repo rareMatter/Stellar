@@ -31,13 +31,7 @@ where Content: SContent, ID: Hashable {
 extension SIdentifiableContent: _SSectionContainer
 where Content : _SSectionContainer {
     
-    var anyContentProvider: () -> AnySContent {
-        content.anyContentProvider
-    }
-    var anyHeaderProvider: () -> AnySContent {
-        content.anyHeaderProvider
-    }
-    var anyFooterProvider: () -> AnySContent {
-        content.anyFooterProvider
+    func makeListRow() -> AnySContent {
+        content.makeListRow()
     }
 }

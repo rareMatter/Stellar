@@ -12,12 +12,12 @@ public
 struct SOutlineGroup<Data, ID, Parent, Leaf, Subgroup>
 where Data : RandomAccessCollection, ID : Hashable {
     
-    enum Root {
+    enum TreeNode {
         case collection(Data)
         case single(Data.Element)
     }
     
-    let root: Root
+    let root: TreeNode
     let children: KeyPath<Data.Element, Data?>
     let id: KeyPath<Data.Element, ID>
     let content: (Data.Element) -> Leaf
@@ -126,6 +126,86 @@ where Parent : SContent,
     }
 }
 
+// MARK: Creating an Outline Group from a Binding to Hierarchical Data
+
+/* TODO: Implement. Create SOutlineGroup using a binding to data or an element.
+public
+extension SOutlineGroup
+where Data : RandomAccessCollection,
+      ID == Data.Element.ID,
+      Parent == Leaf,
+      Subgroup == SDisclosureGroup<Parent, SOutlineSubgroupChildren>,
+      Data.Element : Identifiable {
+    
+    /// Creates an outline group from a binding to a root data element and a key path to its children.
+    ///
+    /// This initializer creates an instance that uniquely identifies views across updates based on the identity of the underlying data element.
+    /// All generated disclosure groups begin in the collapsed state.
+    /// Make sure that the identifier of a data element only changes if you mean to replace that element with a new element, one with a new identity. If the ID of an element changes, then the content view generated from that element will lose any current state and animations.
+    init<C, E>(_ root: Binding<E>,
+               children: WritableKeyPath<E, C?>,
+               content: @escaping (Binding<E>) -> Leaf)
+    where Data == Binding<C>,
+    ID == E.ID,
+    C : MutableCollection,
+    C : RandomAccessCollection,
+    E : Identifiable,
+    E == C.Element {
+        
+    }
+    
+    /// Creates an outline group from a binding to a collection of root data elements and a key path to its children.
+    ///
+    /// This initializer creates an instance that uniquely identifies views across updates based on the identity of the underlying data element.
+    /// All generated disclosure groups begin in the collapsed state.
+    /// Make sure that the identifier of a data element only changes if you mean to replace that element with a new element, one with a new identity. If the ID of an element changes, then the content view generated from that element will lose any current state and animations.
+    init<C, E>(_ data: Binding<C>,
+               children: WritableKeyPath<E, C?>,
+               content: @escaping (Binding<E>) -> Leaf)
+    where Data == Binding<C>,
+    ID == E.ID,
+    C : MutableCollection,
+    C : RandomAccessCollection,
+    E : Identifiable,
+    E == C.Element {
+        
+    }
+    
+    /// Creates an outline group from a binding to a root data element, the key path to its identifier, and a key path to its children.
+    ///
+    /// This initializer creates an instance that uniquely identifies views across updates based on the identity of the underlying data element.
+    /// All generated disclosure groups begin in the collapsed state.
+    /// Make sure that the identifier of a data element only changes if you mean to replace that element with a new element, one with a new identity. If the ID of an element changes, then the content view generated from that element will lose any current state and animations.
+    init<C, E>(_ root: Binding<E>,
+               id: KeyPath<E, ID>,
+               children: WritableKeyPath<E, C?>,
+               content: @escaping (Binding<E>) -> Leaf)
+    where Data == Binding<C>,
+    C : MutableCollection,
+    C : RandomAccessCollection,
+    E == C.Element {
+        
+    }
+
+    /// Creates an outline group from a binding to a collection of root data elements, the key path to a data element’s identifier, and a key path to its children.
+    ///
+    /// This initializer creates an instance that uniquely identifies views across updates based on the identity of the underlying data element.
+    /// All generated disclosure groups begin in the collapsed state.
+    /// Make sure that the identifier of a data element only changes if you mean to replace that element with a new element, one with a new identity. If the ID of an element changes, then the content view generated from that element will lose any current state and animations.
+    init<C, E>(_ data: Binding<C>,
+               id: KeyPath<E, ID>,
+               children: WritableKeyPath<E, C?>,
+               content: @escaping (Binding<E>) -> Leaf)
+    where Data == Binding<C>,
+    C : MutableCollection,
+    C : RandomAccessCollection,
+    E == C.Element {
+        
+    }
+}
+ */
+
+/// Type-erased content representing the children in an outline subgroup.
 public
 struct SOutlineSubgroupChildren: SContent {
     

@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+// TODO: Obsoleted. Remove this.
 struct SAccessoriesModifier<Accessory>: SContentModifier {
     typealias Body = Never
     let accessories: [Accessory]
