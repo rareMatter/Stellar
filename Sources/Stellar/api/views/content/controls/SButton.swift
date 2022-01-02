@@ -8,31 +8,18 @@
 import UIKit
 
 public
-struct SButton: SPrimitiveContent {
-    
-    var title: String
-    var image: UIImage?
-    
-    var actionHandler: () -> Void
-    
-    var backgroundColor: UIColor?
-    
-    public
-    init(title: String,
-         backgroundColor: UIColor?,
-         action: @escaping () -> Void) {
-        self.title = title
-        self.backgroundColor = backgroundColor
-        self.actionHandler = action
-    }
-    
-    public
-    init(image: UIImage,
-         backgroundColor: UIColor? = nil,
-         action: @escaping () -> Void) {
-        self.init(title: "",
-                  backgroundColor: backgroundColor,
-                  action: action)
-        self.image = image
+struct SButton<Content>: SPrimitiveContent
+where Content : SContent {
+    let actionHandler: SIdentifiableContainer<() -> Void>
+    let content: Content
+}
+
+public
+extension SButton {
+
+    init(action: @escaping () -> Void,
+         content: () -> Content) {
+        self.actionHandler = .init(action)
+        self.content = content()
     }
 }

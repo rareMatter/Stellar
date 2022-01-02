@@ -70,6 +70,8 @@ extension ButtonContentConfiguration {
 }
 
 // MARK: - SContent mapping
+// TODO: Remove this.
+/*
 extension SButton: UIKitContentRenderer {
     
     func mountContent(on target: UIKitRenderableContent) {
@@ -80,3 +82,4 @@ extension SButton: UIKitContentRenderer {
                                        backgroundColor: backgroundColor)
     }
 }
+*/

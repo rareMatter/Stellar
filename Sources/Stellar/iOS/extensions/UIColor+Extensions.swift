@@ -38,6 +38,9 @@ extension UIColor {
             .userInterfaceStyle == .dark ? .dark : .light
         let resolvedColor = sDynamicColor.resolvedColor(with: currentColorScheme)
         
-        self.init(sColor: resolvedColor)
+        self.init(sColor: SColor(red: resolvedColor.r,
+                                 green: resolvedColor.g,
+                                 blue: resolvedColor.b,
+                                 opacity: resolvedColor.opacity))
     }
 }

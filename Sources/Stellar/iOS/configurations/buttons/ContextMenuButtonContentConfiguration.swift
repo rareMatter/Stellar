@@ -83,6 +83,8 @@ extension ContextMenuButtonContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
+// TODO: Remove this.
+/*
 extension SContextMenuButton: UIKitContentRenderer {
     
     func mountContent(on target: UIKitRenderableContent) {
@@ -95,3 +97,4 @@ extension SContextMenuButton: UIKitContentRenderer {
                                                               children: menuItems))
     }
 }
+*/

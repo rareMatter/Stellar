@@ -15,20 +15,19 @@ import UIKit
 public
 struct SDynamicColor: SPrimitiveContent {
     public
-    typealias ColorResolver = (ColorScheme) -> SColor
+    typealias ColorResolver = (ColorScheme) -> SColorData
     
-    private
-    let colorResolver: ColorResolver
+    let colorResolverContainer: SIdentifiableContainer<ColorResolver>
     
     /// Creates a color which adapts to the current environment.
     public
     init(colorResolver: @escaping ColorResolver) {
-        self.colorResolver = colorResolver
+        self.colorResolverContainer = .init(colorResolver)
     }
 }
 extension SDynamicColor {
-    func resolvedColor(with colorScheme: ColorScheme) -> SColor {
-        colorResolver(colorScheme)
+    func resolvedColor(with colorScheme: ColorScheme) -> SColorData {
+        colorResolverContainer.t(colorScheme)
     }
 }
 

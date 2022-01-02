@@ -11,6 +11,12 @@ import Foundation
 
 import UIKit
 
+public
+typealias SColorData = (r: Double,
+                       g: Double,
+                       b: Double,
+                       opacity: Double)
+
 /** A representation of a color which can be used as a view.
  
  The type colors available are all created in the `sRGB` color space.

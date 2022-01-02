@@ -228,9 +228,18 @@ enum UIKitPrimitiveViewType: Hashable {
     // MARK: images
     case image
     
+    // MARK: colors
+    case color(r: Double,
+               g: Double,
+               b: Double,
+               opacity: Double)
+    case dynamicColor(colorResolverContainer: SIdentifiableContainer<SDynamicColor.ColorResolver>)
+    
     // MARK: buttons
     case button
-    case menuButton
+    case menu
+    case menuContent
+    case menuLabel
     
     // MARK: stacks
     case hStack
