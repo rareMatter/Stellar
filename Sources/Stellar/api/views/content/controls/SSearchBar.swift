@@ -10,20 +10,23 @@ import UIKit
 public
 struct SSearchBar: SPrimitiveContent {
     
-    var text: String
-    var placeholderText: String
+    @SBinding var text: String
+    let placeholderText: String
     
     var onSearch: (String) -> Void
     var onSearchEnded: () -> Void
     
     var style: UISearchBar.Style = .default
-    
-    public
-    init(text: String,
+}
+
+public
+extension SSearchBar {
+
+    init(text: SBinding<String>,
          placeholderText: String = "Search...",
          onSearch: @escaping (String) -> Void,
          onSearchEnded: @escaping () -> Void = {}) {
-        self.text = text
+        self._text = text
         self.placeholderText = placeholderText
         self.onSearch = onSearch
         self.onSearchEnded = onSearchEnded

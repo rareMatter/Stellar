@@ -10,18 +10,20 @@ import UIKit
 public
 struct STextEditor: SPrimitiveContent {
     
-    var text: String
-    var placeholderText: String
+    @SBinding var text: String
+    let placeholderText: String
     
-    var onTextChange: (String) -> Void
-    
+    let onTextChange: (String) -> Void
     var inputAccessoryView: UIView?
+}
+
+public
+extension STextEditor {
     
-    public
-    init(text: String,
+    init(text: SBinding<String>,
          placeholderText: String = "",
          onTextChange: @escaping (String) -> Void) {
-        self.text = text
+        self._text = text
         self.placeholderText = placeholderText
         self.onTextChange = onTextChange
     }
