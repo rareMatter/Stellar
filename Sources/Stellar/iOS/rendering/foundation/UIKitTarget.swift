@@ -14,7 +14,7 @@ final
 class UIKitTarget: RenderableTarget {
     
     /// The live view produced by this target's renderable primitive content.
-    let view: UIViewPrimitiveProtocol
+    let view: UIKitRenderableContext
     
     // `RenderableTarget` conformance. This property is updated by the framework before the renderer is asked to update the target instance.
     // TODO: What else does the framework use this property for?
@@ -29,7 +29,7 @@ class UIKitTarget: RenderableTarget {
 }
 
 // TODO: Move this.
-func makeView(from primitive: AnyUIKitPrimitive) -> UIViewPrimitiveProtocol {
+func makeView(from primitive: AnyUIKitPrimitive) -> UIKitRenderableContext {
     // TODO: ...
     switch primitive.viewType {
         case .root(_):

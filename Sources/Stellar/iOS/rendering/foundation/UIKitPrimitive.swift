@@ -19,16 +19,19 @@ protocol UIKitPrimitive {
 }
 
 /// A UIView which can update itself from `AnyUIKitPrimitive`.
-protocol UIViewPrimitiveProtocol: UIView {
+protocol UIKitRenderableContext: UIView {
+    
+    // Creation
+    init(primitive: AnyUIKitPrimitive)
     
     // State updates
     func update(using primitive: AnyUIKitPrimitive)
     
     // Children
-    func addChild(_ view: UIViewPrimitiveProtocol)
-    func addChild(_ view: UIViewPrimitiveProtocol,
-                  before sibling: UIViewPrimitiveProtocol)
-    func removeChild(_ view: UIViewPrimitiveProtocol)
+    func addChild(_ context: UIKitRenderableContext)
+    func addChild(_ context: UIKitRenderableContext,
+                  before siblingContext: UIKitRenderableContext)
+    func removeChild(_ context: UIKitRenderableContext)
     
     // Attributes
     var attributes: [UIKitViewAttribute] { get }
@@ -37,18 +40,18 @@ protocol UIViewPrimitiveProtocol: UIView {
     func updateAttributes(_ attributes: [UIKitViewAttribute])
 }
 // Default implementations. Specialized UIViews should overload these as needed.
-extension UIViewPrimitiveProtocol {
+extension UIKitRenderableContext {
     
-    func addChild(_ view: UIViewPrimitiveProtocol) {
-        addSubview(view)
+    func addChild(_ context: UIKitRenderableContext) {
+        addSubview(context)
     }
-    func addChild(_ view: UIViewPrimitiveProtocol,
-                  before sibling: UIViewPrimitiveProtocol) {
-        insertSubview(view,
-                      belowSubview: view)
+    func addChild(_ context: UIKitRenderableContext,
+                  before siblingContext: UIKitRenderableContext) {
+        insertSubview(context,
+                      belowSubview: siblingContext)
     }
-    func removeChild(_ view: UIViewPrimitiveProtocol) {
-        view.removeFromSuperview()
+    func removeChild(_ context: UIKitRenderableContext) {
+        context.removeFromSuperview()
     }
     
     func addAttributes(_ attributes: [UIKitViewAttribute]) {

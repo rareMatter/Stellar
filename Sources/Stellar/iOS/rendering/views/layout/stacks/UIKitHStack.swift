@@ -10,20 +10,12 @@ import UIKit
 // TODO: WIP
 
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
-class UIKitPrimitiveStackView: UIStackView, UIViewPrimitiveProtocol {
+class UIKitPrimitiveStackView: UIStackView, UIKitRenderableContext {
     
-    var primitive: AnyUIKitPrimitive {
-        didSet {
-            guard primitive.viewType == .vStack ||
-                    primitive.viewType == .hStack else {
-                        assertionFailure("Incompatible primitive type provided.")
-                        return
-                    }
-            updateAttributes(primitive.attributes)
-        }
-    }
+    var primitive: AnyUIKitPrimitive
     var attributes: [UIKitViewAttribute] = []
     
+    required
     init(primitive: AnyUIKitPrimitive) {
         self.primitive = primitive
         super.init(frame: .zero)
@@ -44,6 +36,17 @@ final
 class UIKitHStack: UIKitPrimitiveStackView {
     
     override
+    var primitive: AnyUIKitPrimitive {
+        didSet {
+            guard primitive.viewType == .hStack else {
+                assertionFailure("Incompatible primitive type provided: \(primitive.viewType)")
+                return
+            }
+            updateAttributes(primitive.attributes)
+        }
+    }
+    
+    required
     init(primitive: AnyUIKitPrimitive) {
         super.init(primitive: primitive)
         axis = .horizontal
@@ -60,6 +63,17 @@ final
 class UIKitVStack: UIKitPrimitiveStackView {
     
     override
+    var primitive: AnyUIKitPrimitive {
+        didSet {
+            guard primitive.viewType == .vStack else {
+                assertionFailure("Incompatible primitive type provided: \(primitive.viewType)")
+                return
+            }
+            updateAttributes(primitive.attributes)
+        }
+    }
+    
+    required
     init(primitive: AnyUIKitPrimitive) {
         super.init(primitive: primitive)
         axis = .vertical
