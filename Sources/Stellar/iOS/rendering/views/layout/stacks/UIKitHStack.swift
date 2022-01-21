@@ -10,14 +10,9 @@ import UIKit
 // TODO: WIP
 
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
-class UIKitPrimitiveStackView: UIStackView, UIKitRenderableContext {
+class UIKitPrimitiveStackView: UIStackView, UIKitTargetView {
     
-    var primitive: AnyUIKitPrimitive
-    var attributes: [UIKitViewAttribute] = []
-    
-    required
-    init(primitive: AnyUIKitPrimitive) {
-        self.primitive = primitive
+    init() {
         super.init(frame: .zero)
     }
     
@@ -27,8 +22,33 @@ class UIKitPrimitiveStackView: UIStackView, UIKitRenderableContext {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(using primitive: AnyUIKitPrimitive) {
-        self.primitive = primitive
+    func update(with primitive: AnyUIKitPrimitive2) {
+        fatalError()
+    }
+    
+    func addChild(_ context: UIKitTargetView) {
+        addArrangedSubview(context)
+    }
+    func addChild(_ context: UIKitTargetView,
+                  before siblingContext: UIKitTargetView) {
+        guard let index = arrangedSubviews.firstIndex(of: siblingContext) else {
+            addArrangedSubview(context)
+            return
+        }
+        insertArrangedSubview(context, at: index)
+    }
+    func removeChild(_ context: UIKitTargetView) {
+        context.removeFromSuperview()
+    }
+    
+    func addAttributes(_ attributes: [UIKitViewAttribute]) {
+        UIView.addAttributes(attributes, to: self)
+    }
+    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
+        UIView.removeAttributes(attributes, from: self)
+    }
+    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
+        UIView.updateAttributes(attributes, on: self)
     }
 }
 
@@ -36,26 +56,16 @@ final
 class UIKitHStack: UIKitPrimitiveStackView {
     
     override
-    var primitive: AnyUIKitPrimitive {
-        didSet {
-            guard primitive.viewType == .hStack else {
-                assertionFailure("Incompatible primitive type provided: \(primitive.viewType)")
-                return
-            }
-            updateAttributes(primitive.attributes)
-        }
-    }
-    
-    required
-    init(primitive: AnyUIKitPrimitive) {
-        super.init(primitive: primitive)
+    init() {
+        super.init()
         axis = .horizontal
     }
     
-    @available(*, unavailable)
-    required
-    init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    override
+    func update(with primitive: AnyUIKitPrimitive2) {
+        if let hStack = primitive as? UIKitHStackPrimitive {
+            
+        }
     }
 }
 
@@ -63,25 +73,15 @@ final
 class UIKitVStack: UIKitPrimitiveStackView {
     
     override
-    var primitive: AnyUIKitPrimitive {
-        didSet {
-            guard primitive.viewType == .vStack else {
-                assertionFailure("Incompatible primitive type provided: \(primitive.viewType)")
-                return
-            }
-            updateAttributes(primitive.attributes)
-        }
-    }
-    
-    required
-    init(primitive: AnyUIKitPrimitive) {
-        super.init(primitive: primitive)
+    init() {
+        super.init()
         axis = .vertical
     }
     
-    @available(*, unavailable)
-    required
-    init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    override
+    func update(with primitive: AnyUIKitPrimitive2) {
+        if let vStack = primitive as? UIKitVStackPrimitive {
+            
+        }
     }
 }

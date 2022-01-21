@@ -11,7 +11,6 @@ import UIKit
 /// A button which displays a context menu when tapped.
 ///
 /// Configure the context menu by setting the menu property. Add animations by setting the corresponding menu appearance and disappearance closures.
-final
 class _SContextMenuButton: UIButton {
 	
 	typealias MenuTransitionHandler = (_ interaction: UIContextMenuInteraction, _ configuration: UIContextMenuConfiguration, _ animator: UIContextMenuInteractionAnimating?) -> Void

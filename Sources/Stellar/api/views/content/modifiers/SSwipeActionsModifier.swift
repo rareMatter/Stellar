@@ -5,23 +5,14 @@
 //  Created by Jesse Spencer on 11/22/21.
 //
 
+// TODO: WIP.
+
 import Foundation
 
 struct SSwipeActionsModifier<Actions>: SContentModifier
 where Actions : SContent {
-    let actions: Actions
-    let edge: SHorizontalEdge
-    let allowsFullSwipe: Bool
+    typealias Body = Never
     
-    func body(content: Content) -> some SContent {
-        SSwipeActionsModifierContainer(actions: actions,
-                                       edge: edge,
-                                       allowsFullSwipe: allowsFullSwipe)
-    }
-}
-
-struct SSwipeActionsModifierContainer<Actions>: SPrimitiveContent
-where Actions : SContent {
     let actions: Actions
     let edge: SHorizontalEdge
     let allowsFullSwipe: Bool

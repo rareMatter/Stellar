@@ -1,5 +1,5 @@
 //
-//  STextView.swift
+//  _TextView.swift
 //  
 //
 //  Created by Jesse Spencer on 4/30/21.
@@ -10,7 +10,7 @@ import UIKit
 import Combine
 
 /// A text view which accepts handlers for interactions.
-class STextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier, SRespondable {
+class _TextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier, SRespondable {
 
     // -- respondable
     private
@@ -82,7 +82,7 @@ class STextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier
 }
 
 // MARK: - delegate
-extension STextView {
+extension _TextView {
     // -- editing
     
     func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
@@ -116,7 +116,7 @@ extension STextView {
 }
 
 // MARK: - dynamic size
-extension STextView {
+extension _TextView {
     
     var sizeDidChangePublisher: AnyPublisher<Any, Never> {
         _sizeChangePublisher.eraseToAnyPublisher()
@@ -124,7 +124,7 @@ extension STextView {
 }
 
 // MARK: - respondable
-extension STextView {
+extension _TextView {
     
     var responderStatus: ResponderState.Status {
         isFirstResponder ?
@@ -156,7 +156,7 @@ extension STextView {
 }
 
 // MARK: - typealiases
-extension STextView {
+extension _TextView {
     typealias TextViewRequestHandler = (_ textView: UITextView) -> Bool
     typealias TextViewEventHandler = (UITextView) -> Void
 }

@@ -1,5 +1,5 @@
 //
-//  SSearchBarView.swift
+//  _SearchBarView.swift
 //  
 //
 //  Created by Jesse Spencer on 4/30/21.
@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class SSearchBarView: UISearchBar, UISearchBarDelegate, SRespondable {
+class _SearchBarView: UISearchBar, UISearchBarDelegate, SRespondable {
     
     // -- respondable
     private
@@ -74,7 +74,7 @@ class SSearchBarView: UISearchBar, UISearchBarDelegate, SRespondable {
 }
 
 // MARK: - delegate
-extension SSearchBarView {
+extension _SearchBarView {
     
     // -- changes
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -118,14 +118,14 @@ extension SSearchBarView {
 }
 
 // MARK: - dynamic size
-extension SSearchBarView {
+extension _SearchBarView {
     var sizeDidChangePublisher: AnyPublisher<Any, Never> {
         Empty(completeImmediately: true).eraseToAnyPublisher()
     }
 }
 
 // MARK: - respondable
-extension SSearchBarView {
+extension _SearchBarView {
     
     var responderStatus: ResponderState.Status {
         isFirstResponder ?
@@ -157,7 +157,7 @@ extension SSearchBarView {
 }
 
 // MARK: - typealiases
-extension SSearchBarView {
+extension _SearchBarView {
     typealias SearchBarRequestHandler = (_ searchBar: UISearchBar) -> Bool
     typealias SearchBarEventHandler = (_ searchBar: UISearchBar) -> Void
     typealias SearchBarScopeChangeHandler = (_ selectedScope: Int, _ searchBar: UISearchBar) -> Void

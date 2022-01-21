@@ -10,7 +10,6 @@ import UIKit
 /// A button view which calls a provided handler closure when activated.
 ///
 /// This class provides API for easily updating the button handler.
-final
 class _SButton: UIButton {
     
     /// The closure which is called when the primary action is activated.

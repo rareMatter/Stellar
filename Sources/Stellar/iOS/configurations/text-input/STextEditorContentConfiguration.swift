@@ -40,8 +40,8 @@ extension STextEditorContentConfiguration {
     
     func contentView() -> _SContentView<Self> {
         
-        let textView: STextView = {
-            let textView = STextView(frame: .zero)
+        let textView: _TextView = {
+            let textView = _TextView(frame: .zero)
             textView.translatesAutoresizingMaskIntoConstraints = false
             textView.isScrollEnabled = false
             textView.adjustsFontForContentSizeCategory = true

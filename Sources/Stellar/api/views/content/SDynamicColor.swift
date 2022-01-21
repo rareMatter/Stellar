@@ -12,6 +12,7 @@ import Foundation
 import UIKit
 
 /// A color which, when created, allows you to dynamically respond to changes in the environment to adapt the actual color.
+@available(*, deprecated, message: "No longer needed. Just use SColor when composing content as needed.")
 public
 struct SDynamicColor: SPrimitiveContent {
     public

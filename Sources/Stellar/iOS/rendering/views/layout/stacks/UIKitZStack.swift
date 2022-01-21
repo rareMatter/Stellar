@@ -6,5 +6,18 @@
 //
 
 import Foundation
+import UIKit
 
-// TODO: ...
+final
+class UIKitZStack: UIView, UIKitTargetView {
+    
+    convenience
+    init() {
+        self.init(frame: .zero)
+    }
+    
+    func update(with primitive: AnyUIKitPrimitive2) {
+        // TODO:
+        fatalError("TODO")
+    }
+}

@@ -38,10 +38,10 @@ class UIKitRenderer: Renderer {
         self.scheduler = scheduler
         self.rootViewController = controller
         
+        let rootPrimitive = UIKitRootViewPrimitive()
         self.reconciler = .init(content: content,
-                                target: UIKitTarget(content,
-                                                    uiKitPrimitive: UIKitViewPrimitive(viewType: .root(rootViewController.view),
-                                                                                       content: { content })),
+                                target: UIKitTarget(content: .init(rootPrimitive),
+                                                    rootView: rootPrimitive.makeUIView()),
                                 renderer: self,
                                 scheduler: { scheduler.schedule(options: nil, $0) })
     }
@@ -50,31 +50,19 @@ class UIKitRenderer: Renderer {
                      on parent: UIKitTarget,
                      with host: ElementHost) -> UIKitTarget? {
         
-        if let anyPrimitive = host.content as? AnyUIKitPrimitive {
-            let target = UIKitTarget(host.content,
-                                     uiKitPrimitive: anyPrimitive)
-            let view = makeView(from: anyPrimitive)
-            
-            // check for a sibling
-            if let sibling = sibling {
-                // add target to parent as a sibling, before sibling param
-                parent.view.addChild(view,
-                                     before: sibling.view)
-            }
-            else {
-                // add target to parent as a child
-                parent.view.addChild(view)
-            }
-            
+        if let anyPrimitive = host.content.content as? AnyUIKitPrimitive2 {
+            let target = UIKitTarget(content: host.content,
+                                     rootView: anyPrimitive.makeUIView())
+            parent.addChild(target, before: sibling)
             return target
         }
         // UIKit primitives may also be a UIKitViewModifier which should be applied to the parent target instead of creating one.
-        else if let anyModifiedContent = host.content as? AnyUIKitModifiedContent {
-            parent.view.addAttributes(anyModifiedContent.attributes)
+        else if let anyModifiedContent = host.content.content as? AnyUIKitModifiedContent {
+            parent.addAttributes(anyModifiedContent.attributes)
             return parent
         }
         // Handle container primitives which haven't been declared UIKit renderable by passing down the parent target
-        else if host.content is _SContentContainer {
+        else if host.content.content is _SContentContainer {
             return parent
         }
         
@@ -84,11 +72,11 @@ class UIKitRenderer: Renderer {
     
     func update(target: UIKitTarget,
                 with host: ElementHost) {
-        if let anyPrimitive = host.content as? AnyUIKitPrimitive {
-            target.view.update(using: anyPrimitive)
+        if let anyUIKitPrimitive = host.content.content as? AnyUIKitPrimitive2 {
+            target.update(withPrimitive: anyUIKitPrimitive)
         }
-        else if let anyModifiedContent = host.content as? AnyUIKitModifiedContent {
-            target.view.updateAttributes(anyModifiedContent.attributes)
+        else if let anyModifiedContent = host.content.content as? AnyUIKitModifiedContent {
+            target.updateAttributes(anyModifiedContent.attributes)
         }
     }
     
@@ -97,12 +85,12 @@ class UIKitRenderer: Renderer {
                  withTask task: UnmountHostTask<UIKitRenderer>) {
         // TODO: This likely needs the same type checks as mount.
         
-        if let _ = task.host.content as? AnyUIKitPrimitive {
-            parent.view.removeChild(target.view)
+        if let _ = task.host.content.content as? AnyUIKitPrimitive {
+            parent.removeChild(target)
         }
         // UIKit primitives may also be a UIKitViewModifier which should be applied to the parent target instead of creating one.
-        else if let anyModifiedContent = task.host.content as? AnyUIKitModifiedContent {
-            parent.view.removeAttributes(anyModifiedContent.attributes)
+        else if let anyModifiedContent = task.host.content.content as? AnyUIKitModifiedContent {
+            parent.removeAttributes(anyModifiedContent.attributes)
         }
         
         // TODO: Perform removal transition.

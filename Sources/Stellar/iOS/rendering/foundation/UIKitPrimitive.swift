@@ -18,11 +18,53 @@ protocol UIKitPrimitive {
     var renderedBody: AnySContent { get }
 }
 
-/// A UIView which can update itself from `AnyUIKitPrimitive`.
-protocol UIKitRenderableContext: UIView {
+/// Requirements for a renderable context within UIKit. The context is a distinct renderable container which responds to necessary messages for updates to its renderable tree of elements or attributes for appearance.
+protocol UIKitTargetView: UIView {
     
-    // Creation
-    init(primitive: AnyUIKitPrimitive)
+    // State updates
+    func update(with primitive: AnyUIKitPrimitive2)
+    
+    // Children
+    func addChild(_ view: UIKitTargetView)
+    func addChild(_ view: UIKitTargetView,
+                  before siblingView: UIKitTargetView)
+    func removeChild(_ view: UIKitTargetView)
+    
+    // Attributes
+    func addAttributes(_ attributes: [UIKitViewAttribute])
+    func removeAttributes(_ attributes: [UIKitViewAttribute])
+    func updateAttributes(_ attributes: [UIKitViewAttribute])
+}
+// Default implementations. Specialized UIViews should overload these as needed.
+extension UIKitTargetView {
+    
+    func addChild(_ context: UIKitTargetView) {
+        UIView.addChild(context)
+    }
+    func addChild(_ context: UIKitTargetView,
+                  before siblingContext: UIKitTargetView) {
+        UIView.addChild(context,
+                        before: siblingContext)
+    }
+    func removeChild(_ context: UIKitTargetView) {
+        UIView.removeChild(context)
+    }
+    
+    func addAttributes(_ attributes: [UIKitViewAttribute]) {
+        UIView.addAttributes(attributes, to: self)
+    }
+    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
+        UIView.removeAttributes(attributes, from: self)
+    }
+    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
+        UIView.updateAttributes(attributes, on: self)
+    }
+}
+
+/*
+// TODO: Revise. Replaced by UIKitTargetView.
+/// Requirements for a renderable context within UIKit. The context is a distinct renderable container which responds to necessary messages for updates to its renderable tree of elements or attributes for appearance.
+protocol UIKitRenderableContext: UIView {
     
     // State updates
     func update(using primitive: AnyUIKitPrimitive)
@@ -34,7 +76,6 @@ protocol UIKitRenderableContext: UIView {
     func removeChild(_ context: UIKitRenderableContext)
     
     // Attributes
-    var attributes: [UIKitViewAttribute] { get }
     func addAttributes(_ attributes: [UIKitViewAttribute])
     func removeAttributes(_ attributes: [UIKitViewAttribute])
     func updateAttributes(_ attributes: [UIKitViewAttribute])
@@ -57,8 +98,6 @@ extension UIKitRenderableContext {
     func addAttributes(_ attributes: [UIKitViewAttribute]) {
         for attribute in attributes {
             switch attribute {
-            case .alignment(let alignment):
-                assertionFailure("TODO")
             case .cornerRadius(let value, let antialiased):
                 layer.masksToBounds = true
                 layer.cornerRadius = value
@@ -79,8 +118,6 @@ extension UIKitRenderableContext {
     func removeAttributes(_ attributes: [UIKitViewAttribute]) {
         for attribute in attributes {
             switch attribute {
-            case .alignment(_):
-                assertionFailure("TODO")
             case .cornerRadius( _, _):
                 layer.cornerRadius = 0
                 layer.allowsEdgeAntialiasing = false
@@ -107,8 +144,6 @@ extension UIKitRenderableContext {
     func updateAttributes(_ attributes: [UIKitViewAttribute]) {
         for attribute in attributes {
             switch attribute {
-            case .alignment(let alignment):
-                assertionFailure("TODO")
             case .cornerRadius(let value, let antialiased):
                 layer.masksToBounds = true
                 layer.cornerRadius = value
@@ -130,6 +165,7 @@ extension UIKitRenderableContext {
         }
     }
 }
+ */
 
 // TODO: All UIKit primitives should conform to this.
 /// A `UIKit` primitive type which can be rendered on the platform.
@@ -138,6 +174,14 @@ extension UIKitRenderableContext {
 protocol AnyUIKitPrimitive {
     var viewType: UIKitPrimitiveViewType { get }
     var attributes: [UIKitViewAttribute] { get }
+
+    static
+    func makeUIView() -> UIKitTargetView
+}
+
+protocol AnyUIKitPrimitive2 {
+    /// Creates a UIKit renderable view from self.
+    func makeUIView() -> UIKitTargetView
 }
 
 /// A `UIKit` view attribute which can be applied to the primitive for rendering modifications.
@@ -148,9 +192,14 @@ protocol AnyUIKitModifiedContent {
 protocol UIKitModifier {
     var renderableAttribute: UIKitViewAttribute { get }
 }
+protocol UIKitComposableModifier: UIKitModifier {
+    associatedtype Content : SContent
+    var content: Content { get }
+}
 
 // TODO: Use these types to transform SContent primitives. These types will be used to replace the SContent primitives in the Descriptive Tree. When implementing conformance to `UIKitPrimitive`, provide these types as the rendered equivalents.
-
+// TODO: It probably makes more sense for this to store the actual primitives provided during "rendering". The current approach necessitates that each primitive is converted into an enum case which requires all properties to be included. Why shouldn't this just store a copy of the corresponding primitive? The primitive content is available during calls into UIKitRenderer. Pass this along during rendering to avoid duplicating properties. Its also being stored by the UIKitTarget. However, perhaps type mapping should be kept in extensions of primitives to simplify understanding further down the call chain and utilize type-erasure.
+/*
 struct UIKitViewPrimitive<Content>: SContent, AnyUIKitPrimitive {
     
     let viewType: UIKitPrimitiveViewType
@@ -188,6 +237,7 @@ where Content == SEmptyContent {
         self.content = SEmptyContent()
     }
 }
+ */
 
 struct UIKitViewModifier: SContent, AnyUIKitModifiedContent {
     
@@ -196,13 +246,25 @@ struct UIKitViewModifier: SContent, AnyUIKitModifiedContent {
     var body: Never { fatalError() }
 }
 
+struct UIKitComposedViewModifier<C>: SContent, AnyUIKitModifiedContent {
+    
+    var attributes = [UIKitViewAttribute]()
+    let content: C
+
+    var body: Never { fatalError() }
+}
+extension UIKitComposedViewModifier: _SContentContainer
+where C : SContent {
+    
+    var children: [AnySContent] {
+        [.init(content)]
+    }
+}
+
 /// The rendering modifiers which can be applied to views.
 /// These roughly correspond the modifiers provided by the framework.
 /// However, in some cases the framework modifiers may be translated into views instead, which means they will not be applied as attributes.
 enum UIKitViewAttribute: Hashable {
-    
-    // MARK: alignment
-    case alignment(SAlignment)
     
     // MARK: appearance
     case cornerRadius(value: CGFloat, antialiased: Bool)
@@ -212,6 +274,8 @@ enum UIKitViewAttribute: Hashable {
 //    case editing(Bool)
     case tapHandler(SHashableClosure)
     case editingSelectable(Bool)
+    case swipeActions(edge: SHorizontalEdge,
+                      allowsFullSwipe: Bool)
     
     // MARK: identity
     case identifier(AnyHashable)
@@ -224,7 +288,7 @@ enum UIKitPrimitiveViewType: Hashable {
     case root(UIView)
     
     // MARK: text
-    case text
+    case text(String)
     case textField
     case textEditor
     
@@ -247,7 +311,7 @@ enum UIKitPrimitiveViewType: Hashable {
     // MARK: stacks
     case hStack
     case vStack
-    case zStack
+    case zStack(alignment: SAlignment)
     
     // MARK: lists
     case list

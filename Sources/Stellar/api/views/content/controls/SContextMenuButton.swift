@@ -8,16 +8,10 @@
 import UIKit
 
 public
-struct SContextMenuButton<Label, Content>: SContent
+struct SContextMenuButton<Label, Content>: SPrimitiveContent
 where Label : SContent, Content : SContent {
     let content: Content
     let label: Label
-    
-    public
-    var body: some SContent {
-        _SContextMenuButtonLabel(content: label)
-        _SContextMenuButtonContent(content: content)
-    }
 }
 
 public

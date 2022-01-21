@@ -42,8 +42,8 @@ extension SearchBarContentConfiguration {
     
     func contentView() -> _SContentView<Self> {
         
-        let searchBar: SSearchBarView = {
-            let searchBar = SSearchBarView()
+        let searchBar: _SearchBarView = {
+            let searchBar = _SearchBarView()
             searchBar.translatesAutoresizingMaskIntoConstraints = false
             updateSearchBarState(searchBar,
                                  with: self)
@@ -66,7 +66,7 @@ extension SearchBarContentConfiguration {
     }
     
     private
-    func updateSearchBarState(_ searchBar: SSearchBarView, with configuration: SearchBarContentConfiguration) {
+    func updateSearchBarState(_ searchBar: _SearchBarView, with configuration: SearchBarContentConfiguration) {
         searchBar.searchBarStyle = configuration.style
         searchBar.placeholder = configuration.placeholderText
         

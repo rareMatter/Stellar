@@ -2,9 +2,17 @@
 //  UIKitText.swift
 //  
 //
-//  Created by Jesse Spencer on 11/4/21.
+//  Created by Jesse Spencer on 1/17/22.
 //
 
 import Foundation
 
-// TODO: ...
+final
+class UIKitText: _TextView, UIKitTargetView {
+
+    func update(with primitive: AnyUIKitPrimitive2) {
+        if let textView = primitive as? UIKitTextPrimitive {
+            
+        }
+    }
+}
