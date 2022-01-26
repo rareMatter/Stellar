@@ -38,10 +38,12 @@ class UIKitRenderer: Renderer {
         self.scheduler = scheduler
         self.rootViewController = controller
         
-        let rootPrimitive = UIKitRootViewPrimitive()
+        guard let anyPrimitive = content as? AnyUIKitPrimitive2 else {
+            fatalError()
+        }
         self.reconciler = .init(content: content,
-                                target: UIKitTarget(content: .init(rootPrimitive),
-                                                    rootView: rootPrimitive.makeUIView()),
+                                target: UIKitTarget(content: .init(content),
+                                                    anyUIKitPrimitive: anyPrimitive),
                                 renderer: self,
                                 scheduler: { scheduler.schedule(options: nil, $0) })
     }
@@ -52,7 +54,7 @@ class UIKitRenderer: Renderer {
         
         if let anyPrimitive = host.content.content as? AnyUIKitPrimitive2 {
             let target = UIKitTarget(content: host.content,
-                                     rootView: anyPrimitive.makeUIView())
+                                     anyUIKitPrimitive: anyPrimitive)
             parent.addChild(target, before: sibling)
             return target
         }

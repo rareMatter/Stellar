@@ -17,7 +17,8 @@ class UIKitContextMenu: _SContextMenuButton, UIKitTargetView {
     }
     
     func update(with primitive: AnyUIKitPrimitive2) {
-        
+        // TODO:
+        fatalError("TODO")
     }
     
     func addChild(_ view: UIKitTargetView) {
@@ -39,6 +40,21 @@ class UIKitContextMenu: _SContextMenuButton, UIKitTargetView {
         // TODO:
         fatalError("TODO")
     }
+    
+    func addAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
 }
 
 /// This class is used to pass details up to its parent, `UIKitContextMenu`, which will use properties of this class to update its appearance.
@@ -57,6 +73,23 @@ class UIKitContextMenuLabel: UIView, UIKitTargetView {
     }
     func addChild(_ view: UIKitTargetView,
                   before siblingView: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func removeChild(_ context: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    func addAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")
     }
@@ -88,6 +121,23 @@ class UIKitContextMenuContent: UIView, UIKitTargetView {
     }
     func addChild(_ view: UIKitTargetView,
                   before siblingView: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func removeChild(_ view: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    func addAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")
     }

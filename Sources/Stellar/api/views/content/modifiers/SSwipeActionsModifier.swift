@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 11/22/21.
 //
 
-// TODO: WIP.
-
 import Foundation
 
 struct SSwipeActionsModifier<Actions>: SContentModifier

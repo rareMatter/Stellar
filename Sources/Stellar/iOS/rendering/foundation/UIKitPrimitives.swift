@@ -55,13 +55,34 @@ extension SEditingSelectableContentModifier: UIKitModifier {
     }
 }
 
-// TODO: FIX - The child content here should end up added to the modifier's parent content but will lose context as to where it came from. This means when its added to the parent content, it may simply be added immediately as a child rather than being treated as a special case, such as is needed here for swipe actions. This could likely be fixed by taking the approach the primitive List does: by decomposing the content manually and augmenting/recognizing it before allowing the framework to take over. Otherwise, a wrapper type may be needed to maintain context during addition to the parent, where likely an intermediate target/view would be created to maintain normal tree operations. This view would never be visible but would be used only as a configuration by the parent. This scenario was being avoided when trying to render the modifier as primitive, where it was necessary to convert the modifier to SContent in order to pass the child content down; now it is necessary in order to recognize the child content once it is passed down.
 extension SSwipeActionsModifier: UIKitComposableModifier {
+    
     var renderableAttribute: UIKitViewAttribute {
         .swipeActions(edge: edge,
                       allowsFullSwipe: allowsFullSwipe)
     }
-    var content: some SContent { actions }
+    
+    var content: some SContent { UIKitSwipeActionsPrimitive(actions) }
+}
+
+struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive2 {
+    
+    let content: AnySContent
+    
+    init<C: SContent>(_ content: C) {
+        self.content = .init(content)
+    }
+    
+    var body: Never { fatalError() }
+    
+    func makeRenderableContent() -> UIKitTargetView {
+        UIKitSwipeActionsConfiguration()
+    }
+}
+extension UIKitSwipeActionsPrimitive: GroupedContent {
+    var children: [AnySContent] {
+        [content]
+    }
 }
 
 // MARK: buttons
@@ -78,7 +99,7 @@ struct UIKitButtonPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitButton()
     }
 }
@@ -100,7 +121,7 @@ struct UIKitContextMenuPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitContextMenu()
     }
 }
@@ -118,7 +139,7 @@ struct UIKitContextMenuButtonContentPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitContextMenuContent()
     }
 }
@@ -136,7 +157,7 @@ struct UIKitContextMenuButtonLabelPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitContextMenuLabel()
     }
 }
@@ -165,7 +186,7 @@ struct UIKitSearchBarPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         // TODO:
         fatalError("TODO")
     }
@@ -183,7 +204,7 @@ struct UIKitTextPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitText()
     }
 }
@@ -207,7 +228,7 @@ struct UIKitTextEditorPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitTextEditor()
     }
 }
@@ -228,7 +249,7 @@ struct UIKitHStackPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitHStack()
     }
 }
@@ -251,7 +272,7 @@ struct UIKitVStackPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitVStack()
     }
 }
@@ -274,7 +295,7 @@ struct UIKitZStackPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitZStack()
     }
 }
@@ -314,7 +335,7 @@ struct UIKitColorPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: Never { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         UIKitColor()
     }
 }
@@ -336,33 +357,6 @@ extension BackgroundModifierContainer: UIKitPrimitive {
         }))
     }
 }
-
-// MARK: - swipe actions
-// TODO: This modifier is now being treated as primitive and passing its content down through an SContent type. Remove this.
-/*
-extension SSwipeActionsModifierContainer: UIKitPrimitive {
-    var renderedBody: AnySContent {
-        .init(UIKitSwipeActionsPrimitive(edge: edge,
-                                         allowsFullSwipe: allowsFullSwipe,
-                                         actions: AnySContent(actions)))
-    }
-}
-struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive2 {
-    
-    let edge: SHorizontalEdge
-    let allowsFullSwipe: Bool
-    let actions: AnySContent
-    
-    var body: Never { fatalError() }
-    
-    func makeUIView() -> UIKitTargetView {
-        UIKitSwipeActionsView()
-    }
-}
-extension UIKitSwipeActionsPrimitive: _SContentContainer {
-    var children: [AnySContent] { [actions] }
-}
- */
 
 // MARK: empty content
 /* TODO: Needed?

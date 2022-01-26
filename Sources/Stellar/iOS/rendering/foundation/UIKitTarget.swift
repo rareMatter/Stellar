@@ -13,17 +13,22 @@ import UIKit
 final
 class UIKitTarget: RenderableTarget {
     
+    /// The UIKit primitive responsible for producing a renderable view.
+    let uiKitPrimitive: AnyUIKitPrimitive2
+    
     /// The live view produced by this target's renderable primitive content.
-    let rootView: UIKitTargetView
+    lazy
+    private(set)
+    var renderableContent: UIKitTargetView = uiKitPrimitive.makeRenderableContent()
     
     // `RenderableTarget` conformance. This property is updated by the framework before the renderer is asked to update the target instance.
     // TODO: What else does the framework use this property for?
     var content: AnySContent
     
     init(content: AnySContent,
-         rootView: UIKitTargetView) {
+         anyUIKitPrimitive: AnyUIKitPrimitive2) {
         self.content = content
-        self.rootView = rootView
+        self.uiKitPrimitive = anyUIKitPrimitive
     }
 }
 
@@ -31,33 +36,33 @@ extension UIKitTarget {
     
     // MARK: - updates
     func update(withPrimitive primitive: AnyUIKitPrimitive2) {
-        rootView.update(with: primitive)
+        renderableContent.update(with: primitive)
     }
     
     // MARK: - tree changes
     func addChild(_ target: UIKitTarget,
                   before siblingTarget: UIKitTarget?) {
         if let siblingTarget = siblingTarget {
-            rootView.addChild(target.rootView,
-                              before: siblingTarget.rootView)
+            renderableContent.addChild(target.renderableContent,
+                              before: siblingTarget.renderableContent)
         }
         else {
-            rootView.addChild(target.rootView)
+            renderableContent.addChild(target.renderableContent)
         }
     }
     func removeChild(_ target: UIKitTarget) {
-        rootView.removeChild(target.rootView)
+        renderableContent.removeChild(target.renderableContent)
     }
     
     // MARK: - attribute changes
     func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        rootView.addAttributes(attributes)
+        renderableContent.addAttributes(attributes)
     }
     func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        rootView.removeAttributes(attributes)
+        renderableContent.removeAttributes(attributes)
     }
     func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        rootView.updateAttributes(attributes)
+        renderableContent.updateAttributes(attributes)
     }
 }
 

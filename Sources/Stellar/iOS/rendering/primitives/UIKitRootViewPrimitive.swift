@@ -11,7 +11,7 @@ struct UIKitRootViewPrimitive: SContent, AnyUIKitPrimitive2 {
     
     var body: some SContent { fatalError() }
     
-    func makeUIView() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetView {
         // TODO:
         fatalError("TODO")
     }

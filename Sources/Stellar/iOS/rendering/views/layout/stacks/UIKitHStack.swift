@@ -27,18 +27,25 @@ class UIKitPrimitiveStackView: UIStackView, UIKitTargetView {
     }
     
     func addChild(_ context: UIKitTargetView) {
-        addArrangedSubview(context)
+        if let view = context as? UIView {
+            addArrangedSubview(view)
+        }
     }
     func addChild(_ context: UIKitTargetView,
                   before siblingContext: UIKitTargetView) {
-        guard let index = arrangedSubviews.firstIndex(of: siblingContext) else {
-            addArrangedSubview(context)
-            return
+        if let view = context as? UIView {
+            guard let siblingView = siblingContext as? UIView,
+                  let index = arrangedSubviews.firstIndex(of: siblingView) else {
+                addArrangedSubview(view)
+                return
+            }
+            insertArrangedSubview(view, at: index)
         }
-        insertArrangedSubview(context, at: index)
     }
     func removeChild(_ context: UIKitTargetView) {
-        context.removeFromSuperview()
+        if let view = context as? UIView {
+            view.removeFromSuperview()
+        }
     }
     
     func addAttributes(_ attributes: [UIKitViewAttribute]) {
@@ -64,7 +71,8 @@ class UIKitHStack: UIKitPrimitiveStackView {
     override
     func update(with primitive: AnyUIKitPrimitive2) {
         if let hStack = primitive as? UIKitHStackPrimitive {
-            
+            // TODO:
+            fatalError("TODO")
         }
     }
 }
@@ -81,7 +89,8 @@ class UIKitVStack: UIKitPrimitiveStackView {
     override
     func update(with primitive: AnyUIKitPrimitive2) {
         if let vStack = primitive as? UIKitVStackPrimitive {
-            
+            // TODO:
+            fatalError("TODO")
         }
     }
 }

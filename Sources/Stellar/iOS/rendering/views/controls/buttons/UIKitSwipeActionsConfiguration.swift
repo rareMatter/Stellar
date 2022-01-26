@@ -1,34 +1,29 @@
 //
-//  UIKitButton.swift
+//  UIKitSwipeActionsConfiguration.swift
 //  
 //
-//  Created by Jesse Spencer on 1/16/22.
+//  Created by Jesse Spencer on 1/20/22.
 //
 
 import Foundation
 import UIKit
 
-final
-class UIKitButton: UIView, UIKitTargetView {
+// TODO: Any view which supports (or whose parent supports) swipe actions should check for this view when being told to add a child.
+struct UIKitSwipeActionsConfiguration: UIKitTargetView {
     
-    convenience
-    init() {
-        self.init(frame: .zero)
-    }
+    init() {}
     
     func update(with primitive: AnyUIKitPrimitive2) {
-        if let button = primitive as? UIKitButtonPrimitive {
-            // TODO: Reinstall gestures.
-        }
-        // TODO:
-        fatalError()
-    }
-    
-    func addChild(_ view: UIKitTargetView) {
         // TODO:
         fatalError("TODO")
     }
-    func addChild(_ view: UIKitTargetView, before siblingView: UIKitTargetView) {
+    
+    func addChild(_ view: UIKitTargetView) {
+        // TODO: When children are added, check for buttons and extract their properties to create a UISwipeActionsConfiguration which will be used by a parent.
+        fatalError("TODO")
+    }
+    func addChild(_ view: UIKitTargetView,
+                  before siblingView: UIKitTargetView) {
         // TODO:
         fatalError("TODO")
     }
@@ -41,10 +36,12 @@ class UIKitButton: UIView, UIKitTargetView {
         // TODO:
         fatalError("TODO")
     }
+    
     func removeAttributes(_ attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")
     }
+    
     func updateAttributes(_ attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")

@@ -19,7 +19,7 @@ protocol UIKitPrimitive {
 }
 
 /// Requirements for a renderable context within UIKit. The context is a distinct renderable container which responds to necessary messages for updates to its renderable tree of elements or attributes for appearance.
-protocol UIKitTargetView: UIView {
+protocol UIKitTargetView {
     
     // State updates
     func update(with primitive: AnyUIKitPrimitive2)
@@ -34,31 +34,6 @@ protocol UIKitTargetView: UIView {
     func addAttributes(_ attributes: [UIKitViewAttribute])
     func removeAttributes(_ attributes: [UIKitViewAttribute])
     func updateAttributes(_ attributes: [UIKitViewAttribute])
-}
-// Default implementations. Specialized UIViews should overload these as needed.
-extension UIKitTargetView {
-    
-    func addChild(_ context: UIKitTargetView) {
-        UIView.addChild(context)
-    }
-    func addChild(_ context: UIKitTargetView,
-                  before siblingContext: UIKitTargetView) {
-        UIView.addChild(context,
-                        before: siblingContext)
-    }
-    func removeChild(_ context: UIKitTargetView) {
-        UIView.removeChild(context)
-    }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.addAttributes(attributes, to: self)
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.removeAttributes(attributes, from: self)
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.updateAttributes(attributes, on: self)
-    }
 }
 
 /*
@@ -180,8 +155,8 @@ protocol AnyUIKitPrimitive {
 }
 
 protocol AnyUIKitPrimitive2 {
-    /// Creates a UIKit renderable view from self.
-    func makeUIView() -> UIKitTargetView
+    /// Creates UIKit renderable content.
+    func makeRenderableContent() -> UIKitTargetView
 }
 
 /// A `UIKit` view attribute which can be applied to the primitive for rendering modifications.
@@ -281,6 +256,7 @@ enum UIKitViewAttribute: Hashable {
     case identifier(AnyHashable)
 }
 
+// TODO: Remove this. It has been replaced by a layer of UIKit primitive types.
 enum UIKitPrimitiveViewType: Hashable {
     
     // MARK: hierarchy
