@@ -11,16 +11,6 @@ import UIKit
 final
 class UIKitContextMenu: _SContextMenuButton, UIKitTargetView {
     
-    convenience
-    init() {
-        self.init(frame: .zero)
-    }
-    
-    func update(with primitive: AnyUIKitPrimitive2) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
     func addChild(_ view: UIKitTargetView) {
         if let label = view as? UIKitContextMenuLabel {
             // TODO:
@@ -31,30 +21,6 @@ class UIKitContextMenu: _SContextMenuButton, UIKitTargetView {
             fatalError("TODO")
         }
     }
-    func addChild(_ view: UIKitTargetView,
-                  before siblingView: UIKitTargetView) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func removeChild(_ view: UIKitTargetView) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
 }
 
 /// This class is used to pass details up to its parent, `UIKitContextMenu`, which will use properties of this class to update its appearance.
@@ -64,32 +30,8 @@ class UIKitContextMenuLabel: UIView, UIKitTargetView {
     var titleText: String?
     var image: UIImage?
     
-    func update(with primitive: AnyUIKitPrimitive2) {}
-    
     func addChild(_ view: UIKitTargetView) {
         // TODO: Check for supported primitive types which can be used for the appearance of a context menu button.
-        // TODO:
-        fatalError("TODO")
-    }
-    func addChild(_ view: UIKitTargetView,
-                  before siblingView: UIKitTargetView) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func removeChild(_ context: UIKitTargetView) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")
     }
@@ -105,8 +47,6 @@ class UIKitContextMenuContent: UIView, UIKitTargetView {
 //    var options: UIMenu.Options
     var children: [UIMenuElement] = []
     
-    func update(with primitive: AnyUIKitPrimitive2) {}
-    
     func addChild(_ view: UIKitTargetView) {
         if let textView = view as? UIKitText {
             self.title = textView.text
@@ -118,27 +58,5 @@ class UIKitContextMenuContent: UIView, UIKitTargetView {
         else if let menu = view as? UIKitContextMenu {
             // TODO: Add child.
         }
-    }
-    func addChild(_ view: UIKitTargetView,
-                  before siblingView: UIKitTargetView) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func removeChild(_ view: UIKitTargetView) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
     }
 }

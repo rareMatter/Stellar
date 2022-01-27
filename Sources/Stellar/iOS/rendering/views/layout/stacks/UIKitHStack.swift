@@ -12,20 +12,6 @@ import UIKit
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
 class UIKitPrimitiveStackView: UIStackView, UIKitTargetView {
     
-    init() {
-        super.init(frame: .zero)
-    }
-    
-    @available(*, unavailable)
-    required
-    init(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    func update(with primitive: AnyUIKitPrimitive2) {
-        fatalError()
-    }
-    
     func addChild(_ context: UIKitTargetView) {
         if let view = context as? UIView {
             addArrangedSubview(view)
@@ -62,13 +48,12 @@ class UIKitPrimitiveStackView: UIStackView, UIKitTargetView {
 final
 class UIKitHStack: UIKitPrimitiveStackView {
     
-    override
+    convenience
     init() {
-        super.init()
+        self.init(frame: .zero)
         axis = .horizontal
     }
     
-    override
     func update(with primitive: AnyUIKitPrimitive2) {
         if let hStack = primitive as? UIKitHStackPrimitive {
             // TODO:
@@ -80,13 +65,12 @@ class UIKitHStack: UIKitPrimitiveStackView {
 final
 class UIKitVStack: UIKitPrimitiveStackView {
     
-    override
+    convenience
     init() {
-        super.init()
+        self.init(frame: .zero)
         axis = .vertical
     }
     
-    override
     func update(with primitive: AnyUIKitPrimitive2) {
         if let vStack = primitive as? UIKitVStackPrimitive {
             // TODO:

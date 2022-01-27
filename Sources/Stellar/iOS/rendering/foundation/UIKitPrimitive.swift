@@ -35,6 +35,48 @@ protocol UIKitTargetView {
     func removeAttributes(_ attributes: [UIKitViewAttribute])
     func updateAttributes(_ attributes: [UIKitViewAttribute])
 }
+extension UIKitTargetView
+where Self : UIView {
+
+    init() {
+        self.init(frame: .zero)
+    }
+    
+    // State updates
+    func update(with primitive: AnyUIKitPrimitive2) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    // Children
+    func addChild(_ view: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func addChild(_ view: UIKitTargetView,
+                  before siblingView: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func removeChild(_ view: UIKitTargetView) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    // Attributes
+    func addAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+}
 
 /*
 // TODO: Revise. Replaced by UIKitTargetView.
