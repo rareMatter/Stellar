@@ -11,7 +11,7 @@ import UIKit
 final
 class UIKitButton: UIView, UIKitTargetView {
     
-    func update(with primitive: AnyUIKitPrimitive2) {
+    func update(with primitive: AnyUIKitPrimitive) {
         if let button = primitive as? UIKitButtonPrimitive {
             // TODO: Reinstall gestures.
         }

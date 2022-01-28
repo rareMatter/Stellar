@@ -10,7 +10,7 @@ import Foundation
 final
 class UIKitText: _TextView, UIKitTargetView {
 
-    func update(with primitive: AnyUIKitPrimitive2) {
+    func update(with primitive: AnyUIKitPrimitive) {
         if let textView = primitive as? UIKitTextPrimitive {
             // TODO:
             fatalError("TODO")

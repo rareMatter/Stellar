@@ -12,7 +12,7 @@ import UIKit
 /// A view which displays one or more lines of read-only text.
 class UIKitLabelPrimitive: UILabel, UIKitTargetView {
     
-    func update(with primitive: AnyUIKitPrimitive2) {
+    func update(with primitive: AnyUIKitPrimitive) {
         if let label = primitive as? UIKitLabelPrimitive {
             // TODO:
             fatalError("TODO")

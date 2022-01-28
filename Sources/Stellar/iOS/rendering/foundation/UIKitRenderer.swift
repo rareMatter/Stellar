@@ -38,7 +38,7 @@ class UIKitRenderer: Renderer {
         self.scheduler = scheduler
         self.rootViewController = controller
         
-        guard let anyPrimitive = content as? AnyUIKitPrimitive2 else {
+        guard let anyPrimitive = content as? AnyUIKitPrimitive else {
             fatalError()
         }
         self.reconciler = .init(content: content,
@@ -52,7 +52,7 @@ class UIKitRenderer: Renderer {
                      on parent: UIKitTarget,
                      with host: ElementHost) -> UIKitTarget? {
         
-        if let anyPrimitive = host.content.content as? AnyUIKitPrimitive2 {
+        if let anyPrimitive = host.content.content as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
                                      anyUIKitPrimitive: anyPrimitive)
             parent.addChild(target, before: sibling)
@@ -74,7 +74,7 @@ class UIKitRenderer: Renderer {
     
     func update(target: UIKitTarget,
                 with host: ElementHost) {
-        if let anyUIKitPrimitive = host.content.content as? AnyUIKitPrimitive2 {
+        if let anyUIKitPrimitive = host.content.content as? AnyUIKitPrimitive {
             target.update(withPrimitive: anyUIKitPrimitive)
         }
         else if let anyModifiedContent = host.content.content as? AnyUIKitModifiedContent {

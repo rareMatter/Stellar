@@ -14,7 +14,7 @@ final
 class UIKitTarget: RenderableTarget {
     
     /// The UIKit primitive responsible for producing a renderable view.
-    let uiKitPrimitive: AnyUIKitPrimitive2
+    let uiKitPrimitive: AnyUIKitPrimitive
     
     /// The live view produced by this target's renderable primitive content.
     lazy
@@ -26,7 +26,7 @@ class UIKitTarget: RenderableTarget {
     var content: AnySContent
     
     init(content: AnySContent,
-         anyUIKitPrimitive: AnyUIKitPrimitive2) {
+         anyUIKitPrimitive: AnyUIKitPrimitive) {
         self.content = content
         self.uiKitPrimitive = anyUIKitPrimitive
     }
@@ -35,7 +35,7 @@ class UIKitTarget: RenderableTarget {
 extension UIKitTarget {
     
     // MARK: - updates
-    func update(withPrimitive primitive: AnyUIKitPrimitive2) {
+    func update(withPrimitive primitive: AnyUIKitPrimitive) {
         renderableContent.update(with: primitive)
     }
     

@@ -10,7 +10,6 @@
 import UIKit
 import SwiftUI
 
-// TODO: Create a type-erased UIKit modifier layer, or simply use one modifier content type?
 // MARK: modified content
 extension SModifiedContent: UIKitPrimitive
 where Content : SContent, Modifier : UIKitModifier {
@@ -65,7 +64,7 @@ extension SSwipeActionsModifier: UIKitComposableModifier {
     var content: some SContent { UIKitSwipeActionsPrimitive(actions) }
 }
 
-struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive {
     
     let content: AnySContent
     
@@ -92,7 +91,7 @@ extension SButton: UIKitPrimitive {
                                    content: AnySContent(content)))
     }
 }
-struct UIKitButtonPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitButtonPrimitive: SContent, AnyUIKitPrimitive {
     
     let actionHandler: SIdentifiableContainer<() -> Void>
     let content: AnySContent
@@ -114,7 +113,7 @@ extension SContextMenuButton: UIKitPrimitive {
                                         content: .init(content)))
     }
 }
-struct UIKitContextMenuPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitContextMenuPrimitive: SContent, AnyUIKitPrimitive {
     
     let label: AnySContent
     let content: AnySContent
@@ -134,7 +133,7 @@ extension _SContextMenuButtonContent: UIKitPrimitive {
         .init(UIKitContextMenuButtonContentPrimitive(content: AnySContent(content)))
     }
 }
-struct UIKitContextMenuButtonContentPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitContextMenuButtonContentPrimitive: SContent, AnyUIKitPrimitive {
     let content: AnySContent
     
     var body: Never { fatalError() }
@@ -152,7 +151,7 @@ extension _SContextMenuButtonLabel: UIKitPrimitive {
         .init(UIKitContextMenuButtonLabelPrimitive(content: AnySContent(content)))
     }
 }
-struct UIKitContextMenuButtonLabelPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitContextMenuButtonLabelPrimitive: SContent, AnyUIKitPrimitive {
     let content: AnySContent
     
     var body: Never { fatalError() }
@@ -175,7 +174,7 @@ extension SSearchBar: UIKitPrimitive {
                                       style: style))
     }
 }
-struct UIKitSearchBarPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitSearchBarPrimitive: SContent, AnyUIKitPrimitive {
     let text: String
     let placeholderText: String
     
@@ -198,7 +197,7 @@ extension SText: UIKitPrimitive {
         .init(UIKitTextPrimitive(string: string))
     }
 }
-struct UIKitTextPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitTextPrimitive: SContent, AnyUIKitPrimitive {
     
     let string: String
     
@@ -218,7 +217,7 @@ extension STextEditor: UIKitPrimitive {
                                        inputAccessoryView: inputAccessoryView))
     }
 }
-struct UIKitTextEditorPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitTextEditorPrimitive: SContent, AnyUIKitPrimitive {
     
     let text: String
     let placeholderText: String
@@ -242,7 +241,7 @@ extension SHStack: UIKitPrimitive {
                                    content: AnySContent(content)))
     }
 }
-struct UIKitHStackPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitHStackPrimitive: SContent, AnyUIKitPrimitive {
     let alignment: SVerticalAlignment
     let spacing: CGFloat
     let content: AnySContent
@@ -264,7 +263,7 @@ extension SVStack: UIKitPrimitive {
                                    content: AnySContent(content)))
     }
 }
-struct UIKitVStackPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitVStackPrimitive: SContent, AnyUIKitPrimitive {
     
     let alignment: SHorizontalAlignment
     let spacing: CFloat
@@ -287,7 +286,7 @@ extension SZStack: UIKitPrimitive {
                                    content: AnySContent(content)))
     }
 }
-struct UIKitZStackPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitZStackPrimitive: SContent, AnyUIKitPrimitive {
     
     let alignment: SAlignment
     let spacing: Float?
@@ -323,7 +322,7 @@ extension SColor: UIKitPrimitive {
                                   colorSpace: colorSpace))
     }
 }
-struct UIKitColorPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitColorPrimitive: SContent, AnyUIKitPrimitive {
     
     let red: Double
     let green: Double
@@ -357,12 +356,3 @@ extension BackgroundModifierContainer: UIKitPrimitive {
         }))
     }
 }
-
-// MARK: empty content
-/* TODO: Needed?
-extension SEmptyContent: UIKitPrimitive {
-    var renderedBody: AnySContent {
-        .init(<#T##content: SContent##SContent#>)
-    }
-}
-*/

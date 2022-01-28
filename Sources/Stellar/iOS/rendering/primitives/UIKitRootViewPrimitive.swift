@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct UIKitRootViewPrimitive: SContent, AnyUIKitPrimitive2 {
+struct UIKitRootViewPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: some SContent { fatalError() }
     

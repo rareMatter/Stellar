@@ -13,7 +13,7 @@ struct UIKitSwipeActionsConfiguration: UIKitTargetView {
     
     init() {}
     
-    func update(with primitive: AnyUIKitPrimitive2) {
+    func update(with primitive: AnyUIKitPrimitive) {
         // TODO:
         fatalError("TODO")
     }

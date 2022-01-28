@@ -54,7 +54,7 @@ class UIKitHStack: UIKitPrimitiveStackView {
         axis = .horizontal
     }
     
-    func update(with primitive: AnyUIKitPrimitive2) {
+    func update(with primitive: AnyUIKitPrimitive) {
         if let hStack = primitive as? UIKitHStackPrimitive {
             // TODO:
             fatalError("TODO")
@@ -71,7 +71,7 @@ class UIKitVStack: UIKitPrimitiveStackView {
         axis = .vertical
     }
     
-    func update(with primitive: AnyUIKitPrimitive2) {
+    func update(with primitive: AnyUIKitPrimitive) {
         if let vStack = primitive as? UIKitVStackPrimitive {
             // TODO:
             fatalError("TODO")
