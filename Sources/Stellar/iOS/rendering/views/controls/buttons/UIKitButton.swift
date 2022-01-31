@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 final
-class UIKitButton: UIView, UIKitTargetView {
+class UIKitButton: UIView, UIKitTargetRenderableContent {
     
     func update(with primitive: AnyUIKitPrimitive) {
         if let button = primitive as? UIKitButtonPrimitive {

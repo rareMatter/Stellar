@@ -19,23 +19,23 @@ protocol UIKitPrimitive {
 }
 
 /// Requirements for a renderable context within UIKit. The context is a distinct renderable container which responds to necessary messages for updates to its renderable tree of elements or attributes for appearance.
-protocol UIKitTargetView {
+protocol UIKitTargetRenderableContent {
     
     // State updates
     func update(with primitive: AnyUIKitPrimitive)
     
     // Children
-    func addChild(_ view: UIKitTargetView)
-    func addChild(_ view: UIKitTargetView,
-                  before siblingView: UIKitTargetView)
-    func removeChild(_ view: UIKitTargetView)
+    func addChild(_ view: UIKitTargetRenderableContent)
+    func addChild(_ view: UIKitTargetRenderableContent,
+                  before siblingView: UIKitTargetRenderableContent)
+    func removeChild(_ view: UIKitTargetRenderableContent)
     
     // Attributes
     func addAttributes(_ attributes: [UIKitViewAttribute])
     func removeAttributes(_ attributes: [UIKitViewAttribute])
     func updateAttributes(_ attributes: [UIKitViewAttribute])
 }
-extension UIKitTargetView
+extension UIKitTargetRenderableContent
 where Self : UIView {
 
     init() {
@@ -49,16 +49,16 @@ where Self : UIView {
     }
     
     // Children
-    func addChild(_ view: UIKitTargetView) {
+    func addChild(_ view: UIKitTargetRenderableContent) {
         // TODO:
         fatalError("TODO")
     }
-    func addChild(_ view: UIKitTargetView,
-                  before siblingView: UIKitTargetView) {
+    func addChild(_ view: UIKitTargetRenderableContent,
+                  before siblingView: UIKitTargetRenderableContent) {
         // TODO:
         fatalError("TODO")
     }
-    func removeChild(_ view: UIKitTargetView) {
+    func removeChild(_ view: UIKitTargetRenderableContent) {
         // TODO:
         fatalError("TODO")
     }
@@ -80,14 +80,14 @@ where Self : UIView {
 
 protocol AnyUIKitPrimitive {
     /// Creates UIKit renderable content.
-    func makeRenderableContent() -> UIKitTargetView
+    func makeRenderableContent() -> UIKitTargetRenderableContent
 }
 
 /// A `UIKit` view attribute which can be applied to the primitive for rendering modifications.
 protocol AnyUIKitModifiedContent {
     var attributes: [UIKitViewAttribute] { get }
 }
-// TODO: All framework modifiers should conform to this.
+
 protocol UIKitModifier {
     var renderableAttribute: UIKitViewAttribute { get }
 }

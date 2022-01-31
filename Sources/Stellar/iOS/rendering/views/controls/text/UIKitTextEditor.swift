@@ -9,6 +9,6 @@ import Foundation
 import UIKit
 
 final
-class UIKitTextEditor: UITextView, UIKitTargetView {
+class UIKitTextEditor: UITextView, UIKitTargetRenderableContent {
     // TODO:
 }

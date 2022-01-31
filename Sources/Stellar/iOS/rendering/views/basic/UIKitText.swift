@@ -8,7 +8,7 @@
 import Foundation
 
 final
-class UIKitText: _TextView, UIKitTargetView {
+class UIKitText: _TextView, UIKitTargetRenderableContent {
 
     func update(with primitive: AnyUIKitPrimitive) {
         if let textView = primitive as? UIKitTextPrimitive {

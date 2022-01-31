@@ -9,6 +9,6 @@ import Foundation
 import UIKit
 
 final
-class UIKitColor: UIView, UIKitTargetView {
+class UIKitColor: UIView, UIKitTargetRenderableContent {
     // TODO: 
 }

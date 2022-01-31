@@ -10,15 +10,15 @@ import UIKit
 // TODO: WIP
 
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
-class UIKitPrimitiveStackView: UIStackView, UIKitTargetView {
+class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
     
-    func addChild(_ context: UIKitTargetView) {
+    func addChild(_ context: UIKitTargetRenderableContent) {
         if let view = context as? UIView {
             addArrangedSubview(view)
         }
     }
-    func addChild(_ context: UIKitTargetView,
-                  before siblingContext: UIKitTargetView) {
+    func addChild(_ context: UIKitTargetRenderableContent,
+                  before siblingContext: UIKitTargetRenderableContent) {
         if let view = context as? UIView {
             guard let siblingView = siblingContext as? UIView,
                   let index = arrangedSubviews.firstIndex(of: siblingView) else {
@@ -28,7 +28,7 @@ class UIKitPrimitiveStackView: UIStackView, UIKitTargetView {
             insertArrangedSubview(view, at: index)
         }
     }
-    func removeChild(_ context: UIKitTargetView) {
+    func removeChild(_ context: UIKitTargetRenderableContent) {
         if let view = context as? UIView {
             view.removeFromSuperview()
         }

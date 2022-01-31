@@ -74,7 +74,7 @@ struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitSwipeActionsConfiguration()
     }
 }
@@ -98,7 +98,7 @@ struct UIKitButtonPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitButton()
     }
 }
@@ -120,7 +120,7 @@ struct UIKitContextMenuPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitContextMenu()
     }
 }
@@ -138,7 +138,7 @@ struct UIKitContextMenuButtonContentPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitContextMenuContent()
     }
 }
@@ -156,7 +156,7 @@ struct UIKitContextMenuButtonLabelPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitContextMenuLabel()
     }
 }
@@ -185,7 +185,7 @@ struct UIKitSearchBarPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         // TODO:
         fatalError("TODO")
     }
@@ -203,7 +203,7 @@ struct UIKitTextPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitText()
     }
 }
@@ -227,7 +227,7 @@ struct UIKitTextEditorPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitTextEditor()
     }
 }
@@ -248,7 +248,7 @@ struct UIKitHStackPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitHStack()
     }
 }
@@ -271,7 +271,7 @@ struct UIKitVStackPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitVStack()
     }
 }
@@ -294,7 +294,7 @@ struct UIKitZStackPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitZStack()
     }
 }
@@ -334,7 +334,7 @@ struct UIKitColorPrimitive: SContent, AnyUIKitPrimitive {
     
     var body: Never { fatalError() }
     
-    func makeRenderableContent() -> UIKitTargetView {
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
         UIKitColor()
     }
 }

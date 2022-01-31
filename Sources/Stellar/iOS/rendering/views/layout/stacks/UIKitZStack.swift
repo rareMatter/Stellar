@@ -9,6 +9,6 @@ import Foundation
 import UIKit
 
 final
-class UIKitZStack: UIView, UIKitTargetView {
+class UIKitZStack: UIView, UIKitTargetRenderableContent {
     // TODO:
 }

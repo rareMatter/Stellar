@@ -10,7 +10,7 @@ import UIKit
 // TODO: ...
 
 /// A view which displays one or more lines of read-only text.
-class UIKitLabelPrimitive: UILabel, UIKitTargetView {
+class UIKitLabelPrimitive: UILabel, UIKitTargetRenderableContent {
     
     func update(with primitive: AnyUIKitPrimitive) {
         if let label = primitive as? UIKitLabelPrimitive {

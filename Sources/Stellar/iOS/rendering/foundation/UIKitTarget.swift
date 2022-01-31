@@ -19,7 +19,7 @@ class UIKitTarget: RenderableTarget {
     /// The live view produced by this target's renderable primitive content.
     lazy
     private(set)
-    var renderableContent: UIKitTargetView = uiKitPrimitive.makeRenderableContent()
+    var renderableContent: UIKitTargetRenderableContent = uiKitPrimitive.makeRenderableContent()
     
     // `RenderableTarget` conformance. This property is updated by the framework before the renderer is asked to update the target instance.
     // TODO: What else does the framework use this property for?
@@ -88,16 +88,16 @@ extension UIView {
     }
     
     static
-    func addChild(_ context: UIKitTargetView) {
+    func addChild(_ context: UIKitTargetRenderableContent) {
         fatalError()
     }
     static
-    func addChild(_ context: UIKitTargetView,
-                  before siblingContext: UIKitTargetView) {
+    func addChild(_ context: UIKitTargetRenderableContent,
+                  before siblingContext: UIKitTargetRenderableContent) {
         fatalError()
     }
     static
-    func removeChild(_ context: UIKitTargetView) {
+    func removeChild(_ context: UIKitTargetRenderableContent) {
         fatalError()
     }
 }

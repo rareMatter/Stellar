@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 // TODO: Any view which supports (or whose parent supports) swipe actions should check for this view when being told to add a child.
-struct UIKitSwipeActionsConfiguration: UIKitTargetView {
+struct UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
     
     init() {}
     
@@ -18,16 +18,16 @@ struct UIKitSwipeActionsConfiguration: UIKitTargetView {
         fatalError("TODO")
     }
     
-    func addChild(_ view: UIKitTargetView) {
+    func addChild(_ view: UIKitTargetRenderableContent) {
         // TODO: When children are added, check for buttons and extract their properties to create a UISwipeActionsConfiguration which will be used by a parent.
         fatalError("TODO")
     }
-    func addChild(_ view: UIKitTargetView,
-                  before siblingView: UIKitTargetView) {
+    func addChild(_ view: UIKitTargetRenderableContent,
+                  before siblingView: UIKitTargetRenderableContent) {
         // TODO:
         fatalError("TODO")
     }
-    func removeChild(_ view: UIKitTargetView) {
+    func removeChild(_ view: UIKitTargetRenderableContent) {
         // TODO:
         fatalError("TODO")
     }
