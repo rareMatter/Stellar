@@ -7,15 +7,15 @@
 
 import UIKit
 
-/// An identifiable, closure-based wrapper of `UITapGestureRecognizer.`
+/// A closure-based wrapper of `UITapGestureRecognizer.`
 final
 class TapGestureRecognizer {
     
     private(set)
     var tapGestureRecognizer: UITapGestureRecognizer!
-    var handler: SHashableClosure
+    var handler: () -> Void
     
-    init(_ handler: SHashableClosure) {
+    init(_ handler: @escaping () -> Void) {
         self.handler = handler
         tapGestureRecognizer = .init(target: self, action: #selector(Self.handleTap))
     }
@@ -24,13 +24,5 @@ class TapGestureRecognizer {
     private
     func handleTap() {
         handler()
-    }
-}
-extension TapGestureRecognizer {
-    
-    static
-    func ==(lhs: TapGestureRecognizer,
-            rhs: TapGestureRecognizer) -> Bool {
-        lhs.handler == rhs.handler
     }
 }

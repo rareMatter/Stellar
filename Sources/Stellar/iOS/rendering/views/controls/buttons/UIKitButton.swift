@@ -11,11 +11,34 @@ import UIKit
 final
 class UIKitButton: UIView, UIKitTargetRenderableContent {
     
+    private
+    var tapHandlerContainer: SIdentifiableContainer<() -> Void>? = nil
+    
+    private
+    var tapGesture: TapGestureRecognizer
+    
+    init(buttonPrimitive: UIKitButtonPrimitive) {
+        self.tapHandlerContainer = buttonPrimitive.actionHandler
+        self.tapGesture = .init(buttonPrimitive.actionHandler.t)
+        
+        super.init(frame: .zero)
+
+        installTapGesture()
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func update(with primitive: AnyUIKitPrimitive) {
         if let button = primitive as? UIKitButtonPrimitive {
-            // TODO: Reinstall gestures.
+            if button.actionHandler != tapHandlerContainer {
+                tapGesture.handler = button.actionHandler.t
+            }
         }
-        // TODO:
-        fatalError()
+    }
+    
+    private
+    func installTapGesture() {
+        addGestureRecognizer(tapGesture.tapGestureRecognizer)
     }
 }
