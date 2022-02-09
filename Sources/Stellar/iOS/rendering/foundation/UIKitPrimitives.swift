@@ -146,25 +146,7 @@ extension UIKitContextMenuButtonContentPrimitive: _SContentContainer {
     var children: [AnySContent] { [content] }
 }
 
-extension _SContextMenuButtonLabel: UIKitPrimitive {
-    var renderedBody: AnySContent {
-        .init(UIKitContextMenuButtonLabelPrimitive(content: AnySContent(content)))
-    }
-}
-struct UIKitContextMenuButtonLabelPrimitive: SContent, AnyUIKitPrimitive {
-    let content: AnySContent
-    
-    var body: Never { fatalError() }
-    
-    func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitContextMenuLabel()
-    }
-}
-extension UIKitContextMenuButtonLabelPrimitive: _SContentContainer {
-    var children: [AnySContent] { [content] }
-}
-
-// MARK: search bar
+// MARK: - search bar
 extension SSearchBar: UIKitPrimitive {
     var renderedBody: AnySContent {
         .init(UIKitSearchBarPrimitive(text: text,

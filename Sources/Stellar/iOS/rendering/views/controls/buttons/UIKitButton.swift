@@ -9,13 +9,16 @@ import Foundation
 import UIKit
 
 final
-class UIKitButton: UIView, UIKitTargetRenderableContent {
+class UIKitButton: UIControl, UIKitTargetRenderableContent {
     
-    private
+    private(set)
     var tapHandlerContainer: SIdentifiableContainer<() -> Void>? = nil
     
-    private
+    private(set)
     var tapGesture: TapGestureRecognizer
+    
+    private(set)
+    var title: String = ""
     
     init(buttonPrimitive: UIKitButtonPrimitive) {
         self.tapHandlerContainer = buttonPrimitive.actionHandler
@@ -40,5 +43,13 @@ class UIKitButton: UIView, UIKitTargetRenderableContent {
     private
     func installTapGesture() {
         addGestureRecognizer(tapGesture.tapGestureRecognizer)
+    }
+    
+    func addChild(_ view: UIKitTargetRenderableContent) {
+        if let text = view as? UIKitText {
+            title = text.text
+            UIView.addChild(view)
+        }
+        // TODO: Need support for UIKitImage.
     }
 }

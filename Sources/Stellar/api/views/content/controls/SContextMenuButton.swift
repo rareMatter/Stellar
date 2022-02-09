@@ -26,6 +26,13 @@ extension SContextMenuButton {
         self.content = content()
         self.label = label()
     }
+    
+    init<S>(_ title: S,
+            content: () -> Content)
+    where Label == SText, S : StringProtocol {
+        self.content = content()
+        self.label = .init(title)
+    }
 }
 
 /// A wrapper used to specify the content of a context menu button primitive.

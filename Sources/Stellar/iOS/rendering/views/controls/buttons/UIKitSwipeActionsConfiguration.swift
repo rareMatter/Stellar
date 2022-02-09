@@ -9,7 +9,8 @@ import Foundation
 import UIKit
 
 // TODO: Any view which supports (or whose parent supports) swipe actions should check for this view when being told to add a child.
-struct UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
+final
+class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
     
     init() {}
     

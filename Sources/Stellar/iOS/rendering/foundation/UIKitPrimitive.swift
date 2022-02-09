@@ -19,7 +19,9 @@ protocol UIKitPrimitive {
 }
 
 /// Requirements for a renderable context within UIKit. The context is a distinct renderable container which responds to necessary messages for updates to its renderable tree of elements or attributes for appearance.
-protocol UIKitTargetRenderableContent {
+///
+/// The protocol is class constrained to allow matching of instances during tree changes and updates.
+protocol UIKitTargetRenderableContent: AnyObject {
     
     // State updates
     func update(with primitive: AnyUIKitPrimitive)
