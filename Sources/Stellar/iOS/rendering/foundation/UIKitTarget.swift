@@ -42,13 +42,8 @@ extension UIKitTarget {
     // MARK: - tree changes
     func addChild(_ target: UIKitTarget,
                   before siblingTarget: UIKitTarget?) {
-        if let siblingTarget = siblingTarget {
-            renderableContent.addChild(target.renderableContent,
-                              before: siblingTarget.renderableContent)
-        }
-        else {
-            renderableContent.addChild(target.renderableContent)
-        }
+        renderableContent.addChild(target.renderableContent,
+                                   before: siblingTarget?.renderableContent)
     }
     func removeChild(_ target: UIKitTarget) {
         renderableContent.removeChild(target.renderableContent)
@@ -67,37 +62,43 @@ extension UIKitTarget {
 }
 
 // MARK: - TODO
-// MARK: - Standard UIView rendering functions
+// MARK: - Standard UIView rendering functions for any general cases
 extension UIView {
 
-    // MARK: - attributes
+    // State updates
     static
-    func addAttributes(_ attributes: [UIKitViewAttribute],
-                       to view: UIView) {
-        fatalError()
-    }
-    static
-    func removeAttributes(_ attributes: [UIKitViewAttribute],
-                          from view: UIView) {
-        fatalError()
-    }
-    static
-    func updateAttributes(_ attributes: [UIKitViewAttribute],
-                          on view: UIView) {
-        fatalError()
+    func update(view updatedView: UIView, with primitive: AnyUIKitPrimitive) {
+        // TODO:
+        fatalError("TODO")
     }
     
+    // Children
     static
-    func addChild(_ context: UIKitTargetRenderableContent) {
-        fatalError()
+    func addChild(toView destinationView: UIView, childView: UIKitTargetRenderableContent,
+                  before siblingView: UIKitTargetRenderableContent?) {
+        // TODO:
+        fatalError("TODO")
     }
     static
-    func addChild(_ context: UIKitTargetRenderableContent,
-                  before siblingContext: UIKitTargetRenderableContent) {
-        fatalError()
+    func removeChild(fromView targetView: UIView, childView: UIKitTargetRenderableContent) {
+        // TODO:
+        fatalError("TODO")
+    }
+    
+    // Attributes
+    static
+    func addAttributes(toView targetView: UIView, attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
     }
     static
-    func removeChild(_ context: UIKitTargetRenderableContent) {
-        fatalError()
+    func removeAttributes(fromView targetView: UIView, attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
+    }
+    static
+    func updateAttributes(onView targetView: UIView, attributes: [UIKitViewAttribute]) {
+        // TODO:
+        fatalError("TODO")
     }
 }

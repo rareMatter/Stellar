@@ -43,7 +43,7 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func addChild(_ view: UIKitTargetRenderableContent) {
+    func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
         // Use text to create a title.
         if let text = view as? UIKitText {
             title = text.text
@@ -54,7 +54,7 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
         }
         // Hand off any other views to be added as a standard child. (Any views here should be coming from other types in the label content.
         else {
-            UIView.addChild(view)
+            UIView.addChild(toView: self, childView: view, before: siblingView)
         }
     }
     
@@ -110,14 +110,8 @@ class UIKitContextMenuContent: UIKitTargetRenderableContent {
     
     func update(with primitive: AnyUIKitPrimitive) {}
     
-    func addChild(_ view: UIKitTargetRenderableContent) {
-        if view is UIKitButton || view is UIKitContextMenu {
-            children.append(view)
-        }
-    }
-    
     func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent) {
+                  before siblingView: UIKitTargetRenderableContent?) {
         if view is UIKitButton || view is UIKitContextMenu {
             if let siblingIndex = children.firstIndex(where: { $0 === siblingView }) {
                 children.insert(view, at: siblingIndex)

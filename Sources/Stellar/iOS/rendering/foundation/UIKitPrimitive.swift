@@ -27,9 +27,8 @@ protocol UIKitTargetRenderableContent: AnyObject {
     func update(with primitive: AnyUIKitPrimitive)
     
     // Children
-    func addChild(_ view: UIKitTargetRenderableContent)
     func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent)
+                  before siblingView: UIKitTargetRenderableContent?)
     func removeChild(_ view: UIKitTargetRenderableContent)
     
     // Attributes
@@ -51,12 +50,8 @@ where Self : UIView {
     }
     
     // Children
-    func addChild(_ view: UIKitTargetRenderableContent) {
-        // TODO:
-        fatalError("TODO")
-    }
     func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent) {
+                  before siblingView: UIKitTargetRenderableContent?) {
         // TODO:
         fatalError("TODO")
     }

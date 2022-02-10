@@ -19,13 +19,9 @@ class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
         fatalError("TODO")
     }
     
-    func addChild(_ view: UIKitTargetRenderableContent) {
-        // TODO: When children are added, check for buttons and extract their properties to create a UISwipeActionsConfiguration which will be used by a parent.
-        fatalError("TODO")
-    }
     func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent) {
-        // TODO:
+                  before siblingView: UIKitTargetRenderableContent?) {
+        // TODO: When children are added, check for buttons and extract their properties to create a UISwipeActionsConfiguration which will be used by a parent.
         fatalError("TODO")
     }
     func removeChild(_ view: UIKitTargetRenderableContent) {

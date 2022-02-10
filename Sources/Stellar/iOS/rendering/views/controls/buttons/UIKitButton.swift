@@ -45,10 +45,10 @@ class UIKitButton: UIControl, UIKitTargetRenderableContent {
         addGestureRecognizer(tapGesture.tapGestureRecognizer)
     }
     
-    func addChild(_ view: UIKitTargetRenderableContent) {
+    func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
         if let text = view as? UIKitText {
             title = text.text
-            UIView.addChild(view)
+            UIView.addChild(toView: self, childView: view, before: siblingView)
         }
         // TODO: Need support for UIKitImage.
     }

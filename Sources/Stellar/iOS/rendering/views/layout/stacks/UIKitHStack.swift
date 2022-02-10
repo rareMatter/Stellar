@@ -35,13 +35,13 @@ class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
     }
     
     func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.addAttributes(attributes, to: self)
+        UIView.addAttributes(toView: self, attributes: attributes)
     }
     func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.removeAttributes(attributes, from: self)
+        UIView.removeAttributes(fromView: self, attributes: attributes)
     }
     func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.updateAttributes(attributes, on: self)
+        UIView.updateAttributes(onView: self, attributes: attributes)
     }
 }
 
