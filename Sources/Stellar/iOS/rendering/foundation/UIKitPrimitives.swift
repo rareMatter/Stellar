@@ -210,7 +210,7 @@ struct UIKitTextEditorPrimitive: SContent, AnyUIKitPrimitive {
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitTextEditor()
+        UIKitTextEditor(primitive: self)
     }
 }
 
