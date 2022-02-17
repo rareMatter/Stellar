@@ -14,10 +14,10 @@ protocol Renderer: AnyObject {
     
     /// Called by the reconciler when a new target instance should be created and added to the parent (either as a subview or some other way, e.g. installed if it's a layout constraint).
     ///
-    /// - parameter sibling: A sibling is provided to allow correct ordering of a new target when being added to the parent target as a child. The new target should be inserted before the sibling. The value of the sibling is a view which will be removed from the `Live Tree` after mounting has finished. Generally, a sibling value is only provided when `GroupedContent` (which is not rendered) appears in the `Descriptive Tree`. The `GroupedContent` is removed from the chain during rendering and therefore a sibling is provided to ensure correct ordering during `Live Tree` updates.
-    /// - parameter parent: Parent target that will own a newly created target instance.
-    /// - parameter host: The host view that renders to the newly created target.
-    /// - returns: The newly created target or nil.
+    /// - parameter sibling: Insert the new target before this `sibling` as a child of `parent` to maintain correct ordering. If `sibling` is nil, you can simply append the new target to the collection of children. Generally, a sibling is provided when a child is being swapped out.
+    /// - parameter parent: A target that will own the newly created target instance as its child.
+    /// - parameter host: The host which stores and manages the new target.
+    /// - returns: A new target or nil if none should be created.
     func mountTarget(before sibling: TargetType?,
                      on parent: TargetType,
                      with host: ElementHost) -> TargetType?
