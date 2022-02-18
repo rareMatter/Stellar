@@ -80,44 +80,81 @@ protocol AnyUIKitPrimitive {
     func makeRenderableContent() -> UIKitTargetRenderableContent
 }
 
-/// A `UIKit` view attribute which can be applied to the primitive for rendering modifications.
-protocol AnyUIKitModifiedContent {
-    var attributes: [UIKitViewAttribute] { get }
-}
-
+/// This protocol is used to declare and recognize modifier primitives as supported on `UIKit`.
+///
+/// Check for conformance to this protocol when converting modified content primitive instances into UIKit renderable instances (generally as a generic constraint).
 protocol UIKitModifier {
-    var renderableAttribute: UIKitViewAttribute { get }
-}
-protocol UIKitComposableModifier: UIKitModifier {
-    associatedtype Content : SContent
-    var content: Content { get }
+    /// A renderable description of the modifier primitive.
+    /// This is a collection because modifiers may be chained and flattened into one instance.
+    var renderableAttributes: [UIKitViewAttribute] { get }
 }
 
-struct UIKitViewModifier: SContent, AnyUIKitModifiedContent {
+/// Apply this protocol to `UIKit` supported primitive modifiers which provide their own child content.
+protocol UIKitComposableModifier {
+    /// The content provided by the modifier.
+    ///
+    /// Since modifiers of this type cannot be converted into a `UIKitViewAttribute` like standard `UIKitModifiers` can, generally you should convert the modifier into a content type and return an instance of that type from this property. That content type will own the modifier content as child content. This allows you to recognize the modifier's content during rendering when it's provided to your modifier content type as child content.
+    var content: AnySContent { get }
+}
+
+
+/// This protocol is used to recognize modified content primitives which meet the requirements in order to flatten modifiers.
+protocol AnyUIKitModifiedContent {
     
-    var attributes = [UIKitViewAttribute]()
+    var uiKitModifier: UIKitModifier { get }
 
-    var body: Never { fatalError() }
+    /// Content to which the modifier was applied.
+    var anyContent: AnySContent { get }
 }
 
-struct UIKitComposedViewModifier<C>: SContent, AnyUIKitModifiedContent {
+/// A content type which is used to 'render' modified content primitive instances.
+///
+/// Modified content primitives will be converted into this type during the render process.
+struct UIKitModifiedContentPrimitive<Content>: SContent, AnyUIKitPrimitive
+where Content : SContent {
     
-    var attributes = [UIKitViewAttribute]()
-    let content: C
-
+    let attributes: [UIKitViewAttribute]
+    let content: Content
+    
     var body: Never { fatalError() }
+    
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
+        UIKitModifiedContentView(attributes: attributes)
+    }
 }
-extension UIKitComposedViewModifier: _SContentContainer
-where C : SContent {
+// content container conformance
+extension UIKitModifiedContentPrimitive: _SContentContainer {
     
     var children: [AnySContent] {
         [.init(content)]
     }
 }
 
+// TODO: Document.
+struct UIKitComposedModifiedContentPrimitive<Content, ModifierContent>: SContent, AnyUIKitPrimitive
+where Content : SContent, ModifierContent : SContent {
+    
+    let content: Content
+    let modifierContent: ModifierContent
+    
+    var body: Never { fatalError() }
+    
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
+        UIKitModifiedContentView(attributes: [])
+    }
+}
+// content container
+extension UIKitComposedModifiedContentPrimitive: _SContentContainer {
+    
+    var children: [AnySContent] {
+        [.init(content),
+         .init(modifierContent)]
+    }
+}
+
 /// The rendering modifiers which can be applied to views.
 /// These roughly correspond the modifiers provided by the framework.
-/// However, in some cases the framework modifiers may be translated into views instead, which means they will not be applied as attributes.
+/// However, in some cases the framework modifiers may be translated into content instead, which means they will not be applied as attributes.
 enum UIKitViewAttribute: Hashable {
     
     // MARK: appearance

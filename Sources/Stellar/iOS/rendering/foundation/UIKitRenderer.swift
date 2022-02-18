@@ -58,11 +58,6 @@ class UIKitRenderer: Renderer {
             parent.addChild(target, before: sibling)
             return target
         }
-        // UIKit primitives may also be a UIKitViewModifier which should be applied to the parent target instead of creating one.
-        else if let anyModifiedContent = host.content.content as? AnyUIKitModifiedContent {
-            parent.addAttributes(anyModifiedContent.attributes)
-            return parent
-        }
         // Handle container primitives which haven't been declared UIKit renderable by passing down the parent target
         else if host.content.content is _SContentContainer {
             return parent
@@ -77,9 +72,6 @@ class UIKitRenderer: Renderer {
         if let anyUIKitPrimitive = host.content.content as? AnyUIKitPrimitive {
             target.update(withPrimitive: anyUIKitPrimitive)
         }
-        else if let anyModifiedContent = host.content.content as? AnyUIKitModifiedContent {
-            target.updateAttributes(anyModifiedContent.attributes)
-        }
     }
     
     func unmount(target: UIKitTarget,
@@ -89,10 +81,6 @@ class UIKitRenderer: Renderer {
         
         if let _ = task.host.content.content as? AnyUIKitPrimitive {
             parent.removeChild(target)
-        }
-        // UIKit primitives may also be a UIKitViewModifier which should be applied to the parent target instead of creating one.
-        else if let anyModifiedContent = task.host.content.content as? AnyUIKitModifiedContent {
-            parent.removeAttributes(anyModifiedContent.attributes)
         }
         
         // TODO: Perform removal transition.

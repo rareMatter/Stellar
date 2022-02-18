@@ -1,20 +1,27 @@
 //
-//  UIKitSwipeActionsConfiguration.swift
+//  UIKitViewAttributesConfiguration.swift
 //  
 //
-//  Created by Jesse Spencer on 1/20/22.
+//  Created by Jesse Spencer on 2/14/22.
 //
 
 import Foundation
 import UIKit
 
-// TODO: Any view which supports (or whose parent supports) swipe actions should check for this view when being told to add a child.
 final
-class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
+class UIKitModifiedContentView: UIView, UIKitTargetRenderableContent {
     
-    init() {
-        // TODO:
-        fatalError("TODO")
+    var attributes: [UIKitViewAttribute]
+    
+    init(attributes: [UIKitViewAttribute]) {
+        self.attributes = attributes
+        
+        super.init(frame: .zero)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     func update(with primitive: AnyUIKitPrimitive) {
@@ -22,11 +29,11 @@ class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
         fatalError("TODO")
     }
     
-    func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        // TODO: When children are added, check for buttons and extract their properties to create a UISwipeActionsConfiguration which will be used by a parent.
+    func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
+        // TODO:
         fatalError("TODO")
     }
+    
     func removeChild(_ view: UIKitTargetRenderableContent) {
         // TODO:
         fatalError("TODO")

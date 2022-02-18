@@ -12,58 +12,90 @@ import SwiftUI
 
 // MARK: modified content
 extension SModifiedContent: UIKitPrimitive
-where Content : SContent, Modifier : UIKitModifier {
+where Content : SContent, Modifier : SContentModifier {
     
     var renderedBody: AnySContent {
-        AnySContent(UIKitViewModifier(attributes: [modifier.renderableAttribute]))
+        // recognized modifiers
+        if let uiKitModifier = modifier as? UIKitModifier {
+            // flatten modifiers when content is UIKit modified content
+            if let modifiedContent = content as? AnyUIKitModifiedContent {
+                return .init(UIKitModifiedContentPrimitive(attributes: modifiedContent.uiKitModifier.renderableAttributes + uiKitModifier.renderableAttributes,
+                                                           content: modifiedContent.anyContent))
+            }
+            else {
+                return AnySContent(UIKitModifiedContentPrimitive(attributes: uiKitModifier.renderableAttributes,
+                                                                 content: content))
+            }
+        }
+        // recognized non-collapsible modifiers
+        else if let uiKitComposableModifier = modifier as? UIKitComposableModifier {
+            return .init(UIKitComposedModifiedContentPrimitive(content: content,
+                                                               modifierContent: uiKitComposableModifier.content))
+        }
+        // unrecognized primitive modifier
+        else if Modifier.Body.self == Never.self {
+            // Pass the content on without calling the modifier - it's primitive and unsupported on UIKit.
+            return AnySContent(content)
+        }
+        // non-primitive modifier
+        else {
+            // call the modifier to continue the rendering chain
+            return AnySContent(modifier.body(content: .init(modifier: modifier, content: .init(content))))
+        }
     }
 }
-// TODO: Will Swift correctly see this overload as conformance to UIKitPrimitive?
-extension SModifiedContent
-where Content : SContent, Modifier : UIKitComposableModifier {
+// chained modifiers
+extension SModifiedContent: UIKitModifier
+where Content : UIKitModifier, Modifier : UIKitModifier {
     
-    var renderedBody: AnySContent {
-        AnySContent(UIKitComposedViewModifier(attributes: [modifier.renderableAttribute],
-                                              content: modifier.content))
+    var renderableAttributes: [UIKitViewAttribute] {
+        // combine attributes to flatten the live tree
+        content.renderableAttributes + modifier.renderableAttributes
+    }
+}
+extension SModifiedContent: AnyUIKitModifiedContent
+where Content : SContent, Modifier : UIKitModifier {
+    
+    var uiKitModifier: UIKitModifier {
+        modifier
+    }
+    
+    var anyContent: AnySContent {
+        .init(content)
     }
 }
 
-// MARK: modifiers
+// MARK: - modifiers
+
 extension STapHandlerModifier: UIKitModifier {
-    var renderableAttribute: UIKitViewAttribute {
-        .tapHandler(.init(tapHandler))
+    var renderableAttributes: [UIKitViewAttribute] {
+        [.tapHandler(.init(tapHandler))]
     }
 }
 
 extension SCornerRadiusModifier: UIKitModifier {
-    var renderableAttribute: UIKitViewAttribute {
-        .cornerRadius(value: cornerRadius,
-                      antialiased: antialiased)
+    var renderableAttributes: [UIKitViewAttribute] {
+        [.cornerRadius(value: cornerRadius,
+                      antialiased: antialiased)]
     }
 }
 
 extension SDisabledContentModifier: UIKitModifier {
-    var renderableAttribute: UIKitViewAttribute {
-        .disabled(isDisabled)
+    var renderableAttributes: [UIKitViewAttribute] {
+        [.disabled(isDisabled)]
     }
 }
 
 extension SEditingSelectableContentModifier: UIKitModifier {
-    var renderableAttribute: UIKitViewAttribute {
-        .editingSelectable(isSelectable)
+    var renderableAttributes: [UIKitViewAttribute] {
+        [.editingSelectable(isSelectable)]
     }
 }
 
+// MARK: - swipe actions
 extension SSwipeActionsModifier: UIKitComposableModifier {
-    
-    var renderableAttribute: UIKitViewAttribute {
-        .swipeActions(edge: edge,
-                      allowsFullSwipe: allowsFullSwipe)
-    }
-    
-    var content: some SContent { UIKitSwipeActionsPrimitive(actions) }
+    var content: AnySContent { .init(UIKitSwipeActionsPrimitive(actions)) }
 }
-
 struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive {
     
     let content: AnySContent
@@ -78,7 +110,7 @@ struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive {
         UIKitSwipeActionsConfiguration()
     }
 }
-extension UIKitSwipeActionsPrimitive: GroupedContent {
+extension UIKitSwipeActionsPrimitive: _SContentContainer {
     var children: [AnySContent] {
         [content]
     }
