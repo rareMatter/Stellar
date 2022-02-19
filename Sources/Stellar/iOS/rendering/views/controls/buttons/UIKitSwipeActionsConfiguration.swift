@@ -8,42 +8,61 @@
 import Foundation
 import UIKit
 
-// TODO: Any view which supports (or whose parent supports) swipe actions should check for this view when being told to add a child.
 final
 class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
     
-    init() {
-        // TODO:
-        fatalError("TODO")
+    /// Computed from current state.
+    var uiConfiguration: UISwipeActionsConfiguration {
+        let actions = buttons.map { button in
+            UIContextualAction(style: .normal,
+                               title: button.title,
+                               handler: { action, originView, completion in
+                button.tapHandlerContainer?.t()
+                completion(true)
+            })
+        }
+        let config = UISwipeActionsConfiguration(actions: actions)
+        config.performsFirstActionWithFullSwipe = allowsFullSwipe
+        return config
+    }
+    /// The edge to install the swipe actions.
+    private(set) var edge: SHorizontalEdge
+    
+    /// Apply this property to the swipe actions configuration before providing it to clients.
+    private var allowsFullSwipe: Bool
+    /// Buttons added as children. Use these to create the swipe actions.
+    private var buttons: [UIKitButton] = []
+    
+    init(primitive: UIKitSwipeActionsPrimitive) {
+        self.edge = primitive.edge
+        self.allowsFullSwipe = primitive.allowsFullSwipe
     }
     
     func update(with primitive: AnyUIKitPrimitive) {
-        // TODO:
-        fatalError("TODO")
+        guard let primitive = primitive as? UIKitSwipeActionsPrimitive else { return }
+        edge = primitive.edge
+        allowsFullSwipe = primitive.allowsFullSwipe
     }
     
     func addChild(_ view: UIKitTargetRenderableContent,
                   before siblingView: UIKitTargetRenderableContent?) {
-        // TODO: When children are added, check for buttons and extract their properties to create a UISwipeActionsConfiguration which will be used by a parent.
-        fatalError("TODO")
+        if let button = view as? UIKitButton {
+            buttons.append(button)
+        }
     }
     func removeChild(_ view: UIKitTargetRenderableContent) {
-        // TODO:
-        fatalError("TODO")
+        if let button = view as? UIKitButton {
+            buttons.removeAll { $0 == button }
+        }
     }
     
     func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
+        debugPrint("\(self): Attribute applied to content which does not respond to attributes. \(attributes)")
     }
-    
     func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
+        debugPrint("\(self): Attribute applied to content which does not respond to attributes. \(attributes)")
     }
-    
     func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
+        debugPrint("\(self): Attribute applied to content which does not respond to attributes. \(attributes)")
     }
 }

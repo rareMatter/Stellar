@@ -94,20 +94,18 @@ extension SEditingSelectableContentModifier: UIKitModifier {
 
 // MARK: - swipe actions
 extension SSwipeActionsModifier: UIKitComposableModifier {
-    var content: AnySContent { .init(UIKitSwipeActionsPrimitive(actions)) }
+    var content: AnySContent { .init(UIKitSwipeActionsPrimitive(content: .init(actions), edge: edge, allowsFullSwipe: allowsFullSwipe)) }
 }
 struct UIKitSwipeActionsPrimitive: SContent, AnyUIKitPrimitive {
     
     let content: AnySContent
-    
-    init<C: SContent>(_ content: C) {
-        self.content = .init(content)
-    }
+    let edge: SHorizontalEdge
+    let allowsFullSwipe: Bool
     
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitSwipeActionsConfiguration()
+        UIKitSwipeActionsConfiguration(primitive: self)
     }
 }
 extension UIKitSwipeActionsPrimitive: _SContentContainer {

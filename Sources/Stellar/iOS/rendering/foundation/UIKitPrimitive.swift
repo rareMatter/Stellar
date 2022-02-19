@@ -10,7 +10,6 @@
 import Foundation
 import UIKit
 
-// TODO: All supported framework primitives should conform to this.
 /// A type which can be rendered by UIKit.
 ///
 /// For any framework primitives which can be rendered by `UIKit`, make them conform to this protocol where they should be converted into a `UIKit` renderable primitive type, represented by `UIKitPrimitiveType` and type-erased for recognition during render using `AnyUIKitPrimitive`.
