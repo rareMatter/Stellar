@@ -245,7 +245,7 @@ struct UIKitTextEditorPrimitive: SContent, AnyUIKitPrimitive {
 }
 
 
-// MARK: containers
+// MARK: containers and layout
 extension SHStack: UIKitPrimitive {
     var renderedBody: AnySContent {
         .init(UIKitHStackPrimitive(alignment: alignment,

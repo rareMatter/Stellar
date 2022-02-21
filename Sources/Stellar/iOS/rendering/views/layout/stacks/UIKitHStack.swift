@@ -7,8 +7,6 @@
 
 import UIKit
 
-// TODO: WIP
-
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
 class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
     
@@ -33,48 +31,60 @@ class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
             view.removeFromSuperview()
         }
     }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.addAttributes(toView: self, attributes: attributes)
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.removeAttributes(fromView: self, attributes: attributes)
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        UIView.updateAttributes(onView: self, attributes: attributes)
-    }
 }
 
 final
 class UIKitHStack: UIKitPrimitiveStackView {
     
-    convenience
     init() {
-        self.init(frame: .zero)
+        super.init(frame: .zero)
         axis = .horizontal
     }
     
+    @available(*, unavailable)
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func update(with primitive: AnyUIKitPrimitive) {
-        if let hStack = primitive as? UIKitHStackPrimitive {
-            // TODO:
-            fatalError("TODO")
+        guard let hStack = primitive as? UIKitHStackPrimitive else { return }
+        
+        switch hStack.alignment {
+        case .top:
+            self.alignment = .top
+        case .bottom:
+            self.alignment = .bottom
+        case .center:
+            self.alignment = .center
         }
+        self.spacing = hStack.spacing
     }
 }
 
 final
 class UIKitVStack: UIKitPrimitiveStackView {
     
-    convenience
     init() {
-        self.init(frame: .zero)
+        super.init(frame: .zero)
         axis = .vertical
     }
     
+    @available(*, unavailable)
+    required init(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     func update(with primitive: AnyUIKitPrimitive) {
-        if let vStack = primitive as? UIKitVStackPrimitive {
-            // TODO:
-            fatalError("TODO")
+        guard let vStack = primitive as? UIKitVStackPrimitive else { return }
+        
+        switch vStack.alignment {
+        case .center:
+            self.alignment = .center
+        case .leading:
+            self.alignment = .leading
+        case .trailing:
+            self.alignment = .trailing
         }
+        self.spacing = spacing
     }
 }
