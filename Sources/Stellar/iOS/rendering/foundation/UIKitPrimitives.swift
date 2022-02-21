@@ -216,7 +216,7 @@ struct UIKitTextPrimitive: SContent, AnyUIKitPrimitive {
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitText()
+        UIKitText(primitive: self)
     }
 }
 

@@ -46,7 +46,7 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
     func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
         // Use text to create a title.
         if let text = view as? UIKitText {
-            title = text.text
+            title = text.string
         }
         // Use `UIKitContextMenuContent` to later create the menu on demand.
         else if let content = view as? UIKitContextMenuContent {
