@@ -22,7 +22,11 @@ extension SColorBackgroundContentModifier: UIKitRenderableContentModifier {
     func applyTo(_ target: UIKitRenderableContent) {
         var backgroundConfig = target.backgroundConfiguration
         
-        backgroundConfig.backgroundColor = UIColor(sColor: backgroundColor)
+        backgroundConfig.backgroundColor = .makeColor(r: backgroundColor.red,
+                                                      g: backgroundColor.green,
+                                                      b: backgroundColor.blue,
+                                                      opacity: backgroundColor.opacity,
+                                                      colorSpace: backgroundColor.colorSpace)
         
         target.backgroundConfiguration = backgroundConfig
     }
@@ -30,10 +34,20 @@ extension SColorBackgroundContentModifier: UIKitRenderableContentModifier {
 
 extension SDynamicColorBackgroundContentModifier: UIKitRenderableContentModifier {
     
+    @available(*, deprecated)
     func applyTo(_ target: UIKitRenderableContent) {
         var backgroundConfig = target.backgroundConfiguration
         
-        backgroundConfig.backgroundColor = UIColor(sDynamicColor: backgroundDynamicColor)
+        let currentColorScheme: ColorScheme = STraitCollection
+            .currentUITraitCollection
+            .userInterfaceStyle == .dark ? .dark : .light
+        let resolvedColor = backgroundDynamicColor.resolvedColor(with: currentColorScheme)
+        
+        backgroundConfig.backgroundColor = .makeColor(r: resolvedColor.r,
+                                                      g: resolvedColor.g,
+                                                      b: resolvedColor.b,
+                                                      opacity: resolvedColor.opacity,
+                                                      colorSpace: resolvedColor.colorSpace)
         
         target.backgroundConfiguration = backgroundConfig
     }

@@ -9,38 +9,29 @@ import UIKit
 
 extension UIColor {
     
-    public
-    convenience
-    init(sColor: SColor) {
-        // convert SColor RGB values to UIColor RGB range [0, 1].
-        let mappedRGBValues = [sColor.red, sColor.green, sColor.blue]
-            .map { colorValue in
-                (1/SColor.allowedColorRange.upperBound) * colorValue
-            }
+    static
+    var allowedColorValueRange: ClosedRange<Double> {
+        0...1
+    }
+}
+
+extension UIColor {
+    
+    static
+    func makeColor(r: Double, g: Double, b: Double, opacity: Double, colorSpace: SColorSpace) -> UIColor {
+        // convert RGB values to UIColor RGB range [0, 1].
+        let mappedRGBValues = [r, g, b]
+            .map { rescale(value: $0, currentMax: SColor.allowedColorRange.upperBound, newMax: UIColor.allowedColorValueRange.upperBound) }
         let red = CGFloat(mappedRGBValues[0])
         let green = CGFloat(mappedRGBValues[1])
         let blue = CGFloat(mappedRGBValues[2])
-        let opacity = CGFloat(sColor.opacity)
+        let opacity = CGFloat(opacity)
         
-        switch sColor.colorSpace {
-            case .displayP3:
-                self.init(displayP3Red: red, green: green, blue: blue, alpha: opacity)
-            case .sRGB:
-                self.init(red: red, green: green, blue: blue, alpha: opacity)
+        switch colorSpace {
+        case .displayP3:
+            return .init(displayP3Red: red, green: green, blue: blue, alpha: opacity)
+        case .sRGB:
+            return .init(red: red, green: green, blue: blue, alpha: opacity)
         }
-    }
-    
-    public
-    convenience
-    init(sDynamicColor: SDynamicColor) {
-        let currentColorScheme: ColorScheme = STraitCollection
-            .currentUITraitCollection
-            .userInterfaceStyle == .dark ? .dark : .light
-        let resolvedColor = sDynamicColor.resolvedColor(with: currentColorScheme)
-        
-        self.init(sColor: SColor(red: resolvedColor.r,
-                                 green: resolvedColor.g,
-                                 blue: resolvedColor.b,
-                                 opacity: resolvedColor.opacity))
     }
 }

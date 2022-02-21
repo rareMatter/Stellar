@@ -13,9 +13,10 @@ import UIKit
 
 public
 typealias SColorData = (r: Double,
-                       g: Double,
-                       b: Double,
-                       opacity: Double)
+                        g: Double,
+                        b: Double,
+                        opacity: Double,
+                        colorSpace: SColorSpace)
 
 /** A representation of a color which can be used as a view.
  
