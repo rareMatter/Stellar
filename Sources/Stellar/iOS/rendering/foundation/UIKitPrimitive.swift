@@ -38,10 +38,6 @@ protocol UIKitTargetRenderableContent: AnyObject {
 extension UIKitTargetRenderableContent
 where Self : UIView {
 
-    init() {
-        self.init(frame: .zero)
-    }
-    
     // State updates
     func update(with primitive: AnyUIKitPrimitive) {
         // TODO:

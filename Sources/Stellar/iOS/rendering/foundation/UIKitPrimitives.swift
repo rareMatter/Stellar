@@ -129,7 +129,7 @@ struct UIKitButtonPrimitive: SContent, AnyUIKitPrimitive {
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitButton()
+        UIKitButton(buttonPrimitive: self)
     }
 }
 extension UIKitButtonPrimitive: _SContentContainer {
@@ -347,7 +347,7 @@ struct UIKitColorPrimitive: SContent, AnyUIKitPrimitive {
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitColor()
+        UIKitColor(primitive: self)
     }
 }
 
