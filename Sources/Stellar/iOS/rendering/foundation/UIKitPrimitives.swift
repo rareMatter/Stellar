@@ -261,7 +261,7 @@ struct UIKitHStackPrimitive: SContent, AnyUIKitPrimitive {
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitHStack()
+        UIKitHStack(primitive: self)
     }
 }
 extension UIKitHStackPrimitive: _SContentContainer {
@@ -284,7 +284,7 @@ struct UIKitVStackPrimitive: SContent, AnyUIKitPrimitive {
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitVStack()
+        UIKitVStack(primitive: self)
     }
 }
 extension UIKitVStackPrimitive: _SContentContainer {

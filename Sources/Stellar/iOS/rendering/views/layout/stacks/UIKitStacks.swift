@@ -1,5 +1,5 @@
 //
-//  UIKitHStack.swift
+//  UIKitStacks.swift
 //  
 //
 //  Created by Jesse Spencer on 11/4/21.
@@ -36,9 +36,10 @@ class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
 final
 class UIKitHStack: UIKitPrimitiveStackView {
     
-    init() {
+    init(primitive: UIKitHStackPrimitive) {
         super.init(frame: .zero)
         axis = .horizontal
+        update(with: primitive)
     }
     
     @available(*, unavailable)
@@ -64,9 +65,10 @@ class UIKitHStack: UIKitPrimitiveStackView {
 final
 class UIKitVStack: UIKitPrimitiveStackView {
     
-    init() {
+    init(primitive: UIKitVStackPrimitive) {
         super.init(frame: .zero)
         axis = .vertical
+        update(with: primitive)
     }
     
     @available(*, unavailable)
