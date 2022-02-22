@@ -6,19 +6,18 @@
 //
 
 import Foundation
-import CoreGraphics
 
 public
 struct SHStack<Content>: SPrimitiveContent
 where Content : SContent {
     
     public let alignment: SVerticalAlignment
-    let spacing: CGFloat
+    let spacing: Float
     public let content: Content
     
     public
     init(alignment: SVerticalAlignment = .center,
-         spacing: CGFloat? = nil,
+         spacing: Float? = nil,
          @SContentBuilder content: () -> Content) {
         self.alignment = alignment
         self.spacing = spacing ?? defaultStackSpacing
@@ -26,7 +25,7 @@ where Content : SContent {
     }
 }
 
-public let defaultStackSpacing: CGFloat = 8
+public let defaultStackSpacing: Float = 8
 
 public
 enum SVerticalAlignment: Hashable {

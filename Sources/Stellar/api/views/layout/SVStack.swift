@@ -6,21 +6,20 @@
 //
 
 import Foundation
-import CoreGraphics
 
 // TODO: ...
 struct SVStack<Content>: SPrimitiveContent
 where Content : SContent {
     
     let alignment: SHorizontalAlignment
-    let spacing: CFloat
+    let spacing: Float
     let content: Content
     
     init(alignment: SHorizontalAlignment = .center,
-         spacing: CGFloat? = nil,
+         spacing: Float? = nil,
          @SContentBuilder content: () -> Content) {
         self.alignment = alignment
-        self.spacing = CFloat(spacing ?? defaultStackSpacing)
+        self.spacing = spacing ?? defaultStackSpacing
         self.content = content()
     }
 }

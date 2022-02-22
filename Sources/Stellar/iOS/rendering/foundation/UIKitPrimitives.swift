@@ -8,7 +8,6 @@
 // TODO: WIP
 
 import UIKit
-import SwiftUI
 
 // MARK: modified content
 extension SModifiedContent: UIKitPrimitive
@@ -255,7 +254,7 @@ extension SHStack: UIKitPrimitive {
 }
 struct UIKitHStackPrimitive: SContent, AnyUIKitPrimitive {
     let alignment: SVerticalAlignment
-    let spacing: CGFloat
+    let spacing: Float
     let content: AnySContent
     
     var body: Never { fatalError() }
@@ -278,7 +277,7 @@ extension SVStack: UIKitPrimitive {
 struct UIKitVStackPrimitive: SContent, AnyUIKitPrimitive {
     
     let alignment: SHorizontalAlignment
-    let spacing: CFloat
+    let spacing: Float
     let content: AnySContent
     
     var body: Never { fatalError() }
@@ -294,29 +293,25 @@ extension UIKitVStackPrimitive: _SContentContainer {
 extension SZStack: UIKitPrimitive {
     var renderedBody: AnySContent {
         .init(UIKitZStackPrimitive(alignment: alignment,
-                                   spacing: spacing,
                                    content: AnySContent(content)))
     }
 }
 struct UIKitZStackPrimitive: SContent, AnyUIKitPrimitive {
     
     let alignment: SAlignment
-    let spacing: Float?
     let content: AnySContent
     
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitZStack()
+        UIKitZStack(primitive: self)
     }
 }
 extension UIKitZStackPrimitive {
     
     init<C: SContent>(alignment: SAlignment = .center,
-                      spacing: Float? = nil,
                       @SContentBuilder content: () -> C) {
         self.alignment = alignment
-        self.spacing = spacing
         self.content = AnySContent(content())
     }
 }
@@ -361,7 +356,6 @@ extension SDynamicColor: UIKitPrimitive {
 extension BackgroundModifierContainer: UIKitPrimitive {
     var renderedBody: AnySContent {
         .init(UIKitZStackPrimitive(alignment: alignment,
-                                   spacing: nil,
                                    content: {
             background
             content

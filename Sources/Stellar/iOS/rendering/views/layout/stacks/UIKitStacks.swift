@@ -58,7 +58,7 @@ class UIKitHStack: UIKitPrimitiveStackView {
         case .center:
             self.alignment = .center
         }
-        self.spacing = hStack.spacing
+        self.spacing = CGFloat(hStack.spacing)
     }
 }
 
