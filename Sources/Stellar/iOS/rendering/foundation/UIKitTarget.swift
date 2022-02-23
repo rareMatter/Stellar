@@ -48,17 +48,6 @@ extension UIKitTarget {
     func removeChild(_ target: UIKitTarget) {
         renderableContent.removeChild(target.renderableContent)
     }
-    
-    // MARK: - attribute changes
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        renderableContent.addAttributes(attributes)
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        renderableContent.removeAttributes(attributes)
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        renderableContent.updateAttributes(attributes)
-    }
 }
 
 // MARK: - TODO
@@ -81,23 +70,6 @@ extension UIView {
     }
     static
     func removeChild(fromView targetView: UIView, childView: UIKitTargetRenderableContent) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    // Attributes
-    static
-    func addAttributes(toView targetView: UIView, attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    static
-    func removeAttributes(fromView targetView: UIView, attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    static
-    func updateAttributes(onView targetView: UIView, attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")
     }

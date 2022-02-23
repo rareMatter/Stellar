@@ -60,13 +60,6 @@ extension SDisabledContentModifier: UIKitRenderableContentModifier {
     }
 }
 
-extension SEditingSelectableContentModifier: UIKitRenderableContentModifier {
-    
-    func applyTo(_ target: UIKitRenderableContent) {
-        target.isEditingSelectable = isSelectable
-    }
-}
-
 extension STapHandlerModifier: UIKitRenderableContentModifier {
     
     func applyTo(_ target: UIKitRenderableContent) {

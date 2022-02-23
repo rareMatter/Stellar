@@ -29,11 +29,6 @@ protocol UIKitTargetRenderableContent: AnyObject {
     func addChild(_ view: UIKitTargetRenderableContent,
                   before siblingView: UIKitTargetRenderableContent?)
     func removeChild(_ view: UIKitTargetRenderableContent)
-    
-    // Attributes
-    func addAttributes(_ attributes: [UIKitViewAttribute])
-    func removeAttributes(_ attributes: [UIKitViewAttribute])
-    func updateAttributes(_ attributes: [UIKitViewAttribute])
 }
 extension UIKitTargetRenderableContent
 where Self : UIView {
@@ -51,20 +46,6 @@ where Self : UIView {
         fatalError("TODO")
     }
     func removeChild(_ view: UIKitTargetRenderableContent) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
-    // Attributes
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        // TODO:
-        fatalError("TODO")
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
         // TODO:
         fatalError("TODO")
     }
@@ -105,11 +86,10 @@ protocol AnyUIKitModifiedContent {
 /// A content type which is used to 'render' modified content primitive instances.
 ///
 /// Modified content primitives will be converted into this type during the render process.
-struct UIKitModifiedContentPrimitive<Content>: SContent, AnyUIKitPrimitive
-where Content : SContent {
+struct UIKitModifiedContentPrimitive: SContent, AnyUIKitPrimitive {
     
     let attributes: [UIKitViewAttribute]
-    let content: Content
+    let content: AnySContent
     
     var body: Never { fatalError() }
     
@@ -121,16 +101,15 @@ where Content : SContent {
 extension UIKitModifiedContentPrimitive: _SContentContainer {
     
     var children: [AnySContent] {
-        [.init(content)]
+        [content]
     }
 }
 
-// TODO: Document.
-struct UIKitComposedModifiedContentPrimitive<Content, ModifierContent>: SContent, AnyUIKitPrimitive
-where Content : SContent, ModifierContent : SContent {
+/// Use this type to render modified content primitives whose modifiers provide content.
+struct UIKitComposedModifiedContentPrimitive: SContent, AnyUIKitPrimitive {
     
-    let content: Content
-    let modifierContent: ModifierContent
+    let content: AnySContent
+    let modifierContent: AnySContent
     
     var body: Never { fatalError() }
     
@@ -142,8 +121,7 @@ where Content : SContent, ModifierContent : SContent {
 extension UIKitComposedModifiedContentPrimitive: _SContentContainer {
     
     var children: [AnySContent] {
-        [.init(content),
-         .init(modifierContent)]
+        [content, modifierContent]
     }
 }
 
@@ -158,9 +136,6 @@ enum UIKitViewAttribute: Hashable {
     // MARK: user interaction
     case disabled(Bool)
     case tapHandler(SHashableClosure)
-    case editingSelectable(Bool)
-    case swipeActions(edge: SHorizontalEdge,
-                      allowsFullSwipe: Bool)
     
     // MARK: identity
     case identifier(AnyHashable)

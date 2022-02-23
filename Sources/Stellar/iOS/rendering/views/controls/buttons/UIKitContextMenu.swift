@@ -104,10 +104,6 @@ class UIKitContextMenuContent: UIKitTargetRenderableContent {
     private
     var children: [UIKitTargetRenderableContent] = []
     
-    /// View attributes which have been applied to this content.
-    private(set)
-    var attributes: [UIKitViewAttribute] = []
-    
     func update(with primitive: AnyUIKitPrimitive) {}
     
     func addChild(_ view: UIKitTargetRenderableContent,
@@ -126,16 +122,5 @@ class UIKitContextMenuContent: UIKitTargetRenderableContent {
         if let index = children.firstIndex(where: { $0 === view }) {
             children.remove(at: index)
         }
-    }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        self.attributes.append(contentsOf: attributes)
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        let diff = self.attributes.difference(from: attributes)
-        self.attributes = self.attributes.applying(diff) ?? self.attributes
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        debugPrint("\(self): Attempt to update attributes in a configuration whose parent will not be notified.")
     }
 }

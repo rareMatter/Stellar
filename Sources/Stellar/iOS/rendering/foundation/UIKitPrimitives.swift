@@ -23,12 +23,12 @@ where Content : SContent, Modifier : SContentModifier {
             }
             else {
                 return AnySContent(UIKitModifiedContentPrimitive(attributes: uiKitModifier.renderableAttributes,
-                                                                 content: content))
+                                                                 content: .init(content)))
             }
         }
         // recognized non-collapsible modifiers
         else if let uiKitComposableModifier = modifier as? UIKitComposableModifier {
-            return .init(UIKitComposedModifiedContentPrimitive(content: content,
+            return .init(UIKitComposedModifiedContentPrimitive(content: .init(content),
                                                                modifierContent: uiKitComposableModifier.content))
         }
         // unrecognized primitive modifier
@@ -82,12 +82,6 @@ extension SCornerRadiusModifier: UIKitModifier {
 extension SDisabledContentModifier: UIKitModifier {
     var renderableAttributes: [UIKitViewAttribute] {
         [.disabled(isDisabled)]
-    }
-}
-
-extension SEditingSelectableContentModifier: UIKitModifier {
-    var renderableAttributes: [UIKitViewAttribute] {
-        [.editingSelectable(isSelectable)]
     }
 }
 

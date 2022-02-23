@@ -55,14 +55,4 @@ class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
             buttons.removeAll { $0 == button }
         }
     }
-    
-    func addAttributes(_ attributes: [UIKitViewAttribute]) {
-        debugPrint("\(self): Attribute applied to content which does not respond to attributes. \(attributes)")
-    }
-    func removeAttributes(_ attributes: [UIKitViewAttribute]) {
-        debugPrint("\(self): Attribute applied to content which does not respond to attributes. \(attributes)")
-    }
-    func updateAttributes(_ attributes: [UIKitViewAttribute]) {
-        debugPrint("\(self): Attribute applied to content which does not respond to attributes. \(attributes)")
-    }
 }
