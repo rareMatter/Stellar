@@ -43,6 +43,8 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
         fatalError("init(coder:) has not been implemented")
     }
     
+    func update(with primitive: AnyUIKitPrimitive) {}
+    
     func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
         // Use text to create a title.
         if let text = view as? UIKitText {
@@ -54,7 +56,9 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
         }
         // Hand off any other views to be added as a standard child. (Any views here should be coming from other types in the label content.
         else {
-            UIView.addChild(toView: self, childView: view, before: siblingView)
+            if let view = view as? UIView {
+                UIView.addChild(toView: self, childView: view, before: siblingView as? UIView)
+            }
         }
     }
     

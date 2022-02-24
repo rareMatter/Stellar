@@ -10,6 +10,10 @@ import UIKit
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
 class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
     
+    func update(with primitive: AnyUIKitPrimitive) {
+        assertionFailure("Must override in subclass.")
+    }
+    
     func addChild(_ context: UIKitTargetRenderableContent) {
         if let view = context as? UIView {
             addArrangedSubview(view)
@@ -47,6 +51,7 @@ class UIKitHStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override
     func update(with primitive: AnyUIKitPrimitive) {
         guard let hStack = primitive as? UIKitHStackPrimitive else { return }
         
@@ -76,6 +81,7 @@ class UIKitVStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override
     func update(with primitive: AnyUIKitPrimitive) {
         guard let vStack = primitive as? UIKitVStackPrimitive else { return }
         

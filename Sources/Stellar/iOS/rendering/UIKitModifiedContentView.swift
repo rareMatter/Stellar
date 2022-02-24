@@ -55,17 +55,17 @@ class UIKitModifiedContentView: UIView, UIKitTargetRenderableContent {
         if let swipeActions = view as? UIKitSwipeActionsConfiguration {
             self.swipeActionsConfiguration = swipeActions
         }
-        else {
+        else if let view = view as? UIView {
             UIView.addChild(toView: self,
                             childView: view,
-                            before: siblingView)
+                            before: siblingView as? UIView)
         }
     }
     func removeChild(_ view: UIKitTargetRenderableContent) {
         if let _ = view as? UIKitSwipeActionsConfiguration {
             self.swipeActionsConfiguration = nil
         }
-        else {
+        else if let view = view as? UIView {
             UIView.removeChild(fromView: self,
                                childView: view)
         }

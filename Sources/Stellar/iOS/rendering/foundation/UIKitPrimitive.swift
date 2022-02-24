@@ -33,21 +33,20 @@ protocol UIKitTargetRenderableContent: AnyObject {
 extension UIKitTargetRenderableContent
 where Self : UIView {
 
-    // State updates
-    func update(with primitive: AnyUIKitPrimitive) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
     // Children
     func addChild(_ view: UIKitTargetRenderableContent,
                   before siblingView: UIKitTargetRenderableContent?) {
-        // TODO:
-        fatalError("TODO")
+        if let view = view as? UIView {
+            UIView.addChild(toView: self,
+                            childView: view,
+                            before: siblingView as? UIView)
+        }
     }
     func removeChild(_ view: UIKitTargetRenderableContent) {
-        // TODO:
-        fatalError("TODO")
+        if let view = view as? UIView {
+            UIView.removeChild(fromView: self,
+                               childView: view)            
+        }
     }
 }
 

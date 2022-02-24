@@ -50,27 +50,25 @@ extension UIKitTarget {
     }
 }
 
-// MARK: - TODO
 // MARK: - Standard UIView rendering functions for any general cases
 extension UIView {
 
-    // State updates
-    static
-    func update(view updatedView: UIView, with primitive: AnyUIKitPrimitive) {
-        // TODO:
-        fatalError("TODO")
-    }
-    
     // Children
     static
-    func addChild(toView destinationView: UIView, childView: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        // TODO:
-        fatalError("TODO")
+    func addChild(toView destinationView: UIView,
+                  childView: UIView,
+                  before siblingView: UIView?) {
+        if let siblingView = siblingView {
+            destinationView.insertSubview(childView,
+                                          belowSubview: siblingView)
+        }
+        else {
+            destinationView.addSubview(childView)
+        }
     }
     static
-    func removeChild(fromView targetView: UIView, childView: UIKitTargetRenderableContent) {
-        // TODO:
-        fatalError("TODO")
+    func removeChild(fromView targetView: UIView,
+                     childView: UIView) {
+        childView.removeFromSuperview()
     }
 }

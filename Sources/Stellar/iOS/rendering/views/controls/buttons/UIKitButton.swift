@@ -48,7 +48,7 @@ class UIKitButton: UIControl, UIKitTargetRenderableContent {
     func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
         if let text = view as? UIKitText {
             title = text.string
-            UIView.addChild(toView: self, childView: view, before: siblingView)
+            UIView.addChild(toView: self, childView: text, before: siblingView as? UIView)
         }
         // TODO: Need support for UIKitImage.
     }
