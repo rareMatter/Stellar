@@ -175,8 +175,7 @@ extension SSearchBar: UIKitPrimitive {
         .init(UIKitSearchBarPrimitive(text: text,
                                       placeholderText: placeholderText,
                                       onSearch: .init(onSearch),
-                                      onSearchEnded: .init(onSearchEnded),
-                                      style: style))
+                                      onSearchEnded: .init(onSearchEnded)))
     }
 }
 struct UIKitSearchBarPrimitive: SContent, AnyUIKitPrimitive {
@@ -186,13 +185,10 @@ struct UIKitSearchBarPrimitive: SContent, AnyUIKitPrimitive {
     let onSearch: SIdentifiableContainer<(String) -> Void>
     let onSearchEnded: SIdentifiableContainer<() -> Void>
     
-    let style: UISearchBar.Style
-    
     var body: Never { fatalError() }
     
     func makeRenderableContent() -> UIKitTargetRenderableContent {
-        // TODO:
-        fatalError("TODO")
+        UIKitSearchBar(primitive: self)
     }
 }
 

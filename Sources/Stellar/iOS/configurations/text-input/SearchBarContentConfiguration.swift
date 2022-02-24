@@ -95,6 +95,7 @@ extension SearchBarContentConfiguration {
 }
 
 // MARK: SPrimitiveRepresentable
+/* TODO: Remove this.
 extension SSearchBar: UIKitContentRenderer {
     
     func mountContent(on target: UIKitRenderableContent) {
@@ -106,3 +107,4 @@ extension SSearchBar: UIKitContentRenderer {
                                           style: style)
     }
 }
+*/
