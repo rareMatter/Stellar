@@ -340,12 +340,6 @@ struct UIKitColorPrimitive: SContent, AnyUIKitPrimitive {
     }
 }
 
-extension SDynamicColor: UIKitPrimitive {
-    var renderedBody: AnySContent {
-        fatalError()
-    }
-}
-
 // MARK: - background
 extension BackgroundModifierContainer: UIKitPrimitive {
     var renderedBody: AnySContent {
