@@ -100,7 +100,7 @@ class ElementHost {
                  parentTask: UnmountTask<UIKitRenderer>?) {
         // TODO: Need Transaction and Parent Task params.
         
-        // TODO: Change this bad behavior.
+        // TODO: Change this bad behavior: Inference about type of self using implicit knowledge of desecendants.
         if !(self is PrimitiveViewHost) {
             unmountTask = parentTask?.appendChild()
         }

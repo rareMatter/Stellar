@@ -38,7 +38,6 @@ extension LeadingViewLabelContentConfiguration {
             return hStack
         }()
         
-        #warning("TODO: this is likely better being its own content view.")
         var leadingView = self.leadingView {
             willSet {
                 guard newValue != leadingView else { return }

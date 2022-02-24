@@ -7,7 +7,6 @@
 
 import Foundation
 
-// TODO: ...
 struct SVStack<Content>: SPrimitiveContent
 where Content : SContent {
     
