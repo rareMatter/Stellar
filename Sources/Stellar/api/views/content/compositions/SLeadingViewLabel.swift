@@ -7,6 +7,7 @@
 
 import UIKit
 
+@available(*, deprecated, message: "Create compositions using primitive content types instead.")
 public
 struct SLeadingViewLabel: SPrimitiveContent {
     
