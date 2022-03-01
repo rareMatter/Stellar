@@ -9,6 +9,7 @@ import UIKit
 
 extension SContent {
     
+    @available(*, deprecated, message: "This rendering system has been replaced by the fully compositional, state managing system.")
     func renderContent() -> UIKitRenderableContent {
         let cellContent: UIKitRenderableContent = .makeDefaultState()
         mountContent(on: cellContent,

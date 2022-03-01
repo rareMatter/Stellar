@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated, message: "This has been replaced by a new rendering system equivalent.")
 protocol UIKitModifiedContentRenderer {
     func mountModifier(on target: UIKitRenderableContent)
 }
@@ -14,6 +15,7 @@ protocol UIKitModifiedContentRenderer {
 extension SModifiedContent: UIKitModifiedContentRenderer
 where Content : SContent, Modifier : UIKitRenderableContentModifier {
     
+    @available(*, deprecated, message: "This has been replaced by a new rendering system equivalent.")
     func mountModifier(on target: UIKitRenderableContent) {
         modifier.applyTo(target)
     }

@@ -7,6 +7,7 @@
 
 import UIKit
 
+@available(*, deprecated, message: "This has been replaced by the new compositional, state managed rendering system.")
 /// Content that can be rendered and updated by UIKit in an efficient way.
 class UIKitRenderableContent {
     

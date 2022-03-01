@@ -7,6 +7,7 @@
 
 import Foundation
 
+@available(*, deprecated, message: "This has been replaced by the new rendering system equivalent.")
 protocol UIKitRenderableContentModifier {
     func applyTo(_ target: UIKitRenderableContent)
 }
