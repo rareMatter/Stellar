@@ -18,8 +18,7 @@ extension SListView {
         self.selection = nil
         
         // TODO: Temp.
-        renderer = .init(content: contentProvider,
-                         controller: NLViewController())
+        renderer = .init(content: body)
     }
     
     init(selection: SBinding<Selection?>?,
@@ -28,8 +27,7 @@ extension SListView {
         self.contentProvider = content()
         
         // TODO: Temp.
-        renderer = .init(content: contentProvider,
-                         controller: NLViewController())
+        renderer = .init(content: body)
     }
     
     init(selection: SBinding<[Selection]>?,
@@ -38,8 +36,7 @@ extension SListView {
         self.contentProvider = content()
         
         // TODO: Temp.
-        renderer = .init(content: contentProvider,
-                         controller: NLViewController())
+        renderer = .init(content: body)
     }
     
     // MARK: - Creating a List from a Range

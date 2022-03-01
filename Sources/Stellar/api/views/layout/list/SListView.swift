@@ -14,10 +14,18 @@ public
 struct SListView<Content, Selection>: SView, SContent
 where Content : SContent {
     
+    /// The content of this list.
     let contentProvider: Content
+    /// The selection, if existing, in the list.
     let selection: _Selection?
     
-    let renderer: UIKitRenderer
+    /// Renders `SContent` into `UIKit` renderable types.
+    /// TODO: This will be moved into app level framework code.
+    var renderer: UIKitRenderer!
+    
+    /// The controller which will perform rendering of this instance.
+    /// TODO: This will be removed when the framework is handling rendering of `SView` types.
+    let controller: NLViewController = .init(nibName: nil, bundle: nil)
     
     enum _Selection {
         case one(SBinding<Selection?>?)
@@ -29,7 +37,13 @@ where Content : SContent {
     
     public
     var content: ViewHierarchyObject {
-        renderer.rootViewController
+        // Add the root view from the rendered target content to the root view controller.
+        guard let rootView = renderer.rootTarget.renderableContent as? UIView else {
+            fatalError("Root content is not a view.")
+        }
+        controller.view = rootView
+        
+        return controller
     }
     
     public

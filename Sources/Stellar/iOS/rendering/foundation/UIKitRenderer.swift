@@ -19,24 +19,18 @@ class UIKitRenderer: Renderer {
     var reconciler: TreeReconciler!
     
     /// Use this to schedule updates to the Descriptive Tree.
-    private
     let scheduler: DispatchQueue
     
     /// The root of the target tree.
-    private
     var rootTarget: UIKitTarget {
         get { reconciler.rootTarget }
     }
     
-    let rootViewController: NLViewController
-    
-    // TODO: Controller param is temporary, until the framework encompasses navigation and presentation of content.
     // For now, rendering can only be done per view controller.
     /// Creates a renderer for the provided content, using the controller's root view as a foundation for rendering.
-    init<C: SContent>(content: C, controller: NLViewController) {
+    init<C: SContent>(content: C) {
         let scheduler = DispatchQueue.main
         self.scheduler = scheduler
-        self.rootViewController = controller
         
         guard let anyPrimitive = content as? AnyUIKitPrimitive else {
             fatalError()
