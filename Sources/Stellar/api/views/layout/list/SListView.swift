@@ -21,7 +21,7 @@ where Content : SContent {
     
     /// Renders `SContent` into `UIKit` renderable types.
     /// TODO: This will be moved into app level framework code.
-    var renderer: UIKitRenderer!
+    var renderer: UIKitRenderer { .init(content: body) }
     
     /// The controller which will perform rendering of this instance.
     /// TODO: This will be removed when the framework is handling rendering of `SView` types.

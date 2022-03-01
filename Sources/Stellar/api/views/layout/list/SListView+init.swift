@@ -16,27 +16,18 @@ extension SListView {
     where Selection == Never {
         self.contentProvider = content()
         self.selection = nil
-        
-        // TODO: Temp.
-        renderer = .init(content: body)
     }
     
     init(selection: SBinding<Selection?>?,
          @SContentBuilder content: @escaping () -> Content) {
         self.selection = .one(selection)
         self.contentProvider = content()
-        
-        // TODO: Temp.
-        renderer = .init(content: body)
     }
     
     init(selection: SBinding<[Selection]>?,
          @SContentBuilder content: @escaping () -> Content) {
         self.selection = .many(selection)
         self.contentProvider = content()
-        
-        // TODO: Temp.
-        renderer = .init(content: body)
     }
     
     // MARK: - Creating a List from a Range
