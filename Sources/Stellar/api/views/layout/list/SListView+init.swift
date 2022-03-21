@@ -18,15 +18,25 @@ extension SListView {
         self.selection = nil
     }
     
-    init(selection: SBinding<Selection?>?,
+    init(selection: SBinding<Selection>?,
          @SContentBuilder content: @escaping () -> Content) {
-        self.selection = .one(selection)
+        if let selection = selection {
+            self.selection = .one(selection)
+        }
+        else {
+            self.selection = nil
+        }
         self.contentProvider = content()
     }
     
-    init(selection: SBinding<[Selection]>?,
+    init(selection: SBinding<Set<Selection>>?,
          @SContentBuilder content: @escaping () -> Content) {
-        self.selection = .many(selection)
+        if let selection = selection {
+            self.selection = .many(selection)
+        }
+        else {
+            self.selection = nil
+        }
         self.contentProvider = content()
     }
     
@@ -51,7 +61,7 @@ extension SListView {
     ///
     /// This instance only reads the initial value of data and doesn’t need to identify views across updates. To compute views on demand over a dynamic range, use init(_:id:selection:rowContent:).
     init<RowContent>(_ data: Range<Int>,
-                     selection: SBinding<Selection?>?,
+                     selection: SBinding<Selection>?,
                      @SContentBuilder rowContent: @escaping (Int) -> RowContent)
     where Content == SForEach<Range<Int>, Int, RowContent>,
     RowContent : SContent {
@@ -66,7 +76,7 @@ extension SListView {
     ///
     /// This instance only reads the initial value of data and doesn’t need to identify views across updates. To compute views on demand over a dynamic range, use init(_:id:selection:rowContent:).
     init<RowContent>(_ data: Range<Int>,
-                     selection: SBinding<[Selection]>?,
+                     selection: SBinding<Set<Selection>>?,
                      @SContentBuilder rowContent: @escaping (Int) -> RowContent)
     where Content == SForEach<Range<Int>, Int, SHStack<RowContent>>,
     RowContent : SContent {
@@ -96,7 +106,7 @@ extension SListView {
     
     /// Creates a list that computes its rows on demand from an underlying collection of identifiable data, optionally allowing users to select a single row.
     init<Data, RowContent>(_ data: Data,
-                           selection: SBinding<Selection?>?,
+                           selection: SBinding<Selection>?,
                            @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SForEach<Data, Data.Element.ID, RowContent>,
     Data : RandomAccessCollection,
@@ -111,7 +121,7 @@ extension SListView {
     
     /// Creates a list that computes its rows on demand from an underlying collection of identifiable data, optionally allowing users to select multiple rows.
     init<Data, RowContent>(_ data: Data,
-                           selection: SBinding<[Selection]>?,
+                           selection: SBinding<Set<Selection>>?,
                            @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SForEach<Data, Data.Element.ID, RowContent>,
     Data : RandomAccessCollection,
@@ -147,7 +157,7 @@ extension SListView {
     ///
     init<Data, ID, RowContent>(_ data: Data,
                                id: KeyPath<Data.Element, ID>,
-                               selection: SBinding<Selection?>?,
+                               selection: SBinding<Selection>?,
                                @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SForEach<Data, ID, RowContent>,
     Data : RandomAccessCollection,
@@ -165,7 +175,7 @@ extension SListView {
     ///
     init<Data, ID, RowContent>(_ data: Data,
                                id: KeyPath<Data.Element, ID>,
-                               selection: SBinding<[Selection]>?,
+                               selection: SBinding<Set<Selection>>?,
                                @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SForEach<Data, ID, RowContent>,
     Data : RandomAccessCollection,
@@ -306,7 +316,7 @@ extension SListView {
     ///
     init<Data, RowContent>(_ data: Data,
                            children: KeyPath<Data.Element, Data?>,
-                           selection: SBinding<Selection?>?,
+                           selection: SBinding<Selection>?,
                            @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SOutlineGroup<Data, Data.Element.ID, RowContent, RowContent, SDisclosureGroup<RowContent, SOutlineSubgroupChildren>>,
     Data : RandomAccessCollection,
@@ -324,7 +334,7 @@ extension SListView {
     ///
     init<Data, RowContent>(_ data: Data,
                            children: KeyPath<Data.Element, Data?>,
-                           selection: SBinding<[Selection]>?,
+                           selection: SBinding<Set<Selection>>?,
                            @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SOutlineGroup<Data, Data.Element.ID, RowContent, RowContent, SDisclosureGroup<RowContent, SOutlineSubgroupChildren>>,
     Data : RandomAccessCollection,
@@ -364,7 +374,7 @@ extension SListView {
     init<Data, ID, RowContent>(_ data: Data,
                                id: KeyPath<Data.Element, ID>,
                                children: KeyPath<Data.Element, Data?>,
-                               selection: SBinding<Selection?>?,
+                               selection: SBinding<Selection>?,
                                @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SOutlineGroup<Data, ID, RowContent, RowContent, SDisclosureGroup<RowContent, SOutlineSubgroupChildren>>,
     Data : RandomAccessCollection,
@@ -383,7 +393,7 @@ extension SListView {
     init<Data, ID, RowContent>(_ data: Data,
                                id: KeyPath<Data.Element, ID>,
                                children: KeyPath<Data.Element, Data?>,
-                               selection: SBinding<[Selection]>?,
+                               selection: SBinding<Set<Selection>>?,
                                @SContentBuilder rowContent: @escaping (Data.Element) -> RowContent)
     where Content == SOutlineGroup<Data, ID, RowContent, RowContent, SDisclosureGroup<RowContent, SOutlineSubgroupChildren>>,
     Data : RandomAccessCollection,

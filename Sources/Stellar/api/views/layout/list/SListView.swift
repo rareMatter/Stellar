@@ -12,7 +12,7 @@ import SwiftUI
 
 public
 struct SListView<Content, Selection>: SView, SContent
-where Content : SContent {
+where Content : SContent, Selection : Hashable {
     
     /// The content of this list.
     let contentProvider: Content
@@ -21,15 +21,15 @@ where Content : SContent {
     
     /// Renders `SContent` into `UIKit` renderable types.
     /// TODO: This will be moved into app level framework code.
-    var renderer: UIKitRenderer { .init(content: body) }
+    var renderer: UIKitRenderer { .init(content: self) }
     
     /// The controller which will perform rendering of this instance.
     /// TODO: This will be removed when the framework is handling rendering of `SView` types.
     let controller: NLViewController = .init(nibName: nil, bundle: nil)
     
     enum _Selection {
-        case one(SBinding<Selection?>?)
-        case many(SBinding<[Selection]>?)
+        case one(SBinding<Selection>)
+        case many(SBinding<Set<Selection>>)
     }
     
     public
@@ -57,13 +57,12 @@ where Content : SContent {
             var otherContents = [AnySContent]()
             
             for child in contentContainer.children {
-                if child.content is _SSectionContainer {
+                if child.content is _AnySection {
                     if !otherContents.isEmpty {
                         // if other contents has been found, create a section for it
                         sections.append(.init(SSection(content: {
                             SForEach(Array(otherContents.enumerated()),
-                                     id: \.offset,
-                                     dataSubject: nil) { _, content in content }
+                                     id: \.offset) { _, content in content }
                         })))
                         otherContents = []
                     }
@@ -85,19 +84,13 @@ where Content : SContent {
             if !otherContents.isEmpty {
                 sections.append(.init(SSection(content: {
                     SForEach(Array(otherContents.enumerated()),
-                             id: \.offset,
-                             dataSubject: nil) { _, content in content }
+                             id: \.offset) { _, content in content }
                 })))
             }
             
             return AnySContent(SForEach(Array(sections.enumerated()),
                             id: \.offset) { _, content in
-                if let section = content as? _SSectionContainer {
-                    section.makeListRow()
-                }
-                else {
-                    content
-                }
+               content
             })
         }
         else {
@@ -105,36 +98,4 @@ where Content : SContent {
            return AnySContent(contentProvider)
         }
     }
-    
-    /*
-     guard let contentContainer = content as? _SContentContainer else {
-     assertionFailure("Unexpected content type.")
-     return .init([])
-     }
-     var sections = [ListSection]()
-     
-     // Check content containers for SSections.
-     for (index, child) in contentContainer.children.enumerated() {
-     if let sectionContainer = child.content as? _SSectionContainer {
-     sections.append(.init(id: index,
-     dataSubject: (sectionContainer.anyContentProvider().content as? DataPublisher)?._dataSubject ?? .init([]),
-     rowProvider: { sectionContainer.anyContentProvider().renderContent() },
-     headerProvider: { sectionContainer.anyHeaderProvider().renderContent() },
-     footerProvider: { sectionContainer.anyFooterProvider().renderContent() }))
-     }
-     }
-     
-     // If no sections were found in the top level list content,
-     // create one.
-     if sections.isEmpty {
-     let emptyRenderableContent = { SEmptyContent().renderContent() }
-     sections.append(.init(id: 0,
-     dataSubject: dataSubject,
-     rowProvider: { content.renderContent() },
-     headerProvider: emptyRenderableContent,
-     footerProvider: emptyRenderableContent))
-     }
-     
-     return sections
-     */
 }

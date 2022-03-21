@@ -16,7 +16,7 @@ class CompositeViewHost: CompositeElementHost {
                reconciler: TreeReconciler) {
         super.prepareForMount()
         
-        // render child body and create a child element host.
+        // render body and create a child element host.
         let childBody = reconciler.render(compositeElement: self)
         let child = childBody.makeElementHost(with: reconciler.renderer,
                                               parentTarget: parentTarget,

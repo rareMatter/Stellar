@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 public
-struct SSection<Content, Header, Footer>: SContent
+struct SSection<Content, Header, Footer>: SPrimitiveContent
 where Content : SContent, Header : SContent, Footer : SContent {
     
     let contentProvider: () -> Content
@@ -24,30 +24,11 @@ where Content : SContent, Header : SContent, Footer : SContent {
         self.headerProvider = header
         self.footerProvider = footer
     }
-    
-    public
-    var body: some SContent {
-        headerProvider()
-        contentProvider()
-        footerProvider()
-    }
 }
 
-// MARK: internal recognition
-protocol _SSectionContainer {
-    func makeListRow() -> AnySContent
-}
-extension SSection: _SSectionContainer {
-    
-    func makeListRow() -> AnySContent {
-        AnySContent(SVStack(alignment: .leading,
-                            spacing: 0) {
-            headerProvider()
-            contentProvider()
-            footerProvider()
-        })
-    }
-}
+// MARK: - internal recognition
+protocol _AnySection {}
+extension SSection: _AnySection {}
 
 // MARK: Create a section without a header or footer.
 public

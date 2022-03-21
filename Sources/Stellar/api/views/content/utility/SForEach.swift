@@ -13,8 +13,6 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
     
     let data: Data
     let id: KeyPath<Data.Element, ID>
-    // TODO: Remove this once the framework is handling updates.
-    let dataSubject: CurrentValueSubject<Data, Never>?
     
     public
     let content: (Data.Element) -> Content
@@ -22,11 +20,9 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
     public
     init(_ data: Data,
          id: KeyPath<Data.Element, ID>,
-         dataSubject: CurrentValueSubject<Data, Never>? = nil,
          @SContentBuilder content: @escaping (Data.Element) -> Content) {
         self.data = data
         self.id = id
-        self.dataSubject = dataSubject
         self.content = content
     }    
 }
@@ -42,22 +38,6 @@ where Data.Element : Identifiable, ID == Data.Element.ID {
     }
 }
 
-// MARK: Dynamic, Identifiable data
-import Combine
-
-public
-extension SForEach
-where Data.Element : Identifiable, ID == Data.Element.ID {
-    // TODO: Remove this once the framework is handling updates.
-    init(_ dataSubject: CurrentValueSubject<Data, Never>,
-         @SContentBuilder content: @escaping (Data.Element) -> Content) {
-        self.init(dataSubject.value,
-                  id: \.id,
-                  dataSubject: dataSubject,
-                  content: content)
-    }
-}
-
 // MARK: Ranges
 
 public
@@ -69,20 +49,11 @@ where Data == Range<Int>,
         self.data = data
         id = \.self
         self.content = content
-        self.dataSubject = nil
-    }
-}
-
-// MARK: - protocol conformance
-
-extension SForEach: _SContentContainer {
-    var children: [AnySContent] {
-        data.map { AnySContent(SIdentifiableContent(content($0), id: $0[keyPath: id])) }
     }
 }
 
 // MARK: Internal recognition
-protocol SForEachProtocol: _SContentContainer {
+protocol SForEachProtocol {
     var elementType: Any.Type { get }
     func element(at: Int) -> Any
 }
@@ -96,13 +67,42 @@ where Data.Index == Int {
     }
 }
 
-// MARK: - temporary flag for data updating content container
-// TODO: Remove this when the framework is handling updates.
-protocol DataPublisher {
-    var _dataSubject: CurrentValueSubject<[AnyHashable], Never>? { get }
+// MARK: type erasure
+
+/// A type-erased ForEach which forwards all calls to the wrapped instance.
+struct AnyForEach: SContent {
+    
+    /// The wrapped data type.
+    let dataType: Any.Type
+    /// The wrapped id keypath type.
+    let idType: Any.Type
+    /// The wrapped content type.
+    let contentType: Any.Type
+    
+    let content: (_ datum: Any) -> AnySContent
+    let data: [Any]
+    let id: AnyKeyPath
+    
+    init<Data, ID, Content>(_ forEach: SForEach<Data, ID, Content>) {
+        self.dataType = Data.self
+        self.idType = ID.self
+        self.contentType = Content.self
+        
+        self.content = { [forEach] datum in
+            guard let matchingDatum = forEach.data.first(where: { element in
+                element[keyPath: forEach.id] == (datum[keyPath: forEach.id as AnyKeyPath] as? ID)
+            }) else { fatalError() }
+            return .init(forEach.content(matchingDatum))
+        }
+        self.data = Array(forEach.data.map({ $0 as Any }))
+        self.id = forEach.id
+    }
+    
+    var body: Never { fatalError() }
 }
-extension SForEach: DataPublisher {
-    var _dataSubject: CurrentValueSubject<[AnyHashable], Never>? {
-        dataSubject as? CurrentValueSubject<[AnyHashable], Never>
+extension AnyForEach: AnyUIKitPrimitive {
+    
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
+        UIKitForEach(primitive: self)
     }
 }

@@ -16,6 +16,7 @@ class UIKitTarget: RenderableTarget {
     /// The UIKit primitive responsible for producing a renderable view.
     let uiKitPrimitive: AnyUIKitPrimitive
     
+    #error("This does not need to be lazy because as soon as a child is added to this target, it will be called and instantiated. Therefore, it may also be rational to convert primitives directly into UIViews to act as UIKit primitive types.")
     /// The live view produced by this target's renderable primitive content.
     lazy
     private(set)

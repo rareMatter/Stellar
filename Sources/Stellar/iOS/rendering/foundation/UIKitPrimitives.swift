@@ -346,3 +346,76 @@ extension BackgroundModifierContainer: UIKitPrimitive {
         }))
     }
 }
+
+// MARK: - list
+extension SListView: UIKitPrimitive {
+    var renderedBody: AnySContent {
+        let selections: Set<AnyHashable>? = {
+            if let selection = self.selection {
+                switch selection {
+                case let .one(binding):
+                    return .init(arrayLiteral: .init(binding.wrappedValue))
+                case let .many(binding):
+                    return binding.wrappedValue
+                }
+            }
+            else { return nil }
+        }()
+        return .init(UIKitListPrimitive(selectionValue: selections,
+                                 content: .init(body)))
+    }
+}
+struct UIKitListPrimitive: SContent, AnyUIKitPrimitive {
+    let selectionValue: Set<AnyHashable>?
+    let content: AnySContent
+    
+    var body: Never { fatalError() }
+    
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
+        UIKitCollectionView(primitive: self)
+    }
+}
+extension UIKitListPrimitive: _SContentContainer {
+    var children: [AnySContent] {
+        [content]
+    }
+}
+
+// MARK: - ForEach
+extension SForEach: UIKitPrimitive
+where Content : _AnySection {
+    var renderedBody: AnySContent {
+        // TODO:
+        fatalError("TODO")
+    }
+}
+struct UIKitSectionCollectionPrimitive: SContent, AnyUIKitPrimitive {
+    let sections: [(id: AnyHashable, section: _AnySection)]
+    
+    var body: Never { fatalError() }
+    
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
+        // TODO:
+        fatalError("TODO")
+    }
+}
+extension UIKitViewCollection: _SContentContainer {
+    var children: [AnySContent] {
+        [ ]
+    }
+}
+
+// MARK: SSection
+extension SSection: UIKitPrimitive {
+    var renderedBody: AnySContent {
+        .init(UIKitSectionPrimitive())
+    }
+}
+struct UIKitSectionPrimitive: SContent, AnyUIKitPrimitive {
+
+    var body: Never { fatalError() }
+    
+    func makeRenderableContent() -> UIKitTargetRenderableContent {
+        UIKitSection(primitive: self)
+    }
+}

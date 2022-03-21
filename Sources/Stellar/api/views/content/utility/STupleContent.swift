@@ -230,6 +230,6 @@ struct STupleContent<T>: SPrimitiveContent {
 }
 
 // MARK: - content container
-extension STupleContent: _SContentContainer {
+extension STupleContent: GroupedContent {
     var children: [AnySContent] { _children }
 }

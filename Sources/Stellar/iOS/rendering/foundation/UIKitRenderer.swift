@@ -26,8 +26,7 @@ class UIKitRenderer: Renderer {
         get { reconciler.rootTarget }
     }
     
-    // For now, rendering can only be done per view controller.
-    /// Creates a renderer for the provided content, using the controller's root view as a foundation for rendering.
+    /// Creates a renderer for the provided content.
     init<C: SContent>(content: C) {
         let scheduler = DispatchQueue.main
         self.scheduler = scheduler
