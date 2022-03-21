@@ -401,7 +401,8 @@ struct UIKitSectionCollectionPrimitive: SContent, AnyUIKitPrimitive {
 }
 extension UIKitViewCollection: _SContentContainer {
     var children: [AnySContent] {
-        [ ]
+        // TODO:
+        fatalError("TODO")
     }
 }
 
