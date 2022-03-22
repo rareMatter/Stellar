@@ -10,7 +10,7 @@
 import Foundation
 import UIKit
 
-/// A type which can be rendered by UIKit.
+/// A type which can be rendered by `UIKit`.
 ///
 /// For any framework primitives which can be rendered by `UIKit`, make them conform to this protocol where they should be converted into a `UIKit` renderable primitive type, represented by `UIKitPrimitiveType` and type-erased for recognition during render using `AnyUIKitPrimitive`.
 protocol UIKitPrimitive {
@@ -50,12 +50,13 @@ where Self : UIView {
     }
 }
 
+/// This protocol allows recognition of any `UIKit` primitive type and defines common requirements.
 protocol AnyUIKitPrimitive {
     /// Creates UIKit renderable content.
     func makeRenderableContent() -> UIKitTargetRenderableContent
 }
 
-/// This protocol is used to declare and recognize modifier primitives as supported on `UIKit`.
+/// A modifier supported by `UIKit`.
 ///
 /// Check for conformance to this protocol when converting modified content primitive instances into UIKit renderable instances (generally as a generic constraint).
 protocol UIKitModifier {
@@ -64,7 +65,9 @@ protocol UIKitModifier {
     var renderableAttributes: [UIKitViewAttribute] { get }
 }
 
-/// Apply this protocol to `UIKit` supported primitive modifiers which provide their own child content.
+/// A modifier supported by `UIKit` which contains it's own child content.
+///
+/// Apply this protocol to `UIKit` supported primitive modifiers which contain their own child content in order to properly pass that content into the rendering process.
 protocol UIKitComposableModifier {
     /// The content provided by the modifier.
     ///

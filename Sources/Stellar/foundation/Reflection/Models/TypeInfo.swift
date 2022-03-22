@@ -48,7 +48,11 @@ public struct TypeInfo {
   }
 }
 
-public func typeInfo(of type: Any.Type) -> TypeInfo? {
+/// Creates `TypeInfo` by inspecting `structs`.
+///
+/// - Important: `nil` is returned if any type other than a `struct` is provided.
+public
+func typeInfo(of type: Any.Type) -> TypeInfo? {
   guard Kind(type: type) == .struct else {
     return nil
   }

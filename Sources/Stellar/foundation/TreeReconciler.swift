@@ -42,11 +42,14 @@ class TreeReconciler {
     private
     var renderQueue = [Render]()
     
-    // TODO: Currently, this is unused at this location. It is also stored by the root element host.
-    /// The renderer's root renderable target.
+    /// The root target provided at creation of this renderer which hosts the platform-specific `Descriptive Tree`.
+    ///
+    /// Use this from your platform renderer to access the rendered content hierarchy, generally when installing the rendered content into your user-visible window or viewport.
     let rootTarget: UIKitTarget
     
-    /// The root of the Live Tree.
+    /// The root of the `Live Tree` of hosted elements.
+    ///
+    /// This host hierarchy is used by the framework to update rendered content after state changes occur.
     let rootElementHost: ElementHost
     
     /// The provided renderer which will be used to create renderable primitives.
@@ -190,13 +193,13 @@ class TreeReconciler {
     /// - Returns: The body of the host's composite element using the provided key path.
     private
     func processBody(of compositeElement: CompositeElementHost,
-                     keyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) -> Any {
+                     body bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) -> Any {
         
         compositeElement.updateEnvironment()
         
         if let typeInfo = typeInfo(of: compositeElement.hostedElementType) {
             var stateIdx = 0
-            let dynamicProperties = typeInfo.dynamicProperties(in: &compositeElement[keyPath: keyPath])
+            let dynamicProperties = typeInfo.dynamicProperties(in: &compositeElement[keyPath: bodyKeyPath])
             
             compositeElement.transientSubscriptions = []
             
@@ -206,18 +209,19 @@ class TreeReconciler {
                     initStorage(id: stateIdx,
                                 for: property,
                                 of: compositeElement,
-                                bodyKeyPath: keyPath)
+                                bodyKeyPath: bodyKeyPath)
                     stateIdx += 1
                 }
                 if property.type is SObservedProperty.Type {
                     initTransientSubscription(for: property,
                                                  of: compositeElement,
-                                                 bodyKeyPath: keyPath)
+                                                 bodyKeyPath: bodyKeyPath)
                 }
             }
         }
+        // TODO: This should probably not be silently skipped. If type info cannot be determined, it's likely that a class type was provided and the client should be informed in some way.
         
-        return compositeElement[keyPath: keyPath]
+        return compositeElement[keyPath: bodyKeyPath]
     }
     
     /// Processes the body of the host's composite element and then asks the renderer for a rendered version of the body or continues down the chain if one is not provided.
@@ -225,7 +229,7 @@ class TreeReconciler {
     /// - Returns: The rendered primitive body of the host's composite element or the non-primitive body if a rendered body is not provided.
     func render(compositeElement: CompositeElementHost) -> AnySContent {
         let content = processBody(of: compositeElement,
-                                  keyPath: \.content.content)
+                                  body: \.content.content)
         
         guard let renderedBody = renderer.bodyFor(primitiveContent: content) else {
             return compositeElement.content.bodyProvider(content)

@@ -12,7 +12,7 @@ import Foundation
 /// The lifecycle of this host is managed by the reconciler in order to provide content tree hosting. Updates are handled through this type and other similar types in the live tree managed by the reconciler.
 final
 class PrimitiveViewHost: ElementHost {
-    // TODO: This is unused.
+    
     /// Target of the closest ancestor host view.
     ///
     /// A parent of this view might be a composite, therefore it must be passed to the first descendant host views.

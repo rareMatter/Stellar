@@ -12,7 +12,7 @@ import Combine
 ///
 ///
 class CompositeElementHost: ElementHost {
-    // TODO: This is unused.
+    
     let parentTarget: UIKitTarget
     
     /// Values taken from state property declarations of the composite element.

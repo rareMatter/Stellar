@@ -169,8 +169,8 @@ extension AnySContent {
         }
         else {
             return CompositeViewHost(content: self,
-                                        parentTarget: parentTarget,
-                                        parent: parent)
+                                     parentTarget: parentTarget,
+                                     parent: parent)
         }
     }
 }
