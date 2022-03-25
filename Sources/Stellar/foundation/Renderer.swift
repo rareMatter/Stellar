@@ -20,7 +20,7 @@ protocol Renderer: AnyObject {
     /// - returns: A new target or nil if none should be created.
     func mountTarget(before sibling: TargetType?,
                      on parent: TargetType,
-                     with host: ElementHost) -> TargetType?
+                     with host: PrimitiveViewHost<Self>) -> TargetType?
     
     /// Called by the reconciler when an existing rendering target instance should be updated.
     ///
@@ -30,7 +30,7 @@ protocol Renderer: AnyObject {
     ///     - target: The existing target instance which needs to be updated.
     ///     - host: The host of the rendered content which needs to be updated.
     func update(target: TargetType,
-                with host: ElementHost)
+                with host: PrimitiveViewHost<Self>)
     
     /// Called by the reconciler when an existing target instance should be removed from the tree.
     ///

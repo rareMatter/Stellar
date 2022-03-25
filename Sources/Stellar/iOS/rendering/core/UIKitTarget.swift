@@ -16,11 +16,8 @@ class UIKitTarget: RenderableTarget {
     /// The UIKit primitive responsible for producing a renderable view.
     let uiKitPrimitive: AnyUIKitPrimitive
     
-    #error("This does not need to be lazy because as soon as a child is added to this target, it will be called and instantiated. Therefore, it may also be rational to convert primitives directly into UIViews to act as UIKit primitive types.")
     /// The live view produced by this target's renderable primitive content.
-    lazy
-    private(set)
-    var renderableContent: UIKitTargetRenderableContent = uiKitPrimitive.makeRenderableContent()
+    let renderableContent: UIKitTargetRenderableContent
     
     // `RenderableTarget` conformance. This property is updated by the framework before the renderer is asked to update the target instance.
     // TODO: What else does the framework use this property for?
@@ -30,6 +27,7 @@ class UIKitTarget: RenderableTarget {
          anyUIKitPrimitive: AnyUIKitPrimitive) {
         self.content = content
         self.uiKitPrimitive = anyUIKitPrimitive
+        self.renderableContent = uiKitPrimitive.makeRenderableContent()
     }
 }
 

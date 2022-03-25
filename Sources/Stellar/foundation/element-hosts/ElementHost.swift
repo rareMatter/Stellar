@@ -10,7 +10,7 @@ import Foundation
 /// The base host for live elements, including the various types of `Descriptive Tree` content.
 ///
 /// Other host types inherit and specialize upon this one, depending on the type of `Descriptive Tree` element.
-class ElementHost {
+class ElementHost<R: Renderer> {
     
     /// The type-erased element being hosted.
     private
@@ -42,8 +42,8 @@ class ElementHost {
     // -- host tree
     
     /// The parent of this host, if it has one.
-    weak var parent: ElementHost?
-    var children = [ElementHost]()
+    weak var parent: ElementHost<R>?
+    var children = [ElementHost<R>]()
     
     // TODO: Need transaction.
     // TODO: Need environment values.
@@ -51,14 +51,14 @@ class ElementHost {
     // TODO: Need view trait store.
     
     /// The current unmounting task of self.
-    var unmountTask: UnmountTask<UIKitRenderer>?
+    var unmountTask: UnmountTask<R>?
     
     // MARK: init
     
     // TODO: Need init for other element types.
     
     init(hostedElement: ElementType,
-         parent: ElementHost?) {
+         parent: ElementHost<R>?) {
         self.hostedElement = hostedElement
         self.parent = parent
         
@@ -67,7 +67,7 @@ class ElementHost {
     
     convenience
     init(content: AnySContent,
-         parent: ElementHost?) {
+         parent: ElementHost<R>?) {
         self.init(hostedElement: .content(content),
                   parent: parent)
     }
@@ -87,17 +87,17 @@ class ElementHost {
     /// Performs needed work to make the hosted element live.
     ///
     /// - Important: You *must* call super at the *end* of your subclass implementation.
-    func mount(beforeSibling sibling: UIKitTarget?,
-               onParent parent: ElementHost?,
-               reconciler: TreeReconciler) {
+    func mount(beforeSibling sibling: R.TargetType?,
+               onParent parent: ElementHost<R>?,
+               reconciler: TreeReconciler<R>) {
         // TODO: Set transition phase.
     }
     
     /// Performs needed work to remove the hosted element from the living tree.
     ///
     /// - Important: You *must* call super *before* all other work.
-    func unmount(in reconciler: TreeReconciler,
-                 parentTask: UnmountTask<UIKitRenderer>?) {
+    func unmount(in reconciler: TreeReconciler<R>,
+                 parentTask: UnmountTask<R>?) {
         // TODO: Need Transaction and Parent Task params.
         
         // TODO: Change this bad behavior: Inference about type of self using implicit knowledge of desecendants.
@@ -129,7 +129,7 @@ class ElementHost {
     
     // TODO: Need transaction param.
     /// Updates the hosted element with the reconciler and transaction.
-    func update(inReconciler reconciler: TreeReconciler) {
+    func update(inReconciler reconciler: TreeReconciler<R>) {
         fatalError("\(#function) must be overridden by a subclass.")
     }
 }
@@ -140,8 +140,8 @@ extension ElementHost {
     /// If self is a `PrimitiveViewHost`, the target is returned. If not, the host hierarchy is recursively checked at each first child until a `PrimitiveViewHost` is found, or nil if a first child does not exist.
     ///
     /// - Note: If a host's content type is `GroupedContent`, it is skipped.
-    func findFirstDescendantPrimitiveTarget() -> UIKitTarget? {
-        if let primitiveHost = self as? PrimitiveViewHost,
+    func findFirstDescendantPrimitiveTarget() -> R.TargetType? {
+        if let primitiveHost = self as? PrimitiveViewHost<R>,
            !(primitiveHost.content.type is GroupedContent.Type) {
             return primitiveHost.target
         }
@@ -155,9 +155,9 @@ extension ElementHost {
 extension AnySContent {
     
     /// Creates an element host type depending on the wrapped type of `self`.
-    func makeElementHost(with renderer: UIKitRenderer,
-                         parentTarget: UIKitTarget,
-                         parentHost: ElementHost?) -> ElementHost {
+    func makeElementHost<R: Renderer>(with renderer: R,
+                                      parentTarget: R.TargetType,
+                                      parentHost: ElementHost<R>?) -> ElementHost<R> {
         if type == SEmptyContent.self {
             return EmptyElementHost(content: self,
                                     parent: parentHost)

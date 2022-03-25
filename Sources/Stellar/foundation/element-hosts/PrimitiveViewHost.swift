@@ -11,7 +11,7 @@ import Foundation
 ///
 /// The lifecycle of this host is managed by the reconciler in order to provide `Descriptive Tree` hosting. Updates are handled through this type and other similar types in the `Live Tree` managed by the `TreeReconciler`.
 final
-class PrimitiveViewHost: ElementHost {
+class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
     
     /// Target of the closest ancestor host view.
     ///
@@ -19,18 +19,18 @@ class PrimitiveViewHost: ElementHost {
     ///
     /// This means the `parentTarget` is not always the same as the target of a parent `View`.
     private
-    let parentTarget: UIKitTarget
+    let parentTarget: R.TargetType
     
     /// Renderable target of this host, supplied by the platform renderer after mounting.
     private(set)
-    var target: UIKitTarget?
+    var target: R.TargetType?
     
     private
-    var parentUnmountTask = UnmountTask<UIKitRenderer>()
+    var parentUnmountTask = UnmountTask<R>()
     
     init(content: AnySContent,
-         parentTarget: UIKitTarget,
-         parent: ElementHost?) {
+         parentTarget: R.TargetType,
+         parent: ElementHost<R>?) {
         self.parentTarget = parentTarget
         
         super.init(hostedElement: .content(content),
@@ -39,9 +39,9 @@ class PrimitiveViewHost: ElementHost {
     
     // TODO: Need transaction and reconciler params.
     override
-    func mount(beforeSibling sibling: UIKitTarget?,
-               onParent parent: ElementHost?,
-               reconciler: TreeReconciler) {
+    func mount(beforeSibling sibling: R.TargetType?,
+               onParent parent: ElementHost<R>?,
+               reconciler: TreeReconciler<R>) {
         super.prepareForMount()
         
 //        self.transaction = transaction
@@ -75,7 +75,7 @@ class PrimitiveViewHost: ElementHost {
     }
     
     override
-    func update(inReconciler reconciler: TreeReconciler) {
+    func update(inReconciler reconciler: TreeReconciler<R>) {
         guard let target = target else { return }
         
         invalidateUnmount()
@@ -116,7 +116,7 @@ class PrimitiveViewHost: ElementHost {
                 // there are existing and new children.
                 // reconcile the differences.
             case (false, false):
-                var newChildren = [ElementHost]()
+                var newChildren = [ElementHost<R>]()
                 
                 // compare each existing and new child.
                 // remount if types differ,
@@ -124,7 +124,7 @@ class PrimitiveViewHost: ElementHost {
                 while let childHost = children.first,
                       let childContent = childrenContent.first {
                     
-                    let newChild: ElementHost
+                    let newChild: ElementHost<R>
                     
                     // same types
                     if childHost.content.typeConstructorName == childContent.typeConstructorName {
@@ -164,7 +164,7 @@ class PrimitiveViewHost: ElementHost {
                 else {
                     // mount any remaining new children.
                     childrenContent.forEach { childContent in
-                        let newChild: ElementHost = childContent.makeElementHost(with: reconciler.renderer,
+                        let newChild: ElementHost<R> = childContent.makeElementHost(with: reconciler.renderer,
                                                                                  parentTarget: target,
                                                                                  parentHost: self)
                         newChild.mount(beforeSibling: nil,
@@ -183,14 +183,14 @@ class PrimitiveViewHost: ElementHost {
     }
     
     override
-    func unmount(in reconciler: TreeReconciler,
-                 parentTask: UnmountTask<UIKitRenderer>?) {
+    func unmount(in reconciler: TreeReconciler<R>,
+                 parentTask: UnmountTask<R>?) {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         
         guard let target = target else { return }
         
-        let task = UnmountHostTask<UIKitRenderer>(self,
+        let task = UnmountHostTask<R>(self,
                                    in: reconciler) {
             self.children.forEach { childHost in
                 childHost.unmount(in: reconciler,

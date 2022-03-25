@@ -8,7 +8,7 @@
 import Combine
 import SwiftUI
 
-/// The Tree Reconciler handles updating of the "Live Tree" (such as `PrimitiveViewHost`) when state changes are seen in the dynamic properties declared by the "Descriptive Tree" (such as `SContent` values), or other changes occur which require updates, such as user interactions or environment properties.
+/// The `TreeReconciler` handles updating of the "Live Tree" (such as `PrimitiveViewHost`) when state changes are seen in the dynamic properties declared by the "Descriptive Tree" (such as `SContent` values), or other changes occur which require updates, such as user interactions or environment properties.
 ///
 /// Any updates in the Descriptive Tree are reflected in the Live Tree.
 ///
@@ -20,10 +20,10 @@ import SwiftUI
 ///
 /// Updates are scheduled using a stack implementation. Performance improvements are likely if a multi-threaded implementation is proven to be possible and effective.
 final
-class TreeReconciler {
+class TreeReconciler<R: Renderer> {
     
     struct Render: Hashable {
-        let element: CompositeElementHost
+        let element: CompositeElementHost<R>
         // TODO:
         // let transaction: Transaction
         
@@ -45,19 +45,19 @@ class TreeReconciler {
     /// The root target provided at creation of this renderer which hosts the platform-specific `Descriptive Tree`.
     ///
     /// Use this from your platform renderer to access the rendered content hierarchy, generally when installing the rendered content into your user-visible window or viewport.
-    let rootTarget: UIKitTarget
+    let rootTarget: R.TargetType
     
     /// The root of the `Live Tree` of hosted elements.
     ///
     /// This host hierarchy is used by the framework to update rendered content after state changes occur.
-    let rootElementHost: ElementHost
+    let rootElementHost: ElementHost<R>
     
     /// The provided renderer which will be used to create renderable primitives.
     ///
     /// - Note: The renderer stores a strong reference to this reconciler object.
     private(set)
     unowned
-    var renderer: UIKitRenderer
+    var renderer: R
     
     /// A platform-specific event loop scheduler.
     ///
@@ -68,8 +68,8 @@ class TreeReconciler {
     let scheduler: (@escaping () -> Void) -> Void
     
     init<Content>(content: Content,
-                  target: UIKitTarget,
-                  renderer: UIKitRenderer,
+                  target: R.TargetType,
+                  renderer: R,
                   scheduler: @escaping (@escaping () -> Void) -> Void)
     where Content : SContent {
         self.renderer = renderer
@@ -97,7 +97,7 @@ class TreeReconciler {
     
     /// Updates the host's storage and schedules a render update.
     private
-    func queueStorageUpdate(for elementHost: CompositeElementHost,
+    func queueStorageUpdate(for elementHost: CompositeElementHost<R>,
                               id: Int,
                               updateHandler: (inout Any) -> Void) {
         updateHandler(&elementHost.storage[id])
@@ -108,7 +108,7 @@ class TreeReconciler {
     ///
     /// If a rendering has already been scheduled within this event loop, the host is simply added to the existing queue.
     private
-    func queueUpdate(for elementHost: CompositeElementHost) {
+    func queueUpdate(for elementHost: CompositeElementHost<R>) {
         let shouldSchedule = renderQueue.isEmpty
         renderQueue.append(.init(element: elementHost))
         
@@ -134,8 +134,8 @@ class TreeReconciler {
     private
     func initStorage(id: Int,
                      for property: PropertyInfo,
-                     of compositeElement: CompositeElementHost,
-                     bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) {
+                     of compositeElement: CompositeElementHost<R>,
+                     bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) {
 
         var storage = property.get(from: compositeElement[keyPath: bodyKeyPath]) as! ValueStorage
         
@@ -163,8 +163,8 @@ class TreeReconciler {
     /// ...
     private
     func initTransientSubscription(for property: PropertyInfo,
-                                   of compositeElement: CompositeElementHost,
-                                   bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) {
+                                   of compositeElement: CompositeElementHost<R>,
+                                   bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) {
         let observed = property.get(from: compositeElement[keyPath: bodyKeyPath]) as! SObservedProperty
         
         observed
@@ -192,8 +192,8 @@ class TreeReconciler {
     ///
     /// - Returns: The body of the host's composite element using the provided key path.
     private
-    func processBody(of compositeElement: CompositeElementHost,
-                     body bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) -> Any {
+    func processBody(of compositeElement: CompositeElementHost<R>,
+                     body bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) -> Any {
         
         compositeElement.updateEnvironment()
         
@@ -227,7 +227,7 @@ class TreeReconciler {
     /// Processes the body of the host's composite element and then asks the renderer for a rendered version of the body or continues down the chain if one is not provided.
     ///
     /// - Returns: The rendered primitive body of the host's composite element or the non-primitive body if a rendered body is not provided.
-    func render(compositeElement: CompositeElementHost) -> AnySContent {
+    func render(compositeElement: CompositeElementHost<R>) -> AnySContent {
         let content = processBody(of: compositeElement,
                                   body: \.content.content)
         
@@ -253,11 +253,11 @@ class TreeReconciler {
     /// Reconciles the `CompositeElementHost` with an updated element.
     ///
     /// Compares the existing composite host's elements to the updated element and either adds, replaces, or updates them in-place.
-    func reconcile<Element>(compositeElement: CompositeElementHost,
+    func reconcile<Element>(compositeElement: CompositeElementHost<R>,
                             with element: Element,
                             getElementType: (Element) -> Any.Type,
-                            updateChild: (ElementHost) -> Void,
-                            mountChild: (Element) -> ElementHost) {
+                            updateChild: (ElementHost<R>) -> Void,
+                            mountChild: (Element) -> ElementHost<R>) {
         
         // FIXME: for now without properly handling `Group` and `TupleView` mounted composite views
         // have only a single element in `mountedChildren`, but this will change when

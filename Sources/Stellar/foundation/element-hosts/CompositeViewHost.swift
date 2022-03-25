@@ -8,12 +8,12 @@
 import Foundation
 
 final
-class CompositeViewHost: CompositeElementHost {
+class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
     
     override
-    func mount(beforeSibling sibling: UIKitTarget?,
-               onParent parent: ElementHost?,
-               reconciler: TreeReconciler) {
+    func mount(beforeSibling sibling: R.TargetType?,
+               onParent parent: ElementHost<R>?,
+               reconciler: TreeReconciler<R>) {
         super.prepareForMount()
         
         // render body and create a child element host.
@@ -41,7 +41,7 @@ class CompositeViewHost: CompositeElementHost {
     }
     
     override
-    func update(inReconciler reconciler: TreeReconciler) {
+    func update(inReconciler reconciler: TreeReconciler<R>) {
         // TODO: Handle transaction.
         // TODO: Update variadic views.
         
@@ -64,8 +64,8 @@ class CompositeViewHost: CompositeElementHost {
     }
     
     override
-    func unmount(in reconciler: TreeReconciler,
-                 parentTask: UnmountTask<UIKitRenderer>?) {
+    func unmount(in reconciler: TreeReconciler<R>,
+                 parentTask: UnmountTask<R>?) {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         

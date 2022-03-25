@@ -62,11 +62,11 @@ class UnmountTask<R> where R: Renderer {
 /// The state for the unmounting of a `PrimitiveViewHost` by a `Renderer`.
 final
 class UnmountHostTask<R>: UnmountTask<R> where R: Renderer {
-    private(set) weak var host: PrimitiveViewHost!
-    private unowned var reconciler: TreeReconciler
+    private(set) weak var host: PrimitiveViewHost<R>!
+    private unowned var reconciler: TreeReconciler<R>
     
-    init(_ host: PrimitiveViewHost,
-         in reconciler: TreeReconciler,
+    init(_ host: PrimitiveViewHost<R>,
+         in reconciler: TreeReconciler<R>,
          callback: @escaping () -> ()) {
         self.host = host
         self.reconciler = reconciler

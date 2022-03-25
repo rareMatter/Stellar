@@ -12,11 +12,9 @@ import UIKit
 final
 class UIKitRenderer: Renderer {
     
-    typealias TargetType = UIKitTarget
-    
     /// The reconciler to use when updating and rendering.
     private
-    var reconciler: TreeReconciler!
+    var reconciler: TreeReconciler<UIKitRenderer>!
     
     /// Use this to schedule updates to the Descriptive Tree.
     let scheduler: DispatchQueue
@@ -43,7 +41,7 @@ class UIKitRenderer: Renderer {
     
     func mountTarget(before sibling: UIKitTarget?,
                      on parent: UIKitTarget,
-                     with host: ElementHost) -> UIKitTarget? {
+                     with host: PrimitiveViewHost<UIKitRenderer>) -> UIKitTarget? {
         // TODO: Create map function (similar to Tokamak) to avoid diving down into `AnySContent` content properties.
         if let anyPrimitive = host.content.content as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
@@ -62,7 +60,7 @@ class UIKitRenderer: Renderer {
     }
     
     func update(target: UIKitTarget,
-                with host: ElementHost) {
+                with host: PrimitiveViewHost<UIKitRenderer>) {
         if let anyUIKitPrimitive = host.content.content as? AnyUIKitPrimitive {
             target.update(withPrimitive: anyUIKitPrimitive)
         }
