@@ -44,13 +44,14 @@ class UIKitRenderer: Renderer {
     func mountTarget(before sibling: UIKitTarget?,
                      on parent: UIKitTarget,
                      with host: ElementHost) -> UIKitTarget? {
-        
+        // TODO: Create map function (similar to Tokamak) to avoid diving down into `AnySContent` content properties.
         if let anyPrimitive = host.content.content as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
                                      anyUIKitPrimitive: anyPrimitive)
             parent.addChild(target, before: sibling)
             return target
         }
+        // TODO: This should probably be checking for GroupedContent?
         // Handle container primitives which haven't been declared UIKit renderable by passing down the parent target
         else if host.content.content is _SContentContainer {
             return parent

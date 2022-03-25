@@ -7,9 +7,9 @@
 
 import Foundation
 
-/// A live view host whose hosted content is primitive.
+/// A content host whose hosted content is primitive.
 ///
-/// The lifecycle of this host is managed by the reconciler in order to provide content tree hosting. Updates are handled through this type and other similar types in the live tree managed by the reconciler.
+/// The lifecycle of this host is managed by the reconciler in order to provide `Descriptive Tree` hosting. Updates are handled through this type and other similar types in the `Live Tree` managed by the `TreeReconciler`.
 final
 class PrimitiveViewHost: ElementHost {
     
@@ -60,7 +60,7 @@ class PrimitiveViewHost: ElementHost {
         children = content.children.map {
             $0.makeElementHost(with: reconciler.renderer,
                                parentTarget: target,
-                               parent: self)
+                               parentHost: self)
         }
         
         children.forEach { child in
@@ -105,7 +105,7 @@ class PrimitiveViewHost: ElementHost {
                 children = childrenContent.map { childContent in
                     childContent.makeElementHost(with: reconciler.renderer,
                                                  parentTarget: target,
-                                                 parent: self)
+                                                 parentHost: self)
                 }
                 children.forEach { childHost in
                     childHost.mount(beforeSibling: nil,
@@ -141,7 +141,7 @@ class PrimitiveViewHost: ElementHost {
                     else {
                         newChild = childContent.makeElementHost(with: reconciler.renderer,
                                                                 parentTarget: target,
-                                                                parent: self)
+                                                                parentHost: self)
                         newChild.mount(beforeSibling: childHost.findFirstDescendantPrimitiveTarget(),
                                        onParent: self,
                                        reconciler: reconciler)
@@ -166,7 +166,7 @@ class PrimitiveViewHost: ElementHost {
                     childrenContent.forEach { childContent in
                         let newChild: ElementHost = childContent.makeElementHost(with: reconciler.renderer,
                                                                                  parentTarget: target,
-                                                                                 parent: self)
+                                                                                 parentHost: self)
                         newChild.mount(beforeSibling: nil,
                                        onParent: self,
                                        reconciler: reconciler)

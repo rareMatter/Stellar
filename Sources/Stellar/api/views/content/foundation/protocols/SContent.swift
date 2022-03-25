@@ -8,6 +8,8 @@
 import Foundation
 
 /// A description of content used to create some Stellar views.
+///
+/// - Important: Only use `struct` when making your content.
 public
 protocol SContent {
     /// The body content type provided by this content.

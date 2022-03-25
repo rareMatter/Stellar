@@ -78,7 +78,7 @@ class TreeReconciler {
         
         rootElementHost = AnySContent(content).makeElementHost(with: renderer,
                                                                parentTarget: rootTarget,
-                                                               parent: nil)
+                                                               parentHost: nil)
         
         performInitialMount()
     }

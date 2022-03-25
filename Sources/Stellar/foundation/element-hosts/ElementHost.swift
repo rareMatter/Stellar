@@ -7,9 +7,9 @@
 
 import Foundation
 
-/// The base host for live elements, including the various types of description tree content.
+/// The base host for live elements, including the various types of `Descriptive Tree` content.
 ///
-/// Other host types inherit and specialize upon this one, depending on the type of description element.
+/// Other host types inherit and specialize upon this one, depending on the type of `Descriptive Tree` element.
 class ElementHost {
     
     /// The type-erased element being hosted.
@@ -157,20 +157,20 @@ extension AnySContent {
     /// Creates an element host type depending on the wrapped type of `self`.
     func makeElementHost(with renderer: UIKitRenderer,
                          parentTarget: UIKitTarget,
-                         parent: ElementHost?) -> ElementHost {
+                         parentHost: ElementHost?) -> ElementHost {
         if type == SEmptyContent.self {
             return EmptyElementHost(content: self,
-                                    parent: parent)
+                                    parent: parentHost)
         }
         else if bodyType == Never.self && !renderer.isPrimitiveContent(type) {
             return PrimitiveViewHost(content: self,
                                      parentTarget: parentTarget,
-                                     parent: parent)
+                                     parent: parentHost)
         }
         else {
             return CompositeViewHost(content: self,
                                      parentTarget: parentTarget,
-                                     parent: parent)
+                                     parent: parentHost)
         }
     }
 }

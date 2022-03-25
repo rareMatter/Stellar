@@ -20,7 +20,7 @@ class CompositeViewHost: CompositeElementHost {
         let childBody = reconciler.render(compositeElement: self)
         let child = childBody.makeElementHost(with: reconciler.renderer,
                                               parentTarget: parentTarget,
-                                              parent: self)
+                                              parentHost: self)
         // add child host to self and tell it to mount
         children = [child]
         child.mount(beforeSibling: sibling,
@@ -59,7 +59,7 @@ class CompositeViewHost: CompositeElementHost {
                              mountChild: { element in
             element.makeElementHost(with: reconciler.renderer,
                                     parentTarget: parentTarget,
-                                    parent: self)
+                                    parentHost: self)
         })
     }
     
