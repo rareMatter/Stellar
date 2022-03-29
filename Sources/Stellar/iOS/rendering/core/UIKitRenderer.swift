@@ -80,7 +80,7 @@ class UIKitRenderer: Renderer {
         task.finish()
     }
     
-    func bodyFor(primitiveContent: Any) -> AnySContent? {
+    func platformMap(primitiveContent: Any) -> AnySContent? {
         (primitiveContent as? UIKitPrimitive)?.renderedBody
     }
     

@@ -31,6 +31,12 @@ class ElementHost<R: Renderer> {
         set { hostedElement = .content(newValue) }
     }
     
+    /// Convenient access to the type-erased content instance wrapped by `AnySContent` in the `content` property.
+    var wrappedContent: Any {
+        get { content.content }
+        set { content.content = newValue }
+    }
+    
     /// The type constructor name, which excludes generic parameters, of the hosted element.
     var typeConstructorName: String {
         switch hostedElement {
@@ -154,10 +160,11 @@ extension ElementHost {
 // MARK: AnySContent factory method
 extension AnySContent {
     
-    /// Creates an element host type depending on the wrapped type of `self`.
+    /// Creates an element host type depending on the wrapped type.
     func makeElementHost<R: Renderer>(with renderer: R,
                                       parentTarget: R.TargetType,
                                       parentHost: ElementHost<R>?) -> ElementHost<R> {
+        // TODO: Why are types declared primitive by the renderer directed into a CompositeViewHost?
         if type == SEmptyContent.self {
             return EmptyElementHost(content: self,
                                     parent: parentHost)

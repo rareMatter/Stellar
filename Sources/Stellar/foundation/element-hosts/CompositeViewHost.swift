@@ -16,14 +16,14 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
                reconciler: TreeReconciler<R>) {
         super.prepareForMount()
         
-        // render body and create a child element host.
-        let childBody = reconciler.render(compositeElement: self)
-        let child = childBody.makeElementHost(with: reconciler.renderer,
+        // render element and create a child element host
+        let renderedHostedElement = reconciler.render(compositeView: self)
+        let childHost = renderedHostedElement.makeElementHost(with: reconciler.renderer,
                                               parentTarget: parentTarget,
                                               parentHost: self)
         // add child host to self and tell it to mount
-        children = [child]
-        child.mount(beforeSibling: sibling,
+        children = [childHost]
+        childHost.mount(beforeSibling: sibling,
                     onParent: self,
                     reconciler: reconciler)
         
@@ -45,15 +45,15 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
         // TODO: Handle transaction.
         // TODO: Update variadic views.
         
-        let childBody = reconciler.render(compositeElement: self)
+        let renderedHostedElement = reconciler.render(compositeView: self)
         
         reconciler.reconcile(compositeElement: self,
-                             with: childBody,
+                             with: renderedHostedElement,
                              getElementType: { $0.type },
                              updateChild: { childHost in
             // TODO: ...
 //            childHost.environmentValues = environmentValues
-            childHost.content = AnySContent(childBody)
+            childHost.content = AnySContent(renderedHostedElement)
 //            childHost.transaction = transaction
         },
                              mountChild: { element in

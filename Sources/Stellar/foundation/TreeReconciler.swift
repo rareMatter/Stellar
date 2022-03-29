@@ -188,54 +188,60 @@ class TreeReconciler<R: Renderer> {
     
     // MARK: - rendering and composite processing
     
-    /// Updates the host's environment, inspects the element's body and sets up the host's value storage and transient subscriptions.
+    /// Updates the host's environment and inspects the hosted element to set up the host's value storage and transient subscriptions.
     ///
-    /// - Returns: The body of the host's composite element using the provided key path.
+    /// - Returns: The host's composite element using the provided key path.
     private
-    func processBody(of compositeElement: CompositeElementHost<R>,
-                     body bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) -> Any {
+    func processBody(of compositeElementHost: CompositeElementHost<R>,
+                     hostedElement: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) -> Any {
         
-        compositeElement.updateEnvironment()
+        compositeElementHost.updateEnvironment()
         
-        if let typeInfo = typeInfo(of: compositeElement.hostedElementType) {
+        if let typeInfo = typeInfo(of: compositeElementHost.hostedElementType) {
             var stateIdx = 0
-            let dynamicProperties = typeInfo.dynamicProperties(in: &compositeElement[keyPath: bodyKeyPath])
+            let dynamicProperties = typeInfo.dynamicProperties(in: &compositeElementHost[keyPath: hostedElement])
             
-            compositeElement.transientSubscriptions = []
+            compositeElementHost.transientSubscriptions = []
             
             for property in dynamicProperties {
                 // set up state and subscriptions
                 if property.type is ValueStorage.Type {
                     initStorage(id: stateIdx,
                                 for: property,
-                                of: compositeElement,
-                                bodyKeyPath: bodyKeyPath)
+                                of: compositeElementHost,
+                                bodyKeyPath: hostedElement)
                     stateIdx += 1
                 }
                 if property.type is SObservedProperty.Type {
                     initTransientSubscription(for: property,
-                                                 of: compositeElement,
-                                                 bodyKeyPath: bodyKeyPath)
+                                              of: compositeElementHost,
+                                              bodyKeyPath: hostedElement)
                 }
             }
         }
         // TODO: This should probably not be silently skipped. If type info cannot be determined, it's likely that a class type was provided and the client should be informed in some way.
         
-        return compositeElement[keyPath: bodyKeyPath]
+        return compositeElementHost[keyPath: hostedElement]
     }
     
-    /// Processes the body of the host's composite element and then asks the renderer for a rendered version of the body or continues down the chain if one is not provided.
+    /// Processes the body of the host's composite content and asks the renderer for a mapped instance. If a mapped instance is not provided the content is skipped.
     ///
-    /// - Returns: The rendered primitive body of the host's composite element or the non-primitive body if a rendered body is not provided.
-    func render(compositeElement: CompositeElementHost<R>) -> AnySContent {
-        let content = processBody(of: compositeElement,
-                                  body: \.content.content)
+    /// - Returns: The renderer-provided content instance or the body of the host's content if one is not provided.
+    /// The rendered primitive body of the host's composite element or the non-primitive body if a rendered body is not provided.
+    func render(compositeView: CompositeViewHost<R>) -> AnySContent {
         
-        guard let renderedBody = renderer.bodyFor(primitiveContent: content) else {
-            return compositeElement.content.bodyProvider(content)
+        // retrieve the hosted element through the processing function
+        let content = processBody(of: compositeView,
+                                  hostedElement: \.wrappedContent)
+        
+        // ask the renderer for a mapped instance
+        guard let platformMappedContent = renderer.platformMap(primitiveContent: content) else {
+            // TODO: This call seems like it could potentially crash on a body of type Never, since it seems that a CompositeViewHost could be created with content whose body type is Never. It seems this will happen anytime a renderer claims a type is 'primitive' and then does not provided a 'rendered' instance.
+            // if a mapped instance is not provided, simply skip the content to continue the chain.
+            return compositeView.content.bodyProvider(content)
         }
         
-        return renderedBody
+        return platformMappedContent
     }
     
     // TODO: Need rendering for other element types.
