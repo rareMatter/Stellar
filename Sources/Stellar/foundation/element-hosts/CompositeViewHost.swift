@@ -16,16 +16,23 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
                reconciler: TreeReconciler<R>) {
         super.prepareForMount()
         
-        // render element and create a child element host
-        let renderedHostedElement = reconciler.render(compositeView: self)
-        let childHost = renderedHostedElement.makeElementHost(with: reconciler.renderer,
-                                              parentTarget: parentTarget,
-                                              parentHost: self)
+        // tell the reconciler to process self's hosted content
+        reconciler.processBody(of: self,
+                               hostedElement: \.wrappedContent)
+        
+        // create a child host for the body of self's hosted content after it has been processed
+        let childHostedContent = content
+            .bodyProvider(wrappedContent)
+        let childHost = childHostedContent
+            .makeElementHost(with: reconciler.renderer,
+                             parentTarget: parentTarget,
+                             parentHost: self)
+        
         // add child host to self and tell it to mount
         children = [childHost]
         childHost.mount(beforeSibling: sibling,
-                    onParent: self,
-                    reconciler: reconciler)
+                        onParent: self,
+                        reconciler: reconciler)
         
         // TODO: schedule post-render callbacks to handle appearance actions and update preferences.
         /*
@@ -45,22 +52,29 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
         // TODO: Handle transaction.
         // TODO: Update variadic views.
         
-        let renderedHostedElement = reconciler.render(compositeView: self)
+        // tell the reconciler to process self's hosted content
+        // In tokamak:
+        // - when self's element is "renderer primitive", the element returned by the renderer would be added as a child here.
+        // - when self's element is NOT "renderer primitive" and has a body, the 'render' function would call the body and that would be used here.
+        reconciler.processBody(of: self,
+                               hostedElement: \.wrappedContent)
         
-        reconciler.reconcile(compositeElement: self,
-                             with: renderedHostedElement,
-                             getElementType: { $0.type },
-                             updateChild: { childHost in
+        // TODO: Why is the reconcile function asking this instance to handle child behaviors in closures?
+        // reconcile state changes with child content
+        let childHostedContent = content
+            .bodyProvider(wrappedContent)
+        reconciler.reconcileChildren(self,
+                                     with: childHostedContent,
+                                     getElementType: { $0.type },
+                                     updateChildHost: {
             // TODO: ...
-//            childHost.environmentValues = environmentValues
-            childHost.content = AnySContent(renderedHostedElement)
-//            childHost.transaction = transaction
+            //            childHost.environmentValues = environmentValues
+            $0.content = AnySContent(childHostedContent)
+            //            childHost.transaction = transaction
         },
-                             mountChild: { element in
-            element.makeElementHost(with: reconciler.renderer,
-                                    parentTarget: parentTarget,
-                                    parentHost: self)
-        })
+                                     mountChildElement: { $0.makeElementHost(with: reconciler.renderer,
+                                                                      parentTarget: parentTarget,
+                                                                      parentHost: self) })
     }
     
     override

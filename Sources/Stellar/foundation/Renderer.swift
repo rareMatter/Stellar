@@ -43,17 +43,4 @@ protocol Renderer: AnyObject {
     func unmount(target: TargetType,
                  from parent: TargetType,
                  withTask task: UnmountHostTask<Self>)
-    
-    // TODO: These functions have two primary effects as currently used: 1) implicitly allows the renderer to direct how a framework primitive is hosted (from a PrimitiveViewHost to a CompositeViewHost); 2) explicitly allows the renderer to swap out an API primitive type to any SContent type it chooses.
-    // TODO: 1) means that if the renderer claims a type will be mapped in `isPrimitiveContent` and does not provide one from `platformMap`, that type's body will be called even if its actually primitive. Therefore, if the renderer claims a type will be mapped in `isPrimitiveContent`, that type MUST be provided by `platformMap`.
-    // TODO: The framework processes the provided primitive type before asking to have it mapped by the renderer.
-    /// Maps the provided primitive content to a platform-provided type if needed. Simply return the provided type is no mapping is necessary.
-    ///
-    /// If nil is returned, the content will be skipped and the renderer should expect to *not* encounter the instance in the `Descriptive Tree` hierarchy. This may be useful in some scenarios but should be avoided in order to match the `Live Tree` exactly to the `Descriptive Tree` as expected.
-    func platformMap(primitiveContent: Any) -> AnySContent?
-    
-    // TODO: Can this be removed to simplify and clarify renderer requirements, while still allowing internal components to utilize `bodyFor` for the same purpose? It seems having these two function as separate allows for a gap for inconsistency and ultimately crashes.
-    // TODO: This should probably not mention primitive content - the content associated with this method is treated as composite by the reconciler. Call it `shouldMap`?
-    /// Asks the renderer if the primitive content type can be rendered.
-    func isPrimitiveContent(_ type: Any.Type) -> Bool
 }

@@ -164,12 +164,11 @@ extension AnySContent {
     func makeElementHost<R: Renderer>(with renderer: R,
                                       parentTarget: R.TargetType,
                                       parentHost: ElementHost<R>?) -> ElementHost<R> {
-        // TODO: Why are types declared primitive by the renderer directed into a CompositeViewHost?
         if type == SEmptyContent.self {
             return EmptyElementHost(content: self,
                                     parent: parentHost)
         }
-        else if bodyType == Never.self && !renderer.isPrimitiveContent(type) {
+        else if bodyType == Never.self {
             return PrimitiveViewHost(content: self,
                                      parentTarget: parentTarget,
                                      parent: parentHost)

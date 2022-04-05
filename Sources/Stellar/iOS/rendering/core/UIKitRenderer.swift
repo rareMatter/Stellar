@@ -79,12 +79,4 @@ class UIKitRenderer: Renderer {
         
         task.finish()
     }
-    
-    func platformMap(primitiveContent: Any) -> AnySContent? {
-        (primitiveContent as? UIKitPrimitive)?.renderedBody
-    }
-    
-    func isPrimitiveContent(_ type: Any.Type) -> Bool {
-        type is UIKitPrimitive.Type
-    }
 }

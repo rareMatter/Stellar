@@ -188,60 +188,38 @@ class TreeReconciler<R: Renderer> {
     
     // MARK: - rendering and composite processing
     
-    /// Updates the host's environment and inspects the hosted element to set up the host's value storage and transient subscriptions.
-    ///
-    /// - Returns: The host's composite element using the provided key path.
-    private
+    /// Updates the host's environment and inspects the hosted element at the key path to set up the host's value storage and transient subscriptions.
     func processBody(of compositeElementHost: CompositeElementHost<R>,
-                     hostedElement: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) -> Any {
+                     hostedElement: ReferenceWritableKeyPath<CompositeElementHost<R>, Any>) {
         
         compositeElementHost.updateEnvironment()
         
-        if let typeInfo = typeInfo(of: compositeElementHost.hostedElementType) {
-            var stateIdx = 0
-            let dynamicProperties = typeInfo.dynamicProperties(in: &compositeElementHost[keyPath: hostedElement])
-            
-            compositeElementHost.transientSubscriptions = []
-            
-            for property in dynamicProperties {
-                // set up state and subscriptions
-                if property.type is ValueStorage.Type {
-                    initStorage(id: stateIdx,
-                                for: property,
-                                of: compositeElementHost,
-                                bodyKeyPath: hostedElement)
-                    stateIdx += 1
-                }
-                if property.type is SObservedProperty.Type {
-                    initTransientSubscription(for: property,
-                                              of: compositeElementHost,
-                                              bodyKeyPath: hostedElement)
-                }
+        guard let typeInfo = typeInfo(of: compositeElementHost.hostedElementType)
+        else {
+            // TODO: If type info cannot be determined, it's likely that a class type was provided and the client should be informed in some way.
+            fatalError()
+        }
+        
+        var stateIdx = 0
+        let dynamicProperties = typeInfo.dynamicProperties(in: &compositeElementHost[keyPath: hostedElement])
+        
+        compositeElementHost.transientSubscriptions = []
+        
+        for property in dynamicProperties {
+            // set up state and subscriptions
+            if property.type is ValueStorage.Type {
+                initStorage(id: stateIdx,
+                            for: property,
+                            of: compositeElementHost,
+                            bodyKeyPath: hostedElement)
+                stateIdx += 1
+            }
+            if property.type is SObservedProperty.Type {
+                initTransientSubscription(for: property,
+                                          of: compositeElementHost,
+                                          bodyKeyPath: hostedElement)
             }
         }
-        // TODO: This should probably not be silently skipped. If type info cannot be determined, it's likely that a class type was provided and the client should be informed in some way.
-        
-        return compositeElementHost[keyPath: hostedElement]
-    }
-    
-    /// Processes the body of the host's composite content and asks the renderer for a mapped instance. If a mapped instance is not provided the content is skipped.
-    ///
-    /// - Returns: The renderer-provided content instance or the body of the host's content if one is not provided.
-    /// The rendered primitive body of the host's composite element or the non-primitive body if a rendered body is not provided.
-    func render(compositeView: CompositeViewHost<R>) -> AnySContent {
-        
-        // retrieve the hosted element through the processing function
-        let content = processBody(of: compositeView,
-                                  hostedElement: \.wrappedContent)
-        
-        // ask the renderer for a mapped instance
-        guard let platformMappedContent = renderer.platformMap(primitiveContent: content) else {
-            // TODO: This call seems like it could potentially crash on a body of type Never, since it seems that a CompositeViewHost could be created with content whose body type is Never. It seems this will happen anytime a renderer claims a type is 'primitive' and then does not provided a 'rendered' instance.
-            // if a mapped instance is not provided, simply skip the content to continue the chain.
-            return compositeView.content.bodyProvider(content)
-        }
-        
-        return platformMappedContent
     }
     
     // TODO: Need rendering for other element types.
@@ -256,48 +234,50 @@ class TreeReconciler<R: Renderer> {
      }
      */
     
-    /// Reconciles the `CompositeElementHost` with an updated element.
+    /// Reconciles the `CompositeElementHost` children with an updated child element.
     ///
-    /// Compares the existing composite host's elements to the updated element and either adds, replaces, or updates them in-place.
-    func reconcile<Element>(compositeElement: CompositeElementHost<R>,
-                            with element: Element,
+    /// Compares the existing composite host's child elements to the updated child element and either adds, replaces, or updates them in-place.
+    func reconcileChildren<Element>(_ compositeElementHost: CompositeElementHost<R>,
+                            with childElement: Element,
                             getElementType: (Element) -> Any.Type,
-                            updateChild: (ElementHost<R>) -> Void,
-                            mountChild: (Element) -> ElementHost<R>) {
+                            updateChildHost: (ElementHost<R>) -> Void,
+                            mountChildElement: (Element) -> ElementHost<R>) {
         
         // FIXME: for now without properly handling `Group` and `TupleView` mounted composite views
         // have only a single element in `mountedChildren`, but this will change when
         // fragments are implemented and this switch should be rewritten to compare
         // all elements in `mountedChildren`
-        switch (compositeElement.children.last, element) {
-            case let (nil, elementBody):
-                // no live children previously, but now there are
-                let child = mountChild(elementBody)
-                compositeElement.children = [child]
-                child.mount(beforeSibling: nil,
+        switch (compositeElementHost.children.last, childElement) {
+        case let (nil, childElement):
+            // a child was added.
+            // use the mounting closure to create a child host,
+            // and add it to the parent then tell it to mount.
+            let childHost = mountChildElement(childElement)
+            compositeElementHost.children = [childHost]
+            childHost.mount(beforeSibling: nil,
                             onParent: nil,
                             reconciler: self)
+            
+        case let (liveChild?, childElement):
+            // there is already children, reconcile the differences.
+            let childBodyType = getElementType(childElement)
+            
+            // new child has the same type as the existing child
+            if liveChild.typeConstructorName == typeConstructorName(childBodyType) {
+                updateChildHost(liveChild)
+                liveChild.update(inReconciler: self)
+            }
+            else {
+                // new child is a different type.
+                // unmount the old child, then mount a new one with the new `childBody`
+                liveChild.unmount(in: self, parentTask: nil)
                 
-            case let (liveChild?, elementBody):
-                // some live children before and now
-                let childBodyType = getElementType(elementBody)
-                
-                if liveChild.typeConstructorName == typeConstructorName(childBodyType) {
-                    // new child has the same type as the existing child
-                    updateChild(liveChild)
-                    liveChild.update(inReconciler: self)
-                }
-                else {
-                    // new child is a different type.
-                    // unmount the old child, then mount a new one with the new `childBody`
-                    liveChild.unmount(in: self, parentTask: nil)
-                    
-                    let newMountedChild = mountChild(elementBody)
-                    compositeElement.children = [newMountedChild]
-                    newMountedChild.mount(beforeSibling: nil,
-                                          onParent: nil,
-                                          reconciler: self)
-                }
+                let newChildHost = mountChildElement(childElement)
+                compositeElementHost.children = [newChildHost]
+                newChildHost.mount(beforeSibling: nil,
+                                      onParent: nil,
+                                      reconciler: self)
+            }
         }
     }
     
