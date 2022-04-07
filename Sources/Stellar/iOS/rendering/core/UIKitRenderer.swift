@@ -39,11 +39,9 @@ class UIKitRenderer: Renderer {
                                 scheduler: { scheduler.schedule(options: nil, $0) })
     }
     
-    func mountTarget(before sibling: UIKitTarget?,
-                     on parent: UIKitTarget,
-                     with host: PrimitiveViewHost<UIKitRenderer>) -> UIKitTarget? {
+    func makeTarget(for host: PrimitiveViewHost<UIKitRenderer>, beforeSibling sibling: UIKitTarget?, withParent parent: UIKitTarget) -> UIKitTarget? {
         // TODO: Create map function (similar to Tokamak) to avoid diving down into `AnySContent` content properties.
-        if let anyPrimitive = host.content.content as? AnyUIKitPrimitive {
+        if let anyPrimitive = host.wrappedContent as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
                                      anyUIKitPrimitive: anyPrimitive)
             parent.addChild(target, before: sibling)
@@ -51,7 +49,7 @@ class UIKitRenderer: Renderer {
         }
         // TODO: This should probably be checking for GroupedContent?
         // Handle container primitives which haven't been declared UIKit renderable by passing down the parent target
-        else if host.content.content is _SContentContainer {
+        else if host.wrappedContent is _SContentContainer {
             return parent
         }
         
@@ -59,19 +57,17 @@ class UIKitRenderer: Renderer {
         return nil
     }
     
-    func update(target: UIKitTarget,
+    func update(_ target: UIKitTarget,
                 with host: PrimitiveViewHost<UIKitRenderer>) {
-        if let anyUIKitPrimitive = host.content.content as? AnyUIKitPrimitive {
+        if let anyUIKitPrimitive = host.wrappedContent as? AnyUIKitPrimitive {
             target.update(withPrimitive: anyUIKitPrimitive)
         }
     }
     
-    func unmount(target: UIKitTarget,
-                 from parent: UIKitTarget,
-                 withTask task: UnmountHostTask<UIKitRenderer>) {
+    func remove(_ target: UIKitTarget, fromParent parent: UIKitTarget, withTask task: UnmountHostTask<UIKitRenderer>) {
         // TODO: This likely needs the same type checks as mount.
         
-        if let _ = task.host.content.content as? AnyUIKitPrimitive {
+        if let _ = task.host.wrappedContent as? AnyUIKitPrimitive {
             parent.removeChild(target)
         }
         

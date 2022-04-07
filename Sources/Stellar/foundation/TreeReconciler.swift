@@ -8,7 +8,7 @@
 import Combine
 import SwiftUI
 
-/// The `TreeReconciler` handles updating of the "Live Tree" (such as `PrimitiveViewHost`) when state changes are seen in the dynamic properties declared by the "Descriptive Tree" (such as `SContent` values), or other changes occur which require updates, such as user interactions or environment properties.
+/// The `Tree Reconciler` handles updating of the "Live Tree" (such as `PrimitiveViewHost`) when state changes are observed in the "Descriptive Tree" (`SContent` values), or other changes occur which require updates, such as user interactions or environment properties.
 ///
 /// Any updates in the Descriptive Tree are reflected in the Live Tree.
 ///
@@ -45,7 +45,7 @@ class TreeReconciler<R: Renderer> {
     /// The root target provided at creation of this renderer which hosts the platform-specific `Descriptive Tree`.
     ///
     /// Use this from your platform renderer to access the rendered content hierarchy, generally when installing the rendered content into your user-visible window or viewport.
-    let rootTarget: R.TargetType
+    let rootTarget: R.RenderableTarget
     
     /// The root of the `Live Tree` of hosted elements.
     ///
@@ -68,7 +68,7 @@ class TreeReconciler<R: Renderer> {
     let scheduler: (@escaping () -> Void) -> Void
     
     init<Content>(content: Content,
-                  target: R.TargetType,
+                  target: R.RenderableTarget,
                   renderer: R,
                   scheduler: @escaping (@escaping () -> Void) -> Void)
     where Content : SContent {

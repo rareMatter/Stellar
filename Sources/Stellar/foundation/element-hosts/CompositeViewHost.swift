@@ -11,7 +11,7 @@ final
 class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
     
     override
-    func mount(beforeSibling sibling: R.TargetType?,
+    func mount(beforeSibling sibling: R.RenderableTarget?,
                onParent parent: ElementHost<R>?,
                reconciler: TreeReconciler<R>) {
         super.prepareForMount()

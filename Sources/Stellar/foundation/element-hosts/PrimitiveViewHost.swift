@@ -19,17 +19,17 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
     ///
     /// This means the `parentTarget` is not always the same as the target of a parent `View`.
     private
-    let parentTarget: R.TargetType
+    let parentTarget: R.RenderableTarget
     
     /// Renderable target of this host, supplied by the platform renderer after mounting.
     private(set)
-    var target: R.TargetType?
+    var target: R.RenderableTarget?
     
     private
     var parentUnmountTask = UnmountTask<R>()
     
     init(content: AnySContent,
-         parentTarget: R.TargetType,
+         parentTarget: R.RenderableTarget,
          parent: ElementHost<R>?) {
         self.parentTarget = parentTarget
         
@@ -39,7 +39,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
     
     // TODO: Need transaction and reconciler params.
     override
-    func mount(beforeSibling sibling: R.TargetType?,
+    func mount(beforeSibling sibling: R.RenderableTarget?,
                onParent parent: ElementHost<R>?,
                reconciler: TreeReconciler<R>) {
         super.prepareForMount()
@@ -47,9 +47,13 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
 //        self.transaction = transaction
         
         // get target from renderer and store it.
-        guard let target = reconciler.renderer.mountTarget(before: sibling,
-                                                           on: parentTarget,
-                                                           with: self) else { return }
+        guard let target = reconciler
+            .renderer
+            .makeTarget(for: self,
+                        beforeSibling: sibling,
+                        withParent: parentTarget) else {
+            return
+        }
         self.target = target
         
         // create and mount children if any exist.
@@ -82,7 +86,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
         
         updateEnvironment()
         target.content = content
-        reconciler.renderer.update(target: target,
+        reconciler.renderer.update(target,
                                    with: self)
         
         var childrenContent = content.children
@@ -201,8 +205,8 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
         task.isCancelled = parentTask?.isCancelled ?? false
         unmountTask = task
         parentTask?.childTasks.append(task)
-        reconciler.renderer.unmount(target: target,
-                                    from: parentTarget,
+        reconciler.renderer.remove(target,
+                                    fromParent: parentTarget,
                                     withTask: task)
     }
     

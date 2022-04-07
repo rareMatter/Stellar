@@ -93,7 +93,7 @@ class ElementHost<R: Renderer> {
     /// Performs needed work to make the hosted element live.
     ///
     /// - Important: You *must* call super at the *end* of your subclass implementation.
-    func mount(beforeSibling sibling: R.TargetType?,
+    func mount(beforeSibling sibling: R.RenderableTarget?,
                onParent parent: ElementHost<R>?,
                reconciler: TreeReconciler<R>) {
         // TODO: Set transition phase.
@@ -146,7 +146,7 @@ extension ElementHost {
     /// If self is a `PrimitiveViewHost`, the target is returned. If not, the host hierarchy is recursively checked at each first child until a `PrimitiveViewHost` is found, or nil if a first child does not exist.
     ///
     /// - Note: If a host's content type is `GroupedContent`, it is skipped.
-    func findFirstDescendantPrimitiveTarget() -> R.TargetType? {
+    func findFirstDescendantPrimitiveTarget() -> R.RenderableTarget? {
         if let primitiveHost = self as? PrimitiveViewHost<R>,
            !(primitiveHost.content.type is GroupedContent.Type) {
             return primitiveHost.target
@@ -162,7 +162,7 @@ extension AnySContent {
     
     /// Creates an element host type depending on the wrapped type.
     func makeElementHost<R: Renderer>(with renderer: R,
-                                      parentTarget: R.TargetType,
+                                      parentTarget: R.RenderableTarget,
                                       parentHost: ElementHost<R>?) -> ElementHost<R> {
         if type == SEmptyContent.self {
             return EmptyElementHost(content: self,

@@ -11,7 +11,7 @@ import UIKit
 
 /// A class which stores all properties needed for rendering on `UIKit` supported platforms.
 final
-class UIKitTarget: RenderableTarget {
+class UIKitTarget: PlatformRenderable {
     
     /// The UIKit primitive responsible for producing a renderable view.
     let uiKitPrimitive: AnyUIKitPrimitive
@@ -19,7 +19,7 @@ class UIKitTarget: RenderableTarget {
     /// The live view produced by this target's renderable primitive content.
     let renderableContent: UIKitTargetRenderableContent
     
-    // `RenderableTarget` conformance. This property is updated by the framework before the renderer is asked to update the target instance.
+    // `PlatformRenderable` conformance. This property is updated by the framework before the renderer is asked to update the target instance.
     // TODO: What else does the framework use this property for?
     var content: AnySContent
     
