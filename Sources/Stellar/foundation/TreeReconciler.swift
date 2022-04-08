@@ -14,11 +14,11 @@ import SwiftUI
 ///
 /// How does the Tree Reconciler understand user-created types?
 ///
-/// The reconciler uses Swift's Reflection capabilities in order to inspect and understand Content types that flow through it. While this happens, the reconciler retrieves the properties of types that it's interested in, such as dynamic properties which will cause updates to the Live Tree.
+/// The reconciler uses Swift's reflection capabilities in order to inspect and understand Content types that flow through it. While this happens, the reconciler retrieves the properties of types that it's interested in, such as dynamic properties, which will cause updates to the Live Tree.
 ///
-/// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The renderable target instances will be requested whenever the Descriptive Tree needs to be reconciled with the Live Tree in order to update the rendered appearance of the Live Tree.
+/// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The renderable target instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
-/// Updates are scheduled using a stack implementation. Performance improvements are likely if a multi-threaded implementation is proven to be possible and effective.
+// Updates are scheduled using a stack implementation. Performance improvements are likely if a multi-threaded implementation is proven to be possible and effective.
 final
 class TreeReconciler<R: Renderer> {
     

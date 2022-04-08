@@ -40,7 +40,6 @@ class UIKitRenderer: Renderer {
     }
     
     func makeTarget(for host: PrimitiveViewHost<UIKitRenderer>, beforeSibling sibling: UIKitTarget?, withParent parent: UIKitTarget) -> UIKitTarget? {
-        // TODO: Create map function (similar to Tokamak) to avoid diving down into `AnySContent` content properties.
         if let anyPrimitive = host.wrappedContent as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
                                      anyUIKitPrimitive: anyPrimitive)
