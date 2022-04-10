@@ -18,7 +18,7 @@ import SwiftUI
 ///
 /// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The renderable target instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
-// Updates are scheduled using a stack implementation. Performance improvements are likely if a multi-threaded implementation is proven to be possible and effective.
+// TODO: Investigate concurrent content updating.
 final
 class TreeReconciler<R: Renderer> {
     
@@ -36,9 +36,9 @@ class TreeReconciler<R: Renderer> {
         }
     }
     
+    // TODO: Investigate uniquing this collection for efficiency.
     /// A stack of `Render` values which need reconciliation.
     ///
-    /// - Note: Potential performance improvements may be gained by de-duplicating the collection before rendering. This will be left until performance tests are prepared.
     private
     var renderQueue = [Render]()
     

@@ -59,9 +59,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
         else if wrappedContent is _SContentContainer {
             self.target = parentTarget
         }
-        // a target was not provided by the renderer
-        // and it is not a content container, skip it.
-        else {
+        guard let target = target else {
             return
         }
         
