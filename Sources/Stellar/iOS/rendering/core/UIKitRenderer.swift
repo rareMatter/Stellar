@@ -40,16 +40,12 @@ class UIKitRenderer: Renderer {
     }
     
     func makeTarget(for host: PrimitiveViewHost<UIKitRenderer>, beforeSibling sibling: UIKitTarget?, withParent parent: UIKitTarget) -> UIKitTarget? {
+        
         if let anyPrimitive = host.wrappedContent as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
                                      anyUIKitPrimitive: anyPrimitive)
             parent.addChild(target, before: sibling)
             return target
-        }
-        // TODO: This should probably be checking for GroupedContent?
-        // Handle container primitives which haven't been declared UIKit renderable by passing down the parent target
-        else if host.wrappedContent is _SContentContainer {
-            return parent
         }
         
         // The content isn't recognized by this renderer or hasn't yet been declared renderable by UIKit.

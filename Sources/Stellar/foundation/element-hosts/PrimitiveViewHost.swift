@@ -47,14 +47,23 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
 //        self.transaction = transaction
         
         // get target from renderer and store it.
-        guard let target = reconciler
+        if let target = reconciler
             .renderer
             .makeTarget(for: self,
                         beforeSibling: sibling,
-                        withParent: parentTarget) else {
+                        withParent: parentTarget) {
+            self.target = target
+        }
+        // if content is a content container,
+        // set target to parent target.
+        else if wrappedContent is _SContentContainer {
+            self.target = parentTarget
+        }
+        // a target was not provided by the renderer
+        // and it is not a content container, skip it.
+        else {
             return
         }
-        self.target = target
         
         // create and mount children if any exist.
         guard !content.children.isEmpty else { return }
