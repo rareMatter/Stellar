@@ -13,32 +13,32 @@ import Foundation
 final
 class PrimitiveViewHost: ElementHost {
     
-    /// Target of the closest ancestor host view or nil if this is a root.
+    /// Platform content of the closest ancestor host view or nil if this is a root.
     ///
     /// A parent of this view might be a composite, therefore it must be passed to the first descendant host views.
     ///
-    /// This means the `parentTarget` is not always the same as the target of a parent `View`.
+    /// This means the `parentPlatformContent` is not always the same as the platform content of a parent `Content`.
     private
-    let parentTarget: PlatformContent?
+    let parentPlatformContent: PlatformContent?
     
-    /// Renderable target of this host, supplied by the platform after mounting.
+    /// Platform content of this host, supplied by the platform after mounting.
     ///
     /// This is provided from either the parent platform content or a closure if this is the root host.
     private(set)
-    var target: PlatformContent?
+    var platformContent: PlatformContent?
     
     /// The platform content provider when this host is the root (and the content cannot be retrieved from the parent platform content).
     private
-    let targetProvider: ((AnySContent) -> PlatformContent)?
+    let platformContentProvider: ((AnySContent) -> PlatformContent)?
     
     private
     var parentUnmountTask = UnmountTask()
     
     init(content: AnySContent,
-         parentTarget: PlatformContent?,
+         parentPlatformContent: PlatformContent?,
          parent: ElementHost?) {
-        self.parentTarget = parentTarget
-        self.targetProvider = nil
+        self.parentPlatformContent = parentPlatformContent
+        self.platformContentProvider = nil
         
         super.init(hostedElement: .content(content),
                    parent: parent)
@@ -48,11 +48,11 @@ class PrimitiveViewHost: ElementHost {
             platformContentProvider: @escaping (C) -> PlatformContent,
             parent: ElementHost?)
     where C : SContent {
-        self.targetProvider = { anyContent in
+        self.platformContentProvider = { anyContent in
             guard let content = anyContent.content as? C else { fatalError("Unexpected type.") }
             return platformContentProvider(content)
         }
-        self.parentTarget = nil
+        self.parentPlatformContent = nil
         
         super.init(content: AnySContent(content),
                    parent: parent)
@@ -68,29 +68,29 @@ class PrimitiveViewHost: ElementHost {
 //        self.transaction = transaction
         
         // render and store the instance
-        if let target = parentTarget?
+        if let parentPlatformContent = parentPlatformContent?
             .makeChild(using: self,
                        preceeding: sibling) {
-            self.target = target
+            self.platformContent = parentPlatformContent
         }
         // if parent is nil, this is a root host.
-        else if let targetProvider = self.targetProvider {
-            self.target = targetProvider(self.content)
+        else if let targetProvider = self.platformContentProvider {
+            self.platformContent = targetProvider(self.content)
         }
         // if content is a content container,
-        // set target to parent target.
+        // set platformContent to parent platformContent.
         else if wrappedContent is _SContentContainer {
-            self.target = parentTarget
+            self.platformContent = parentPlatformContent
         }
         
-        guard let target = target else { return }
+        guard let platformContent = platformContent else { return }
         // create and mount children if any exist.
         guard !content.children.isEmpty else { return }
         
         let isGroup = content.type is GroupedContent.Type
         
         children = content.children.map {
-            $0.makeElementHost(parentTarget: target,
+            $0.makeHost(parentPlatformContent: platformContent,
                                parentHost: self)
         }
         
@@ -107,13 +107,13 @@ class PrimitiveViewHost: ElementHost {
     
     override
     func update(inReconciler reconciler: TreeReconciler) {
-        guard let target = target else { return }
+        guard let platformContent = platformContent else { return }
         
         invalidateUnmount()
         
         updateEnvironment()
 
-        target.update(withHost: self)
+        platformContent.update(using: self)
         
         var childrenContent = content.children
         
@@ -133,7 +133,7 @@ class PrimitiveViewHost: ElementHost {
                 // Create hosts for the children and mount them.
             case (true, false):
                 children = childrenContent.map { childContent in
-                    childContent.makeElementHost(parentTarget: target,
+                    childContent.makeHost(parentPlatformContent: platformContent,
                                                  parentHost: self)
                 }
                 children.forEach { childHost in
@@ -169,9 +169,9 @@ class PrimitiveViewHost: ElementHost {
                     // then unmount the old child.
                     else {
                         newChild = childContent
-                            .makeElementHost(parentTarget: target,
+                            .makeHost(parentPlatformContent: platformContent,
                                              parentHost: self)
-                        newChild.mount(beforeSibling: childHost.findFirstDescendantPrimitiveTarget(),
+                        newChild.mount(beforeSibling: childHost.firstPrimitivePlatformContent(),
                                        onParent: self,
                                        reconciler: reconciler)
                         childHost.unmount(in: reconciler,
@@ -193,7 +193,7 @@ class PrimitiveViewHost: ElementHost {
                 else {
                     // mount any remaining new children.
                     childrenContent.forEach { childContent in
-                        let newChild: ElementHost = childContent.makeElementHost(parentTarget: target,
+                        let newChild: ElementHost = childContent.makeHost(parentPlatformContent: platformContent,
                                                                                  parentHost: self)
                         newChild.mount(beforeSibling: nil,
                                        onParent: self,
@@ -216,11 +216,11 @@ class PrimitiveViewHost: ElementHost {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         
-        guard let parentTarget = parentTarget else {
-            assertionFailure("Attempt to remove the root host's target. This would leave an empty hierarchy.")
+        guard let parentTarget = parentPlatformContent else {
+            assertionFailure("Attempt to remove the root host's platform content. This would leave an empty hierarchy.")
             return
         }
-        guard let target = target else { return }
+        guard let platformContent = platformContent else { return }
         
         let task = UnmountHostTask(self,
                                    in: reconciler) {
@@ -233,8 +233,8 @@ class PrimitiveViewHost: ElementHost {
         task.isCancelled = parentTask?.isCancelled ?? false
         unmountTask = task
         parentTask?.childTasks.append(task)
-        parentTarget.removeChild(target,
-                                  forTask: task)
+        parentTarget.remove(platformContent,
+                                  for: task)
     }
     
     /// Stop any unfinished unmounts and complete them without transitions.

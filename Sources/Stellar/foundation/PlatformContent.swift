@@ -21,9 +21,9 @@ protocol PlatformContent {
                    preceeding sibling: PlatformContent?) -> PlatformContent
     
     /// Updates rendered state of self using the provided host's state.
-    func update(withHost host: PrimitiveViewHost)
+    func update(using host: PrimitiveViewHost)
     
     /// Removes the child using the task as needed.
-    func removeChild(_ child: PlatformContent,
-                     forTask task: UnmountHostTask)
+    func remove(_ child: PlatformContent,
+                for task: UnmountHostTask)
 }

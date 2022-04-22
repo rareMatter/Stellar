@@ -24,7 +24,7 @@ class CompositeViewHost: CompositeElementHost {
         let childHostedContent = content
             .bodyProvider(wrappedContent)
         let childHost = childHostedContent
-            .makeElementHost(parentTarget: parentTarget,
+            .makeHost(parentPlatformContent: parentPlatformContent,
                              parentHost: self)
         
         // add child host to self and tell it to mount
@@ -62,16 +62,16 @@ class CompositeViewHost: CompositeElementHost {
         // reconcile state changes with child content
         let childHostedContent = content
             .bodyProvider(wrappedContent)
-        reconciler.reconcileChildren(self,
-                                     with: childHostedContent,
-                                     getElementType: { $0.type },
+        reconciler.reconcileChildren(for: self,
+                                     withChild: childHostedContent,
+                                     elementType: { $0.type },
                                      updateChildHost: {
             // TODO: ...
             //            childHost.environmentValues = environmentValues
             $0.content = AnySContent(childHostedContent)
             //            childHost.transaction = transaction
         },
-                                     mountChildElement: { $0.makeElementHost(parentTarget: parentTarget,
+                                     mountChildElement: { $0.makeHost(parentPlatformContent: parentPlatformContent,
                                                                              parentHost: self) })
     }
     

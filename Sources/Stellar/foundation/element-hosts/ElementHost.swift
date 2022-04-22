@@ -141,18 +141,18 @@ class ElementHost {
 }
 extension ElementHost {
     
-    /// Finds the target of a `PrimitiveViewHost`, looking through the hierarchy of first children if needed. If one cannot be found, nil is returned.
+    /// Recursively finds the platform content of a `PrimitiveViewHost`, looking through the hierarchy of first children if needed. If one cannot be found, nil is returned.
     ///
-    /// If self is a `PrimitiveViewHost`, the target is returned. If not, the host hierarchy is recursively checked at each first child until a `PrimitiveViewHost` is found, or nil if a first child does not exist.
+    /// If self is a `PrimitiveViewHost`, the platform content is simply returned. If not, the host hierarchy is recursively checked at each first child until a `PrimitiveViewHost` is found, or nil if a first child does not exist.
     ///
     /// - Note: If a host's content type is `GroupedContent`, it is skipped.
-    func findFirstDescendantPrimitiveTarget() -> PlatformContent? {
+    func firstPrimitivePlatformContent() -> PlatformContent? {
         if let primitiveHost = self as? PrimitiveViewHost,
            !(primitiveHost.content.type is GroupedContent.Type) {
-            return primitiveHost.target
+            return primitiveHost.platformContent
         }
         else {
-            return children.first?.findFirstDescendantPrimitiveTarget()
+            return children.first?.firstPrimitivePlatformContent()
         }
     }
 }
@@ -163,27 +163,27 @@ extension AnySContent {
     /// Creates an element host type depending on the wrapped type.
     ///
     /// - Parameters:
-    ///     - parentTarget: The parent target or nil if it's the root target.
+    ///     - parentPlatformContent: The parent platform content or nil if it's the root platform content.
     ///     - parentHost: The parent of the returned host or nil if it's the root host.
-    func makeElementHost(parentTarget: PlatformContent?,
-                         parentHost: ElementHost?) -> ElementHost {
+    func makeHost(parentPlatformContent: PlatformContent?,
+                  parentHost: ElementHost?) -> ElementHost {
         if type == SEmptyContent.self {
             return EmptyElementHost(content: self,
                                     parent: parentHost)
         }
         else if bodyType == Never.self {
             return PrimitiveViewHost(content: self,
-                                     parentTarget: parentTarget,
+                                     parentPlatformContent: parentPlatformContent,
                                      parent: parentHost)
         }
         else {
             return CompositeViewHost(content: self,
-                                     parentTarget: parentTarget,
+                                     parentPlatformContent: parentPlatformContent,
                                      parent: parentHost)
         }
     }
     
-    func makeRootElementHost<C>(platformContentProvider: @escaping (C) -> PlatformContent) -> ElementHost
+    func makeRootHost<C>(platformContentProvider: @escaping (C) -> PlatformContent) -> ElementHost
     where C : SContent {
         // TODO: As of right now, the root content provided to the TreeReconciler could be a composite. Eventually, it will probably be required that it is an App.
         guard bodyType == Never.self else {

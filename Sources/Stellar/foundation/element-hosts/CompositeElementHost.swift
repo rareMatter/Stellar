@@ -13,7 +13,7 @@ import Combine
 ///
 class CompositeElementHost: ElementHost {
     
-    let parentTarget: PlatformContent?
+    let parentPlatformContent: PlatformContent?
     
     /// Values taken from state property declarations of the composite element.
     var storage = [Any]()
@@ -29,9 +29,10 @@ class CompositeElementHost: ElementHost {
     var persistentSubsciptions = [AnyCancellable]()
     
     init(content: AnySContent,
-         parentTarget: PlatformContent?,
+         parentPlatformContent: PlatformContent?,
          parent: ElementHost?) {
-        self.parentTarget = parentTarget
+        self.parentPlatformContent = parentPlatformContent
+        
         super.init(hostedElement: .content(content), parent: parent)
     }
 }
