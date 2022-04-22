@@ -8,12 +8,12 @@
 import Foundation
 
 final
-class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
+class CompositeViewHost: CompositeElementHost {
     
     override
-    func mount(beforeSibling sibling: R.RenderableTarget?,
-               onParent parent: ElementHost<R>?,
-               reconciler: TreeReconciler<R>) {
+    func mount(beforeSibling sibling: PlatformContent?,
+               onParent parent: ElementHost?,
+               reconciler: TreeReconciler) {
         super.prepareForMount()
         
         // tell the reconciler to process self's hosted content
@@ -24,8 +24,7 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
         let childHostedContent = content
             .bodyProvider(wrappedContent)
         let childHost = childHostedContent
-            .makeElementHost(with: reconciler.renderer,
-                             parentTarget: parentTarget,
+            .makeElementHost(parentTarget: parentTarget,
                              parentHost: self)
         
         // add child host to self and tell it to mount
@@ -48,7 +47,7 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
     }
     
     override
-    func update(inReconciler reconciler: TreeReconciler<R>) {
+    func update(inReconciler reconciler: TreeReconciler) {
         // TODO: Handle transaction.
         // TODO: Update variadic views.
         
@@ -72,14 +71,13 @@ class CompositeViewHost<R: Renderer>: CompositeElementHost<R> {
             $0.content = AnySContent(childHostedContent)
             //            childHost.transaction = transaction
         },
-                                     mountChildElement: { $0.makeElementHost(with: reconciler.renderer,
-                                                                      parentTarget: parentTarget,
-                                                                      parentHost: self) })
+                                     mountChildElement: { $0.makeElementHost(parentTarget: parentTarget,
+                                                                             parentHost: self) })
     }
     
     override
-    func unmount(in reconciler: TreeReconciler<R>,
-                 parentTask: UnmountTask<R>?) {
+    func unmount(in reconciler: TreeReconciler,
+                 parentTask: UnmountTask?) {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         

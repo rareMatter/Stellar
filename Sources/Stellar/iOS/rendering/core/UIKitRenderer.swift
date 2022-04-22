@@ -12,19 +12,13 @@ import UIKit
 final
 class UIKitRenderer: Renderer {
     
-    /// The reconciler to use when updating and rendering.
     private
     var reconciler: TreeReconciler<UIKitRenderer>!
     
-    /// Use this to schedule updates to the Descriptive Tree.
     let scheduler: DispatchQueue
     
-    /// The root of the target tree.
-    var rootTarget: UIKitTarget {
-        get { reconciler.rootTarget }
-    }
+    let rootTarget: UIKitTarget
     
-    /// Creates a renderer for the provided content.
     init<C: SContent>(content: C) {
         let scheduler = DispatchQueue.main
         self.scheduler = scheduler
@@ -40,7 +34,7 @@ class UIKitRenderer: Renderer {
     }
     
     func makeTarget(for host: PrimitiveViewHost<UIKitRenderer>, beforeSibling sibling: UIKitTarget?, withParent parent: UIKitTarget) -> UIKitTarget? {
-        
+        // TODO: Create a target and add it to the parent; or create renderable content from the host's primitive and add it to the parent, returning the parent target.
         if let anyPrimitive = host.wrappedContent as? AnyUIKitPrimitive {
             let target = UIKitTarget(content: host.content,
                                      anyUIKitPrimitive: anyPrimitive)
@@ -54,6 +48,8 @@ class UIKitRenderer: Renderer {
     
     func update(_ target: UIKitTarget,
                 with host: PrimitiveViewHost<UIKitRenderer>) {
+        // TODO: This requires a one-to-one relationship of targets to primitive content in order to provide updates to the correct rendered instance. Consequently, as primitive content is provided to the renderer to be translated into a renderable hierarchy, it cannot be flattened into one target instance. This means that on UIKit, it's currently difficult or impossible to create a UIViewController hierarchy within one renderer instance. This may or may not be a significant issue, depending on if UIViewController provides no significant benefits to rendering. If it is better to allow a one-to-many relationship between targets and primitives, it will be necessary to be able to identify primitive instances across updates, or at least to associate primitives with the rendered instance.
+        // OR - the renderer could maintain a hierarchy of view controllers by watching for presentation modifiers. Primitives would be added to the top controller on a stack until another presentation modifier is encountered, where a new controller would be pushed onto the stack.
         if let anyUIKitPrimitive = host.wrappedContent as? AnyUIKitPrimitive {
             target.update(withPrimitive: anyUIKitPrimitive)
         }

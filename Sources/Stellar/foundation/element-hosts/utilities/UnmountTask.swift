@@ -16,9 +16,9 @@
 //
 
 /// A tree of cancellable in-progress unmounts.
-class UnmountTask<R> where R: Renderer {
+class UnmountTask {
     public internal(set) var isCancelled = false
-    var childTasks = [UnmountTask<R>]()
+    var childTasks = [UnmountTask]()
     private let callback: () -> ()
     
     init(_ callback: @escaping () -> () = {}) {
@@ -35,7 +35,7 @@ class UnmountTask<R> where R: Renderer {
     }
     
     /// Adds and returns a new child `UnmountTask`
-    func appendChild() -> UnmountTask<R> {
+    func appendChild() -> UnmountTask {
         let child = UnmountTask()
         child.isCancelled = isCancelled
         childTasks.append(child)
@@ -45,12 +45,12 @@ class UnmountTask<R> where R: Renderer {
     /// Forces the element and all child tasks to unmount without transition.
     func completeImmediately() {
         forEach {
-            guard $0 is UnmountHostTask<R> else { return }
+            guard $0 is UnmountHostTask else { return }
             $0.completeImmediately()
         }
     }
     
-    func forEach(_ f: (UnmountTask<R>) -> ()) {
+    func forEach(_ f: (UnmountTask) -> ()) {
         var stack = [self]
         while let last = stack.popLast() {
             f(last)
@@ -61,12 +61,12 @@ class UnmountTask<R> where R: Renderer {
 
 /// The state for the unmounting of a `PrimitiveViewHost` by a `Renderer`.
 final
-class UnmountHostTask<R>: UnmountTask<R> where R: Renderer {
-    private(set) weak var host: PrimitiveViewHost<R>!
-    private unowned var reconciler: TreeReconciler<R>
+class UnmountHostTask: UnmountTask {
+    private(set) weak var host: PrimitiveViewHost!
+    private unowned var reconciler: TreeReconciler
     
-    init(_ host: PrimitiveViewHost<R>,
-         in reconciler: TreeReconciler<R>,
+    init(_ host: PrimitiveViewHost,
+         in reconciler: TreeReconciler,
          callback: @escaping () -> ()) {
         self.host = host
         self.reconciler = reconciler

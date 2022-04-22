@@ -9,13 +9,13 @@ import Foundation
 
 /// A host for empty content.
 final
-class EmptyElementHost<R: Renderer>: ElementHost<R> {
+class EmptyElementHost: ElementHost {
     
     /// An empty impementation which avoids crashing in super.
     override
-    func mount(beforeSibling sibling: R.RenderableTarget?,
-               onParent parent: ElementHost<R>?,
-               reconciler: TreeReconciler<R>) {
+    func mount(beforeSibling sibling: PlatformContent?,
+               onParent parent: ElementHost?,
+               reconciler: TreeReconciler) {
         super.prepareForMount()
         super.mount(beforeSibling: sibling,
                     onParent: parent,

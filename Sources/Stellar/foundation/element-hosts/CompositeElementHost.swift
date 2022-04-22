@@ -11,9 +11,9 @@ import Combine
 /// A host which is capable of storing dynamic properties declared by the composite content.
 ///
 ///
-class CompositeElementHost<R: Renderer>: ElementHost<R> {
+class CompositeElementHost: ElementHost {
     
-    let parentTarget: R.RenderableTarget
+    let parentTarget: PlatformContent?
     
     /// Values taken from state property declarations of the composite element.
     var storage = [Any]()
@@ -29,8 +29,8 @@ class CompositeElementHost<R: Renderer>: ElementHost<R> {
     var persistentSubsciptions = [AnyCancellable]()
     
     init(content: AnySContent,
-         parentTarget: R.RenderableTarget,
-         parent: ElementHost<R>?) {
+         parentTarget: PlatformContent?,
+         parent: ElementHost?) {
         self.parentTarget = parentTarget
         super.init(hostedElement: .content(content), parent: parent)
     }

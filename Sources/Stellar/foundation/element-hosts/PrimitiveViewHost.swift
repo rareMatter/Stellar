@@ -11,66 +11,86 @@ import Foundation
 ///
 /// The lifecycle of this host is managed by the reconciler in order to provide `Descriptive Tree` hosting. Updates are handled through this type and other similar types in the `Live Tree` managed by the `TreeReconciler`.
 final
-class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
+class PrimitiveViewHost: ElementHost {
     
-    /// Target of the closest ancestor host view.
+    /// Target of the closest ancestor host view or nil if this is a root.
     ///
     /// A parent of this view might be a composite, therefore it must be passed to the first descendant host views.
     ///
     /// This means the `parentTarget` is not always the same as the target of a parent `View`.
     private
-    let parentTarget: R.RenderableTarget
+    let parentTarget: PlatformContent?
     
-    /// Renderable target of this host, supplied by the platform renderer after mounting.
+    /// Renderable target of this host, supplied by the platform after mounting.
+    ///
+    /// This is provided from either the parent platform content or a closure if this is the root host.
     private(set)
-    var target: R.RenderableTarget?
+    var target: PlatformContent?
+    
+    /// The platform content provider when this host is the root (and the content cannot be retrieved from the parent platform content).
+    private
+    let targetProvider: ((AnySContent) -> PlatformContent)?
     
     private
-    var parentUnmountTask = UnmountTask<R>()
+    var parentUnmountTask = UnmountTask()
     
     init(content: AnySContent,
-         parentTarget: R.RenderableTarget,
-         parent: ElementHost<R>?) {
+         parentTarget: PlatformContent?,
+         parent: ElementHost?) {
         self.parentTarget = parentTarget
+        self.targetProvider = nil
         
         super.init(hostedElement: .content(content),
                    parent: parent)
     }
     
+    init<C>(content: C,
+            platformContentProvider: @escaping (C) -> PlatformContent,
+            parent: ElementHost?)
+    where C : SContent {
+        self.targetProvider = { anyContent in
+            guard let content = anyContent.content as? C else { fatalError("Unexpected type.") }
+            return platformContentProvider(content)
+        }
+        self.parentTarget = nil
+        
+        super.init(content: AnySContent(content),
+                   parent: parent)
+    }
+    
     // TODO: Need transaction and reconciler params.
     override
-    func mount(beforeSibling sibling: R.RenderableTarget?,
-               onParent parent: ElementHost<R>?,
-               reconciler: TreeReconciler<R>) {
+    func mount(beforeSibling sibling: PlatformContent?,
+               onParent parent: ElementHost?,
+               reconciler: TreeReconciler) {
         super.prepareForMount()
         
 //        self.transaction = transaction
         
-        // get target from renderer and store it.
-        if let target = reconciler
-            .renderer
-            .makeTarget(for: self,
-                        beforeSibling: sibling,
-                        withParent: parentTarget) {
+        // render and store the instance
+        if let target = parentTarget?
+            .makeChild(using: self,
+                       preceeding: sibling) {
             self.target = target
+        }
+        // if parent is nil, this is a root host.
+        else if let targetProvider = self.targetProvider {
+            self.target = targetProvider(self.content)
         }
         // if content is a content container,
         // set target to parent target.
         else if wrappedContent is _SContentContainer {
             self.target = parentTarget
         }
-        guard let target = target else {
-            return
-        }
         
+        guard let target = target else { return }
         // create and mount children if any exist.
         guard !content.children.isEmpty else { return }
         
         let isGroup = content.type is GroupedContent.Type
         
         children = content.children.map {
-            $0.makeElementHost(with: reconciler.renderer,
-                               parentTarget: target,
+            $0.makeElementHost(parentTarget: target,
                                parentHost: self)
         }
         
@@ -86,15 +106,14 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
     }
     
     override
-    func update(inReconciler reconciler: TreeReconciler<R>) {
+    func update(inReconciler reconciler: TreeReconciler) {
         guard let target = target else { return }
         
         invalidateUnmount()
         
         updateEnvironment()
-        target.content = content
-        reconciler.renderer.update(target,
-                                   with: self)
+
+        target.update(withHost: self)
         
         var childrenContent = content.children
         
@@ -114,8 +133,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
                 // Create hosts for the children and mount them.
             case (true, false):
                 children = childrenContent.map { childContent in
-                    childContent.makeElementHost(with: reconciler.renderer,
-                                                 parentTarget: target,
+                    childContent.makeElementHost(parentTarget: target,
                                                  parentHost: self)
                 }
                 children.forEach { childHost in
@@ -127,7 +145,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
                 // there are existing and new children.
                 // reconcile the differences.
             case (false, false):
-                var newChildren = [ElementHost<R>]()
+                var newChildren = [ElementHost]()
                 
                 // compare each existing and new child.
                 // remount if types differ,
@@ -135,7 +153,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
                 while let childHost = children.first,
                       let childContent = childrenContent.first {
                     
-                    let newChild: ElementHost<R>
+                    let newChild: ElementHost
                     
                     // same types
                     if childHost.content.typeConstructorName == childContent.typeConstructorName {
@@ -150,9 +168,9 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
                     // mount the new child,
                     // then unmount the old child.
                     else {
-                        newChild = childContent.makeElementHost(with: reconciler.renderer,
-                                                                parentTarget: target,
-                                                                parentHost: self)
+                        newChild = childContent
+                            .makeElementHost(parentTarget: target,
+                                             parentHost: self)
                         newChild.mount(beforeSibling: childHost.findFirstDescendantPrimitiveTarget(),
                                        onParent: self,
                                        reconciler: reconciler)
@@ -175,8 +193,7 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
                 else {
                     // mount any remaining new children.
                     childrenContent.forEach { childContent in
-                        let newChild: ElementHost<R> = childContent.makeElementHost(with: reconciler.renderer,
-                                                                                 parentTarget: target,
+                        let newChild: ElementHost = childContent.makeElementHost(parentTarget: target,
                                                                                  parentHost: self)
                         newChild.mount(beforeSibling: nil,
                                        onParent: self,
@@ -194,14 +211,18 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
     }
     
     override
-    func unmount(in reconciler: TreeReconciler<R>,
-                 parentTask: UnmountTask<R>?) {
+    func unmount(in reconciler: TreeReconciler,
+                 parentTask: UnmountTask?) {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         
+        guard let parentTarget = parentTarget else {
+            assertionFailure("Attempt to remove the root host's target. This would leave an empty hierarchy.")
+            return
+        }
         guard let target = target else { return }
         
-        let task = UnmountHostTask<R>(self,
+        let task = UnmountHostTask(self,
                                    in: reconciler) {
             self.children.forEach { childHost in
                 childHost.unmount(in: reconciler,
@@ -212,9 +233,8 @@ class PrimitiveViewHost<R: Renderer>: ElementHost<R> {
         task.isCancelled = parentTask?.isCancelled ?? false
         unmountTask = task
         parentTask?.childTasks.append(task)
-        reconciler.renderer.remove(target,
-                                    fromParent: parentTarget,
-                                    withTask: task)
+        parentTarget.removeChild(target,
+                                  forTask: task)
     }
     
     /// Stop any unfinished unmounts and complete them without transitions.
