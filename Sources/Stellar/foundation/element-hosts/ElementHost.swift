@@ -7,6 +7,7 @@
 
 import Foundation
 
+// TODO: Revise host design. Attempt to replace inheritance tree with composition where it makes sense. This would allow removal of the implicit awareness of subclasses by the ancestor classes (there is at least one instance of this). This also avoids unnecessary overriding and dynamic dispatch.
 /// The base host for live elements, including the various types of `Descriptive Tree` content.
 ///
 /// Other host types inherit and specialize upon this one, depending on the type of `Descriptive Tree` element.
