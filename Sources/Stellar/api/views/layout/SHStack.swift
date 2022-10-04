@@ -12,7 +12,7 @@ struct SHStack<Content>: SPrimitiveContent
 where Content : SContent {
     
     public let alignment: SVerticalAlignment
-    let spacing: Float
+    public let spacing: Float
     public let content: Content
     
     public
@@ -24,6 +24,12 @@ where Content : SContent {
         self.content = content()
     }
 }
+extension SHStack: _SContentContainer {
+    var children: [AnySContent] {
+        (content as? GroupedContent)?.children
+        ?? [AnySContent(content)]
+    }
+}
 
 public let defaultStackSpacing: Float = 8
 
@@ -33,3 +39,11 @@ enum SVerticalAlignment: Hashable {
     case center
     case bottom
 }
+
+// FIXME: temp public
+public
+protocol AnyHStack {
+    var alignment: SVerticalAlignment { get }
+    var spacing: Float { get }
+}
+extension SHStack: AnyHStack {}

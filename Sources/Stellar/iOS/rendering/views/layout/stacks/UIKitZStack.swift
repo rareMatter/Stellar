@@ -9,18 +9,20 @@ import Foundation
 import UIKit
 
 final
-class UIKitZStack: UIView, UIKitTargetRenderableContent {
+class UIKitZStack: UIView, UIKitContent {
     
-    private
-    var primitive: UIKitZStackPrimitive {
-        didSet {
-            setNeedsUpdateConstraints()
-        }
-    }
+    var alignment: SAlignment
+    var spacing: Float?
     
-    init(primitive: UIKitZStackPrimitive) {
-        self.primitive = primitive
+    var modifiers: [UIKitContentModifier] = []
+    
+    init(alignment: SAlignment, spacing: Float?, modifiers: [UIKitContentModifier]) {
+        self.alignment = alignment
+        self.spacing = spacing
+        
         super.init(frame: .zero)
+        
+        applyModifiers(modifiers)
     }
     
     @available(*, unavailable)
@@ -28,29 +30,38 @@ class UIKitZStack: UIView, UIKitTargetRenderableContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let zStack = primitive as? UIKitZStackPrimitive else { return }
-        self.primitive = zStack
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard let zStack = primitiveContent.value as? AnyZStack else { return }
+        alignment = zStack.alignment
+        spacing = zStack.spacing
+        applyModifiers(modifiers.uiKitModifiers())
     }
     
-    func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        guard let uiView = view as? UIView else { return }
-
+    func addChild(for primitiveContent: PrimitiveContentContext,
+                  preceedingSibling sibling: PlatformContent?,
+                  modifiers: [AnySContentModifier],
+                  context: HostMountingContext) -> PlatformContent? {
+        guard let uiKitRenderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
+        let content = uiKitRenderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
+        guard let view = content as? UIView else { fatalError() }
+        
         // add subview
-        if let siblingView = siblingView,
-        let siblingUIView = siblingView as? UIView {
-            insertSubview(uiView, belowSubview: siblingUIView)
+        if let sibling = sibling {
+            guard let siblingUIView = sibling as? UIView else { fatalError() }
+            insertSubview(view, belowSubview: siblingUIView)
         }
         else {
-            addSubview(uiView)
+            addSubview(view)
         }
         
-        makeConstraints(on: uiView)
+        makeConstraints(on: view)
+        
+        return content
     }
-    func removeChild(_ view: UIKitTargetRenderableContent) {
-        guard let uiView = view as? UIView else { return }
-        uiView.removeFromSuperview()
+    
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        guard let view = child as? UIView else { fatalError() }
+        view.removeFromSuperview()
     }
     
     /// A helper which checks alignment and creates appropriate constraints for the view.
@@ -64,7 +75,7 @@ class UIKitZStack: UIView, UIKitTargetRenderableContent {
         lazy var centerX = view.centerXAnchor.constraint(equalTo: self.centerXAnchor)
         lazy var centerY = view.centerYAnchor.constraint(equalTo: self.centerYAnchor)
         
-        switch primitive.alignment {
+        switch alignment {
         case .trailing:
             NSLayoutConstraint.activate([trailing, centerY])
         case .leading:
@@ -84,7 +95,18 @@ class UIKitZStack: UIView, UIKitTargetRenderableContent {
         case .topTrailing:
             NSLayoutConstraint.activate([top, trailing])
         default:
-            assertionFailure("\(self), \(#function): Unexpected alignment case: \(primitive.alignment)")
+            assertionFailure("\(self), \(#function): Unexpected alignment case: \(alignment)")
         }
+    }
+}
+extension UIKitZStack {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        UIView.applyModifiers(modifiers, toView: self)
+    }
+}
+
+extension SZStack: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitZStack(alignment: alignment, spacing: spacing, modifiers: modifiers)
     }
 }

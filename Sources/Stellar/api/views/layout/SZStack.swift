@@ -28,3 +28,10 @@ extension SZStack: _SContentContainer {
         (content as? GroupedContent)?.children ?? [.init(content)]
     }
 }
+
+// FIXME: temp public
+public
+protocol AnyZStack {
+    var alignment: SAlignment { get }
+    var spacing: Float? { get }
+}

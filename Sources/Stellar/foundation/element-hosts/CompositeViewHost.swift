@@ -25,7 +25,7 @@ class CompositeViewHost: CompositeElementHost {
             .bodyProvider(wrappedContent)
         let childHost = childHostedContent
             .makeHost(parentPlatformContent: parentPlatformContent,
-                             parentHost: self)
+                      parentHost: self)
         
         // add child host to self and tell it to mount
         children = [childHost]

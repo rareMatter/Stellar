@@ -10,6 +10,7 @@ import UIKit
 public
 struct SButton<Content>: SPrimitiveContent
 where Content : SContent {
+    public
     let actionHandler: SIdentifiableContainer<() -> Void>
     let content: Content
 }
@@ -23,3 +24,16 @@ extension SButton {
         self.content = content()
     }
 }
+
+extension SButton: _SContentContainer {
+    var children: [AnySContent] { [.init(content)] }
+}
+
+// MARK: - button type erasure
+// FIXME: temp public
+public
+protocol AnyButton {
+    var actionHandler: SIdentifiableContainer<() -> Void> { get }
+}
+
+extension SButton: AnyButton {}

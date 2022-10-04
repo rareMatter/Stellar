@@ -11,7 +11,7 @@ public
 protocol SContentModifier {
     typealias Content = _SContentModifierProxy<Self>
     associatedtype Body: SContent
-    func body(content: Content) -> Self.Body
+    @SContentBuilder func body(content: Content) -> Self.Body
 }
 
 public
@@ -26,6 +26,7 @@ where Modifier : SContentModifier {
 }
 
 // MARK: - default primitive body
+public
 extension SContentModifier
 where Body == Never {
 

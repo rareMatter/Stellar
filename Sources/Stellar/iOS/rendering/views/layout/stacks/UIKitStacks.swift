@@ -8,42 +8,53 @@
 import UIKit
 
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
-class UIKitPrimitiveStackView: UIStackView, UIKitTargetRenderableContent {
+// FIXME: Temp public.
+public
+class UIKitPrimitiveStackView: UIStackView, UIKitContent {
     
-    func update(with primitive: AnyUIKitPrimitive) {
-        assertionFailure("Must override in subclass.")
-    }
+    var modifiers: [UIKitContentModifier] = []
     
-    func addChild(_ context: UIKitTargetRenderableContent) {
-        if let view = context as? UIView {
-            addArrangedSubview(view)
-        }
-    }
-    func addChild(_ context: UIKitTargetRenderableContent,
-                  before siblingContext: UIKitTargetRenderableContent) {
-        if let view = context as? UIView {
-            guard let siblingView = siblingContext as? UIView,
-                  let index = arrangedSubviews.firstIndex(of: siblingView) else {
-                addArrangedSubview(view)
-                return
-            }
+    public func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
+        let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
+        guard let view = content as? UIView else { fatalError() }
+        
+        if let sibling = sibling {
+            guard let siblingView = sibling as? UIView,
+                  let index = arrangedSubviews.firstIndex(of: siblingView) else { fatalError() }
             insertArrangedSubview(view, at: index)
         }
-    }
-    func removeChild(_ context: UIKitTargetRenderableContent) {
-        if let view = context as? UIView {
-            view.removeFromSuperview()
+        else {
+            addArrangedSubview(view)
         }
+        
+        return content
+    }
+    
+    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        fatalError()
+    }
+
+    public func removeChild(_ child: PlatformContent,
+                for task: UnmountHostTask) {
+        guard let view = child as? UIView else { fatalError() }
+        view.removeFromSuperview()
+    }
+}
+extension UIKitPrimitiveStackView {
+    func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        UIView.applyModifiers(modifiers, toView: self)
     }
 }
 
 final
 class UIKitHStack: UIKitPrimitiveStackView {
     
-    init(primitive: UIKitHStackPrimitive) {
+    init(primitive: AnyHStack, modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
         axis = .horizontal
-        update(with: primitive)
+        updateState(with: primitive)
+        applyModifiers(modifiers)
     }
     
     @available(*, unavailable)
@@ -51,11 +62,15 @@ class UIKitHStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let hStack = primitive as? UIKitHStackPrimitive else { return }
-        
-        switch hStack.alignment {
+    override func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard let anyHStack = primitiveContent.value as? AnyHStack else { fatalError() }
+        updateState(with: anyHStack)
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+    
+    private
+    func updateState(with primitive: AnyHStack) {
+        switch primitive.alignment {
         case .top:
             self.alignment = .top
         case .bottom:
@@ -63,17 +78,27 @@ class UIKitHStack: UIKitPrimitiveStackView {
         case .center:
             self.alignment = .center
         }
-        self.spacing = CGFloat(hStack.spacing)
+        self.spacing = CGFloat(primitive.spacing)
     }
 }
 
+extension SHStack: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitHStack(primitive: self, modifiers: modifiers)
+    }
+}
+
+public
 final
 class UIKitVStack: UIKitPrimitiveStackView {
     
-    init(primitive: UIKitVStackPrimitive) {
+    // FIXME: Temp public.
+    public
+    init(primitive: AnyVStack, modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
         axis = .vertical
-        update(with: primitive)
+        updateState(with: primitive)
+        applyModifiers(modifiers)
     }
     
     @available(*, unavailable)
@@ -81,11 +106,17 @@ class UIKitVStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let vStack = primitive as? UIKitVStackPrimitive else { return }
+    // FIXME: Temp public.
+    public override func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard let vStack = primitiveContent.value as? AnyVStack else { fatalError() }
+        updateState(with: vStack)
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+    
+    private
+    func updateState(with primitive: AnyVStack) {
         
-        switch vStack.alignment {
+        switch primitive.alignment {
         case .center:
             self.alignment = .center
         case .leading:
@@ -93,6 +124,12 @@ class UIKitVStack: UIKitPrimitiveStackView {
         case .trailing:
             self.alignment = .trailing
         }
-        self.spacing = spacing
+        self.spacing = CGFloat(primitive.spacing)
+    }
+}
+
+extension SVStack: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitVStack(primitive: self, modifiers: modifiers)
     }
 }

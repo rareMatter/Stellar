@@ -9,35 +9,60 @@ import Foundation
 import SwiftUI
 
 public
-struct SSection<Content, Header, Footer>: SPrimitiveContent
-where Content : SContent, Header : SContent, Footer : SContent {
+struct SSection<Parent, Content, Footer>: SPrimitiveContent
+where Parent : SContent, Content : SContent, Footer : SContent {
     
-    let contentProvider: () -> Content
-    let headerProvider: () -> Header
-    let footerProvider: () -> Footer
+    let parent: _SSectionPart<Parent>
+    let content: _SSectionPart<Content>
+    let footer: _SSectionPart<Footer>
     
     public
-    init(@SContentBuilder content: @escaping () -> Content,
-         @SContentBuilder header: @escaping () -> Header,
-         @SContentBuilder footer: @escaping () -> Footer) {
-        self.contentProvider = content
-        self.headerProvider = header
-        self.footerProvider = footer
+    init(@SContentBuilder parent: () -> Parent,
+         @SContentBuilder content: () -> Content,
+         @SContentBuilder footer: () -> Footer) {
+        self.parent = .init(content: parent(), part: .parent)
+        self.content = .init(content: content(), part: .content)
+        self.footer = .init(content: footer(), part: .footer)
     }
 }
+extension SSection: _SContentContainer {
+    var children: [AnySContent] { [.init(parent), .init(content), .init(footer)] }
+}
+
+// FIXME: temp public
+public
+enum SectionPartType {
+    case parent, content, footer
+}
+struct _SSectionPart<Content: SContent>: SPrimitiveContent {
+    let content: Content
+    let part: SectionPartType
+}
+extension _SSectionPart: _SContentContainer {
+    var children: [AnySContent] { [.init(content)] }
+}
+
+// FIXME: temp public
+public
+protocol AnySectionPart {
+    var part: SectionPartType { get }
+}
+extension _SSectionPart: AnySectionPart {}
 
 // MARK: - internal recognition
+// FIXME: temp public
+public
 protocol _AnySection {}
 extension SSection: _AnySection {}
 
 // MARK: Create a section without a header or footer.
 public
 extension SSection
-where Header == SEmptyContent, Footer == SEmptyContent {
+where Parent == SEmptyContent, Footer == SEmptyContent {
     
     init(@SContentBuilder content: @escaping () -> Content) {
-        self.init(content: content,
-                  header: { SEmptyContent() },
+        self.init(parent: { SEmptyContent() },
+                  content: content,
                   footer: { SEmptyContent() })
     }
 }
@@ -45,12 +70,12 @@ where Header == SEmptyContent, Footer == SEmptyContent {
 // MARK: Create a section with no header.
 public
 extension SSection
-where Header == SEmptyContent {
+where Parent == SEmptyContent {
     
     init(@SContentBuilder content: @escaping () -> Content,
          @SContentBuilder footer: @escaping () -> Footer) {
-        self.init(content: content,
-                  header: { SEmptyContent() },
+        self.init(parent: { SEmptyContent() },
+                  content: content,
                   footer: footer)
     }
 }
@@ -61,9 +86,9 @@ extension SSection
 where Footer == SEmptyContent {
     
     init(@SContentBuilder content: @escaping () -> Content,
-         @SContentBuilder header: @escaping () -> Header) {
-        self.init(content: content,
-                  header: header,
+         @SContentBuilder parent: @escaping () -> Parent) {
+        self.init(parent: parent,
+                  content: content,
                   footer: { SEmptyContent() })
     }
 }

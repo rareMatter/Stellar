@@ -8,19 +8,18 @@
 import Foundation
 import UIKit
 
+// FIXME: temp public
+public
 final
-class UIKitText: UILabel, UIKitTargetRenderableContent {
+class UIKitText: UILabel, UIKitContent {
     
-    private
-    var primitive: UIKitTextPrimitive {
-        didSet {
-            text = primitive.string
-        }
-    }
+    var modifiers: [UIKitContentModifier] = []
     
-    init(primitive: UIKitTextPrimitive) {
-        self.primitive = primitive
+    init(string: String, modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
+        backgroundColor = .white
+        text = string
+        applyModifiers(modifiers)
     }
     
     @available(*, unavailable)
@@ -28,9 +27,18 @@ class UIKitText: UILabel, UIKitTargetRenderableContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let textView = primitive as? UIKitTextPrimitive else { return }
-        self.primitive = textView
+    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard let text = primitiveContent.value as? SText else { fatalError() }
+        self.text = text.string
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+    
+    public func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        fatalError()
+    }
+    
+    public func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        fatalError()
     }
 }
 extension UIKitText {
@@ -38,5 +46,21 @@ extension UIKitText {
     /// The string being displayed.
     var string: String {
         text ?? ""
+    }
+}
+extension UIKitText {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        UIView.applyModifiers(modifiers, toView: self)
+    }
+}
+
+extension SText: UIKitRenderable {
+    
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        makeUIKitText(modifiers: modifiers)
+    }
+    
+    public func makeUIKitText(modifiers: [UIKitContentModifier]) -> UIKitText {
+        UIKitText(string: string, modifiers: modifiers)
     }
 }

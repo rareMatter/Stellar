@@ -9,20 +9,49 @@ import Foundation
 import UIKit
 
 final
-class UIKitTextEditor: _TextView, UIKitTargetRenderableContent {
+class UIKitTextEditor: _TextView, UIKitContent {
     
-    init(primitive: UIKitTextEditorPrimitive) {
-        super.init(frame: .zero, textContainer: nil)
-        update(with: primitive)
+    var modifiers: [UIKitContentModifier] = []
+
+    init(primitive: STextEditor, modifiers: [UIKitContentModifier]) {
+        super.init(frame: .zero,
+                   textContainer: nil)
+        updateState(with: primitive)
+        applyModifiers(modifiers)
     }
 
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let primitive = primitive as? UIKitTextEditorPrimitive else { return }
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard let primitive = primitiveContent.value as? STextEditor else { fatalError() }
+        updateState(with: primitive)
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+    
+    private
+    func updateState(with primitive: STextEditor) {
         self.text = primitive.text
         self.placeholder = primitive.placeholderText
         self.didChange = { textView in
-            primitive.onTextChange.t(textView.text)
+            primitive.onTextChange(textView.text)
         }
         self.inputAccessoryView = primitive.inputAccessoryView
+    }
+    
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        fatalError()
+    }
+    
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        fatalError()
+    }
+}
+extension UIKitTextEditor {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        UIView.applyModifiers(modifiers, toView: self)
+    }
+}
+
+extension STextEditor: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitTextEditor(primitive: self, modifiers: modifiers)
     }
 }

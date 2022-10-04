@@ -8,13 +8,10 @@
 import Foundation
 
 // TODO: This may be better formed by not being primitive and instead simply injecting the ID into the environment.
-struct SIdentifiableContent<Content, ID>: SPrimitiveContent, AnySIdentifiableContent
+struct SIdentifiableContent<Content, ID>: SPrimitiveContent
 where Content: SContent, ID: Hashable {
     let content: Content
     let id: ID
-    
-    var anyIdentifier: AnyHashable { .init(id) }
-    var anyContent: AnySContent { .init(content) }
     
     init(_ content: Content, id: ID) {
         self.content = content
@@ -28,4 +25,11 @@ where Content: SContent, ID: Hashable {
             // .environment(\.id, AnyHashable(id))
     }
      */
+}
+extension SIdentifiableContent: _SContentContainer {
+    var children: [AnySContent] { [.init(content)] }
+}
+extension SIdentifiableContent: AnySIdentifiableContent {
+    var anyIdentifier: AnyHashable { .init(id) }
+    var anyContent: AnySContent { .init(content) }
 }

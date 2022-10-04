@@ -10,51 +10,36 @@ import Foundation
 /// A content host whose hosted content is primitive.
 ///
 /// The lifecycle of this host is managed by the reconciler in order to provide `Descriptive Tree` hosting. Updates are handled through this type and other similar types in the `Live Tree` managed by the `TreeReconciler`.
+// FIXME: Temp public.
+public
 final
 class PrimitiveViewHost: ElementHost {
     
-    /// Platform content of the closest ancestor host view or nil if this is a root.
+    /// The parent platform content of the `PlatformContent` owned by this host.
     ///
-    /// A parent of this view might be a composite, therefore it must be passed to the first descendant host views.
-    ///
-    /// This means the `parentPlatformContent` is not always the same as the platform content of a parent `Content`.
+    /// The `PlatformContent` tree does not have a one-to-one relationship with the host tree. Some hosts, such as composites, do not own a `PlatformContent` instance. Therefore, this property is passed down the host tree during mounting.
     private
-    let parentPlatformContent: PlatformContent?
+    let parentPlatformContent: PlatformContent
     
     /// Platform content of this host, supplied by the platform after mounting.
-    ///
-    /// This is provided from either the parent platform content or a closure if this is the root host.
-    private(set)
     var platformContent: PlatformContent?
     
-    /// The platform content provider when this host is the root (and the content cannot be retrieved from the parent platform content).
+    /// If this instance is hosting modified content, this property will contain the instance of content that is modified. This is handed to the platform for rendering along with the applied modifiers.
     private
-    let platformContentProvider: ((AnySContent) -> PlatformContent)?
+    var modifiedContent: AnySContent? = nil
+    
+    private
+    var isModifiedContent: Bool { modifiedContent != nil }
     
     private
     var parentUnmountTask = UnmountTask()
     
     init(content: AnySContent,
-         parentPlatformContent: PlatformContent?,
+         parentPlatformContent: PlatformContent,
          parent: ElementHost?) {
         self.parentPlatformContent = parentPlatformContent
-        self.platformContentProvider = nil
         
         super.init(hostedElement: .content(content),
-                   parent: parent)
-    }
-    
-    init<C>(content: C,
-            platformContentProvider: @escaping (C) -> PlatformContent,
-            parent: ElementHost?)
-    where C : SContent {
-        self.platformContentProvider = { anyContent in
-            guard let content = anyContent.content as? C else { fatalError("Unexpected type.") }
-            return platformContentProvider(content)
-        }
-        self.parentPlatformContent = nil
-        
-        super.init(content: AnySContent(content),
                    parent: parent)
     }
     
@@ -65,39 +50,55 @@ class PrimitiveViewHost: ElementHost {
                reconciler: TreeReconciler) {
         super.prepareForMount()
         
-//        self.transaction = transaction
+        //        self.transaction = transaction
+        processModifiedContent()
         
-        // render and store the instance
-        if let parentPlatformContent = parentPlatformContent?
-            .makeChild(using: self,
-                       preceeding: sibling) {
+        if let modifiedContent = modifiedContent {
+            // modified content is not rendered
             self.platformContent = parentPlatformContent
+            
+            guard let platformContent = platformContent else {
+                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(content)")
+            }
+            
+            // modified content has already been unraveled using its children, so the resulting content is the child.
+            children = [modifiedContent].map {
+                $0.makeHost(parentPlatformContent: platformContent,
+                            parentHost: self)
+            }
+            children.forEach { child in
+                child.mount(beforeSibling: nil, onParent: self, reconciler: reconciler)
+            }
         }
-        // if parent is nil, this is a root host.
-        else if let targetProvider = self.platformContentProvider {
-            self.platformContent = targetProvider(self.content)
-        }
-        // if content is a content container,
-        // set platformContent to parent platformContent.
-        else if wrappedContent is _SContentContainer {
-            self.platformContent = parentPlatformContent
-        }
-        
-        guard let platformContent = platformContent else { return }
-        // create and mount children if any exist.
-        guard !content.children.isEmpty else { return }
-        
-        let isGroup = content.type is GroupedContent.Type
-        
-        children = content.children.map {
-            $0.makeHost(parentPlatformContent: platformContent,
-                               parentHost: self)
-        }
-        
-        children.forEach { child in
-            child.mount(beforeSibling: isGroup ? sibling : nil,
-                        onParent: self,
-                        reconciler: reconciler)
+        else {
+            if wrappedContent is GroupedContent {
+                // don't give GroupedContent types to the platform renderer
+                self.platformContent = parentPlatformContent
+            }
+            else {
+                // create platform content for this host using either the parent platform content or the provider
+                self.platformContent = parentPlatformContent
+                    .addChild(for: .init(value: wrappedContent), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
+            }
+            
+            // abort if no platform content was provided by the platform for this host
+            guard let platformContent = platformContent else {
+                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(content)")
+            }
+            
+            // create and mount children if the content provides any
+            guard !content.children.isEmpty else { return }
+            let isGroup = wrappedContent is GroupedContent
+            
+            children = content.children.map {
+                $0.makeHost(parentPlatformContent: platformContent,
+                            parentHost: self)
+            }
+            children.forEach { child in
+                child.mount(beforeSibling: isGroup ? sibling : nil,
+                            onParent: self,
+                            reconciler: reconciler)
+            }
         }
         
         super.mount(beforeSibling: sibling,
@@ -110,15 +111,15 @@ class PrimitiveViewHost: ElementHost {
         guard let platformContent = platformContent else { return }
         
         invalidateUnmount()
-        
         updateEnvironment()
-
-        platformContent.update(using: self)
+        processModifiedContent()
         
-        var childrenContent = content.children
+        platformContent.update(withPrimitive: .init(value: modifiedContent ?? wrappedContent), modifiers: modifiers.elements)
+        
+        var contentChildren = modifiedContent != nil ? [modifiedContent!] : content.children
         
         // perform updates for children
-        switch (children.isEmpty, childrenContent.isEmpty) {
+        switch (children.isEmpty, contentChildren.isEmpty) {
                 
                 // there are existing children but now no children.
                 // unmount all existing children.
@@ -132,7 +133,7 @@ class PrimitiveViewHost: ElementHost {
                 // there was no existing children but there are now children.
                 // Create hosts for the children and mount them.
             case (true, false):
-                children = childrenContent.map { childContent in
+                children = contentChildren.map { childContent in
                     childContent.makeHost(parentPlatformContent: platformContent,
                                                  parentHost: self)
                 }
@@ -151,7 +152,7 @@ class PrimitiveViewHost: ElementHost {
                 // remount if types differ,
                 // otherwise update.
                 while let childHost = children.first,
-                      let childContent = childrenContent.first {
+                      let childContent = contentChildren.first {
                     
                     let newChild: ElementHost
                     
@@ -180,7 +181,7 @@ class PrimitiveViewHost: ElementHost {
                     
                     newChildren.append(newChild)
                     children.removeFirst()
-                    childrenContent.removeFirst()
+                    contentChildren.removeFirst()
                 }
                 
                 if !children.isEmpty {
@@ -192,7 +193,7 @@ class PrimitiveViewHost: ElementHost {
                 }
                 else {
                     // mount any remaining new children.
-                    childrenContent.forEach { childContent in
+                    contentChildren.forEach { childContent in
                         let newChild: ElementHost = childContent.makeHost(parentPlatformContent: platformContent,
                                                                                  parentHost: self)
                         newChild.mount(beforeSibling: nil,
@@ -216,10 +217,6 @@ class PrimitiveViewHost: ElementHost {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         
-        guard let parentTarget = parentPlatformContent else {
-            assertionFailure("Attempt to remove the root host's platform content. This would leave an empty hierarchy.")
-            return
-        }
         guard let platformContent = platformContent else { return }
         
         let task = UnmountHostTask(self,
@@ -233,8 +230,8 @@ class PrimitiveViewHost: ElementHost {
         task.isCancelled = parentTask?.isCancelled ?? false
         unmountTask = task
         parentTask?.childTasks.append(task)
-        parentTarget.remove(platformContent,
-                                  for: task)
+        parentPlatformContent.removeChild(platformContent,
+                                     for: task)
     }
     
     /// Stop any unfinished unmounts and complete them without transitions.
@@ -243,5 +240,22 @@ class PrimitiveViewHost: ElementHost {
         parentUnmountTask.cancel()
         parentUnmountTask.completeImmediately()
         parentUnmountTask = .init()
+    }
+    
+    /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
+    private
+    func processModifiedContent() {
+        if wrappedContent is SomeModifiedContent {
+            guard wrappedContent is AnySModifiedContent else { fatalError() }
+            let result = Self.reduceModifiedContent(content)
+            modifiedContent = result.modifiedContent
+            
+            modifiers = inheritedModifiers
+            modifiers.replaceAndAppend(contentsOf: result.modifiers)
+        }
+        else {
+            modifiedContent = nil
+            modifiers = []
+        }
     }
 }

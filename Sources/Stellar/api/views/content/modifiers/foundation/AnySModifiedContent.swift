@@ -7,6 +7,8 @@
 
 import Foundation
 
+// FIXME: Temp public.
+public
 protocol AnySModifiedContent {
     var anyContent: AnySContent { get }
     var anySModifier: AnySContentModifier { get }
@@ -16,11 +18,11 @@ protocol AnySModifiedContent {
 extension SModifiedContent: AnySModifiedContent
 where Content : SContent, Modifier : SContentModifier {
     
-    var anyContent: AnySContent {
+    public var anyContent: AnySContent {
         AnySContent(content)
     }
     
-    var anySModifier: AnySContentModifier {
+    public var anySModifier: AnySContentModifier {
         AnySContentModifier(modifier)
     }
 }

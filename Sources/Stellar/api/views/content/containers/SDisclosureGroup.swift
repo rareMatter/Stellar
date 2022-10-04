@@ -36,7 +36,7 @@ where Label : SContent, Content : SContent {
         self.label = label()
         self.content = content
     }
-    
+    // FIXME: content is not hidden.
     public var body: some SContent {
         label
         

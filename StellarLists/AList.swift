@@ -14,12 +14,34 @@ extension Int: Identifiable {
     public var id: Self { self }
 }
 
-struct AList: SView {
+struct AList: SContent {
 
-    var id: UUID = .init()
-    let searchTextModel = SearchTextStorage()
     let theme = ColorTheme()
     
+    var body: some SContent {
+        SButton {
+            
+        } content: {
+            SText("Button")
+        }
+        .background(SColor.blue)
+//        .disabled(true)
+//        .disabled(false)
+//        SText("Second text")
+//        SText("third text")
+//        SText("fourth text")
+//        SHStack {
+//            SText("Some text")
+//            SText("Second text")
+//            SText("third text")
+//            SText("fourth text")
+//        }
+//        SHStack {
+//            SText("soemthing")
+//        }
+    }
+    
+    /*
     var content: ViewHierarchyObject {
         SListView(0...9) { row in
             switch row {
@@ -94,30 +116,13 @@ struct AList: SView {
         }
         .content
     }
-}
-
-struct CompositeContent: SContent {
-    
-    var title: String
-    
-    var body: some SContent {
-        SLeadingViewLabel(text: title,
-                          leadingView: UIView())
-    }
-}
-
-final
-class SearchTextStorage {
-    var searchText = "" {
-        didSet {
-            debugPrint("Search bar text did update: \(searchText)")
-        }
-    }
+     */
 }
 
 /// A description of a theme. This type allows you to provide your own type for arbitrary special colors. A theme allows dynamic color selection using environmental properties.
 struct BaseColorTheme {
     
+    /*
     //    focus colors
     /// Applied to surfaces which should stand out and match other stand-out surfaces, such as buttons.
     var accentColor: SDynamicColor = .init { scheme in
@@ -150,6 +155,7 @@ struct BaseColorTheme {
     var quaternaryBackground: SDynamicColor = .init { scheme in
         scheme == .light ? .black : .white
     }
+     */
 }
 
 struct ListsColorTheme {

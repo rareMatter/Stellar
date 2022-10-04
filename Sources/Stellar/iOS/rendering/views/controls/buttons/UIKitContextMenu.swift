@@ -9,7 +9,7 @@ import Foundation
 import UIKit
 
 final
-class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
+class UIKitContextMenu: UIControl, UIKitContent {
     
     private(set)
     var title: String = .init()
@@ -33,35 +33,44 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
     private
     var menuContent: UIKitContextMenuContent? = nil
     
-    init() {
+    var modifiers: [UIKitContentModifier] = []
+    
+    init(modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
         isContextMenuInteractionEnabled = true
         showsMenuAsPrimaryAction = true
+        applyModifiers(modifiers)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {}
-    
-    func addChild(_ view: UIKitTargetRenderableContent, before siblingView: UIKitTargetRenderableContent?) {
-        // Use text to create a title.
-        if let text = view as? UIKitText {
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) { fatalError() }
+
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        
+        switch primitiveContent.type {
+        case .text(let text):
             title = text.string
+        
+        case .menuContent(let anyMenuContent):
+            menuContent = anyMenuContent.makeUIKitContextMenuContent(modifiers: modifiers.uiKitModifiers())
+            return menuContent
+        
+        default:
+            guard let renderable = primitiveContent.value as? UIKitRenderable,
+                  let view = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers()) as? UIView else { fatalError() }
+            UIView.addChild(toView: self, childView: view, before: sibling as? UIView)
         }
-        // Use `UIKitContextMenuContent` to later create the menu on demand.
-        else if let content = view as? UIKitContextMenuContent {
-            menuContent = content
-        }
-        // Hand off any other views to be added as a standard child. (Any views here should be coming from other types in the label content.
-        else {
-            if let view = view as? UIView {
-                UIView.addChild(toView: self, childView: view, before: siblingView as? UIView)
-            }
-        }
+        
+        return nil
     }
     
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        fatalError()
+    }
+
     override
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction,
                                 configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
@@ -74,18 +83,24 @@ class UIKitContextMenu: UIControl, UIKitTargetRenderableContent {
         else { return nil }
     }
 }
+extension UIKitContextMenu {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        // TODO:
+        fatalError()
+    }
+}
 
 /// Stores properties which form a `UIMenu`.
 ///
 /// When children are added which match a supported property type for a menu they are converted into stored properties.
 final
-class UIKitContextMenuContent: UIKitTargetRenderableContent {
+class UIKitContextMenuContent: UIKitContent {
     
     var menuChildren: [UIMenuElement] {
         children.compactMap { content in
             if let button = content as? UIKitButton {
                 // TODO: When UIKitImage is added, check button here for image.
-                return UIAction(title: button.title,
+                return UIAction(title: button.text?.string ?? "",
                                          subtitle: nil,
                                          image: nil,
                                          identifier: nil,
@@ -106,25 +121,71 @@ class UIKitContextMenuContent: UIKitTargetRenderableContent {
     
     /// Child content which will be converted into properties of a `UIMenu` on demand.
     private
-    var children: [UIKitTargetRenderableContent] = []
+    var children: [UIKitContent] = []
     
-    func update(with primitive: AnyUIKitPrimitive) {}
+    var modifiers: [UIKitContentModifier] = []
     
-    func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        if view is UIKitButton || view is UIKitContextMenu {
-            if let siblingIndex = children.firstIndex(where: { $0 === siblingView }) {
-                children.insert(view, at: siblingIndex)
+    init(modifiers: [UIKitContentModifier]) {
+        applyModifiers(modifiers)
+    }
+    
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) { fatalError() }
+    
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        
+        switch primitiveContent.type {
+        case .button, .menuContent:
+            guard let uiKitContent = primitiveContent.value as? UIKitContent else { fatalError() }
+            
+            if let sibling = sibling,
+               let siblingContent = sibling as? UIKitContent,
+               let index = children.firstIndex(where: { $0 === siblingContent }) {
+                children.insert(uiKitContent, at: index)
             }
             else {
-                children.append(view)
+                children.append(uiKitContent)
             }
+            
+            return uiKitContent
+            
+        default:
+            fatalError()
         }
     }
     
-    func removeChild(_ view: UIKitTargetRenderableContent) {
-        if let index = children.firstIndex(where: { $0 === view }) {
+    func removeChild(_ child: PlatformContent,
+                for task: UnmountHostTask) {
+        if let content = child as? UIKitContent,
+           let index = children.firstIndex(where: { $0 === content }) {
             children.remove(at: index)
         }
+    }
+}
+extension UIKitContextMenuContent {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        // TODO:
+        fatalError()
+    }
+}
+
+extension AnyContextMenuButton {
+    func makeUIKitContextMenu(modifiers: [UIKitContentModifier]) -> UIKitContextMenu {
+        .init(modifiers: modifiers)
+    }
+}
+extension SContextMenuButton: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitContextMenu(modifiers: modifiers)
+    }
+}
+
+extension AnyContextMenuButtonContent {
+    func makeUIKitContextMenuContent(modifiers: [UIKitContentModifier]) -> UIKitContextMenuContent {
+        .init(modifiers: modifiers)
+    }
+}
+extension _SContextMenuButtonContent: UIKitRenderable {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitContextMenuContent(modifiers: modifiers)
     }
 }

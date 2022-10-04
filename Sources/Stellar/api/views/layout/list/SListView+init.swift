@@ -14,7 +14,7 @@ extension SListView {
     
     init(@SContentBuilder content: () -> Content)
     where Selection == Never {
-        self.contentProvider = content()
+        self.content = content()
         self.selection = nil
     }
     
@@ -26,7 +26,7 @@ extension SListView {
         else {
             self.selection = nil
         }
-        self.contentProvider = content()
+        self.content = content()
     }
     
     init(selection: SBinding<Set<Selection>>?,
@@ -37,7 +37,7 @@ extension SListView {
         else {
             self.selection = nil
         }
-        self.contentProvider = content()
+        self.content = content()
     }
     
     // MARK: - Creating a List from a Range

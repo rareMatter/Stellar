@@ -9,17 +9,31 @@ import Foundation
 
 struct SSwipeActionsModifier<Actions>: SContentModifier
 where Actions : SContent {
-    typealias Body = Never
-    
     let actions: Actions
     let edge: SHorizontalEdge
     let allowsFullSwipe: Bool
+    
+    func body(content: Content) -> some SContent {
+        SwipeActionsModifierContainer(actions: actions,
+                                      edge: edge,
+                                      allowsFullSwipe: allowsFullSwipe)
+    }
 }
 
 public
 enum SHorizontalEdge: Equatable, Hashable {
     case leading
     case trailing
+}
+
+struct SwipeActionsModifierContainer<Actions>: SPrimitiveContent
+where Actions : SContent {
+    let actions: Actions
+    let edge: SHorizontalEdge
+    let allowsFullSwipe: Bool
+}
+extension SwipeActionsModifierContainer: _SContentContainer {
+    var children: [AnySContent] { [.init(actions)] }
 }
 
 public

@@ -7,12 +7,20 @@
 
 import Foundation
 
+// FIXME: Temp public.
+public
 struct AnySContentModifier: SContentModifier {
     
     /// The type of the wrapped `SContentModifier`.
-    /// This is used in order to cast the `_SContentModifierProxy<>` to the correct type.
-    private
-    let contentModifierType: Any.Type
+    let type: Any.Type
+    
+    let typeConstructorName: String
+    
+    /// The type-erased modifier.
+    let modifier: Any
+    
+    /// The type of the `body` of the wrapped `SContentModifier`.
+    let bodyType: Any.Type
     
     private
     let bodyProvider: (Content) -> AnySContent
@@ -23,18 +31,31 @@ struct AnySContentModifier: SContentModifier {
             self = anyModifier
         }
         else {
-            contentModifierType = Modifier.self
+            type = Modifier.self
+            typeConstructorName = Stellar.typeConstructorName(Modifier.self)
+            modifier = erasingModifier
+            bodyType = Modifier.Body.self
             bodyProvider = { contentModifierProxy in
-                guard let contentModifierProxy = contentModifierProxy as? Modifier.Content else {
-                    fatalError()
-                }
+                guard let modifier = contentModifierProxy.modifier.modifier as? Modifier else { fatalError() }
+                let proxy = _SContentModifierProxy(modifier: modifier, content: contentModifierProxy.content)
                 return AnySContent(erasingModifier
-                                    .body(content: contentModifierProxy))
+                                    .body(content: proxy))
             }
         }
     }
     
-    func body(content: Content) -> AnySContent {
+    // FIXME: Temp public.
+    public func body(content: Content) -> AnySContent {
         bodyProvider(content)
+    }
+}
+extension AnySContentModifier: Equatable, Hashable {
+    
+    public static func ==(lhs: AnySContentModifier, rhs: AnySContentModifier) -> Bool {
+        lhs.typeConstructorName == rhs.typeConstructorName
+    }
+    
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(typeConstructorName)
     }
 }

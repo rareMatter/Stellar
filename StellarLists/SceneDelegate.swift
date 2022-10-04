@@ -7,11 +7,11 @@
 
 import UIKit
 import SwiftUI
+import Stellar
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
-
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
@@ -20,11 +20,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
         // Create list view.
         let list = AList()
-
+        
+        let rootController = RootController(nibName: nil, bundle: nil)
+        let reconciler = TreeReconciler(content: list,
+                                        rootPlatformContent: rootController) { handler in
+            DispatchQueue.main.schedule { handler() }
+        }
+        
         // Use a UIHostingController as window root view controller.
         if let windowScene = scene as? UIWindowScene {
             let window = UIWindow(windowScene: windowScene)
-            window.rootViewController = list.content
+            window.rootViewController = rootController
             self.window = window
             window.makeKeyAndVisible()
         }
@@ -61,3 +67,57 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
+final
+class RootController: UIViewController, UIKitContent {
+    
+    var stack: UIStackView = {
+        var stack = UIStackView(arrangedSubviews: [])
+        stack.axis = .vertical
+        stack.alignment = .center
+//        stack.distribution = .fill
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        stack.autoresizingMask = []
+        return stack
+    }()
+    
+    override func viewWillAppear(_ animated: Bool) {
+        view.addSubview(stack)
+        NSLayoutConstraint.activate([
+            stack.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stack.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            stack.topAnchor.constraint(lessThanOrEqualTo: view.topAnchor),
+            stack.leadingAnchor.constraint(lessThanOrEqualTo: view.leadingAnchor)
+        ])
+    }
+    
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        fatalError()
+    }
+    
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
+        let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
+        addChild(content, sibling: sibling)
+        return content
+    }
+    private func addChild(_ content: UIKitContent, sibling: PlatformContent?) {
+        guard let view = content as? UIView else { fatalError() }
+        
+        // TODO: Intrinsic content sizing.
+        view.translatesAutoresizingMaskIntoConstraints = true
+        view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
+        view.frame.size = view.intrinsicContentSize
+        
+        if let sibling = sibling as? UIView,
+           let index = stack.arrangedSubviews.firstIndex(of: sibling) {
+            stack.insertArrangedSubview(view, at: index)
+        }
+        else {
+            stack.addArrangedSubview(view)
+        }
+    }
+    
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        fatalError()
+    }
+}

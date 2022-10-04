@@ -5,45 +5,119 @@
 //  Created by Jesse Spencer on 3/8/22.
 //
 
-import Foundation
+import UIKit
 
+// FIXME: temp public
+public
 final
-class UIKitSection: UIKitTargetRenderableContent, Hashable {
+class UIKitSection: UIKitContent {
     
+    var id: AnyHashable?
+    
+    private(set) var header: UIKitSectionPart?
+    private(set) var content: UIKitSectionPart
+    private(set) var footer: UIKitSectionPart?
+    
+    let modifiers: [UIKitContentModifier]
+    
+    init(modifiers: [UIKitContentModifier]) {
+        self.modifiers = modifiers
+        content = .init(part: .content, modifiers: modifiers)
+    }
+    
+    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) { fatalError() }
+    
+    public func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        
+        switch primitiveContent.type {
+        case .sectionPart(let anyPart):
+            switch anyPart.part {
+            case .parent:
+                let header = anyPart.makeUIKitContent(modifiers: modifiers.uiKitModifiers())
+                self.header = header
+                return header
+                
+            case .content:
+                let content = anyPart.makeUIKitContent(modifiers: modifiers.uiKitModifiers())
+                self.content = content
+                return content
+                
+            case .footer:
+                let footer = anyPart.makeUIKitContent(modifiers: modifiers.uiKitModifiers())
+                self.footer = footer
+                return footer
+            }
+        default:
+            fatalError()
+        }
+    }
+    
+    public
+    func removeChild(_ child: PlatformContent,
+                for task: UnmountHostTask) {
+        guard let content = child as? UIKitContent else { fatalError() }
+        // TODO: Likely the collection view (or similar) which owns this will need to be informed here.
+        if content === header {
+            header = nil
+        }
+        else if content === footer {
+            footer = nil
+        }
+        else if content === self.content {
+            fatalError()
+        }
+        else { fatalError() }
+    }
+}
+extension UIKitSection: Hashable {
+    public
     static
     func == (lhs: UIKitSection, rhs: UIKitSection) -> Bool {
         lhs.id == rhs.id
     }
+    public
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+}
+
+final
+class UIKitSectionPart: UIKitContent {
     
+    private(set) var view: UIView!
+    let part: SectionPartType
+    let modifiers: [UIKitContentModifier]
     
-    private(set)
-    var id: AnyHashable
-    
-    private
-    var headerProvider: () -> AnySContent
-    
-    private
-    var contentProvider: () -> AnySContent
-    
-    private
-    var footerProvider: () -> AnySContent
-    
-    init(primitive: UIKitSectionPrimitive) {
-        // TODO:
-        fatalError("TODO")
+    init(part: SectionPartType, modifiers: [UIKitContentModifier]) {
+        self.part = part
+        self.modifiers = modifiers
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {}
-    
-    func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        // TODO: Check for header, footer, and content.
-        // TODO: Check content as foreach? probably not.
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        fatalError()
     }
-    func removeChild(_ view: UIKitTargetRenderableContent) {
-        
+    
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
+        let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
+        guard let view = content as? UIView else { fatalError() }
+        self.view = view
+        return content
+    }
+    
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        fatalError()
+    }
+}
+extension AnySectionPart {
+    func makeUIKitContent(modifiers: [UIKitContentModifier]) -> UIKitSectionPart {
+        .init(part: part, modifiers: modifiers)
+    }
+}
+
+extension _AnySection {
+    // FIXME: Temp public.
+    public func makeUIKitSection(modifiers: [UIKitContentModifier]) -> UIKitSection {
+        UIKitSection(modifiers: modifiers)
     }
 }

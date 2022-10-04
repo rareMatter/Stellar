@@ -9,13 +9,13 @@ import Foundation
 import UIKit
 
 final
-class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
+class UIKitSwipeActionsConfiguration: UIKitContent {
     
     /// Computed from current state.
     var uiConfiguration: UISwipeActionsConfiguration {
         let actions = buttons.map { button in
             UIContextualAction(style: .normal,
-                               title: button.title,
+                               title: button.text?.string,
                                handler: { action, originView, completion in
                 button.tapHandlerContainer?.t()
                 completion(true)
@@ -33,26 +33,52 @@ class UIKitSwipeActionsConfiguration: UIKitTargetRenderableContent {
     /// Buttons added as children. Use these to create the swipe actions.
     private var buttons: [UIKitButton] = []
     
-    init(primitive: UIKitSwipeActionsPrimitive) {
-        self.edge = primitive.edge
-        self.allowsFullSwipe = primitive.allowsFullSwipe
+    var modifiers: [UIKitContentModifier] = []
+    
+    init(edge: SHorizontalEdge, allowsFullSwipe: Bool, modifiers: [UIKitContentModifier]) {
+        self.edge = edge
+        self.allowsFullSwipe = allowsFullSwipe
+        applyModifiers(modifiers)
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let primitive = primitive as? UIKitSwipeActionsPrimitive else { return }
-        edge = primitive.edge
-        allowsFullSwipe = primitive.allowsFullSwipe
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard let config = primitiveContent.value as? UIKitSwipeActionsConfiguration else { fatalError() }
+        edge = config.edge
+        allowsFullSwipe = config.allowsFullSwipe
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
+        let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
+        
+        if let button = content as? UIKitButton {
+            if let sibling = sibling,
+               let renderable = sibling as? UIKitRenderable,
+               let siblingButton = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers()) as? UIKitButton,
+               let index = buttons.firstIndex(of: siblingButton) {
+                buttons.insert(button, at: index)
+            }
+            else {
+                buttons.append(button)
+            }
+            
+            return content
+        }
+        else { fatalError() }
     }
     
-    func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        if let button = view as? UIKitButton {
-            buttons.append(button)
+    func removeChild(_ child: PlatformContent,
+                for task: UnmountHostTask) {
+        if let button = child as? UIKitButton,
+           let index = buttons.firstIndex(of: button) {
+            buttons.remove(at: index)
         }
     }
-    func removeChild(_ view: UIKitTargetRenderableContent) {
-        if let button = view as? UIKitButton {
-            buttons.removeAll { $0 == button }
-        }
+}
+extension UIKitSwipeActionsConfiguration {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        // TODO:
+        fatalError()
     }
 }

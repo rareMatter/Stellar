@@ -9,11 +9,12 @@ import Foundation
 import UIKit
 
 final
-class UIKitSearchBar: _UIKitSearchTextField, UIKitTargetRenderableContent {
+class UIKitSearchBar: _UIKitSearchTextField, UIKitContent {
     
-    init(primitive: UIKitSearchBarPrimitive) {
+    init(primitive: SSearchBar, modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
-        update(with: primitive)
+        updateState(with: primitive)
+        applyModifiers(modifiers)
     }
     
     @available(*, unavailable)
@@ -21,11 +22,38 @@ class UIKitSearchBar: _UIKitSearchTextField, UIKitTargetRenderableContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let searchPrimitive = primitive as? UIKitSearchBarPrimitive else { return }
-        self.text = searchPrimitive.text
-        self.placeholder = searchPrimitive.placeholderText
-        self.textDidChange = searchPrimitive.onSearch.t
-        self.onReturn = { _ in searchPrimitive.onSearchEnded.t() }
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard case .searchBar(let primitive) = primitiveContent.type else { fatalError() }
+        updateState(with: primitive)
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+    
+    private
+    func updateState(with primitive: SSearchBar) {
+        self.text = primitive.text
+        self.placeholder = primitive.placeholderText
+        self.textDidChange = primitive.onSearch
+        self.onReturn = { _ in
+            primitive.onSearchEnded()
+        }
+    }
+    
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        fatalError()
+    }
+    
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+        fatalError()
+    }
+}
+extension UIKitSearchBar {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        UIView.applyModifiers(modifiers, toView: self)
+    }
+}
+
+extension SSearchBar: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitSearchBar(primitive: self, modifiers: modifiers)
     }
 }

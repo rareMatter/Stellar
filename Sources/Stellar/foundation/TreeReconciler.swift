@@ -19,7 +19,8 @@ import SwiftUI
 /// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The platform content instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
 // TODO: Investigate concurrent content updating.
-final
+// FIXME: Temp public.
+public final
 class TreeReconciler {
     
     struct Update: Hashable {
@@ -53,20 +54,18 @@ class TreeReconciler {
     private
     let scheduler: (@escaping () -> Void) -> Void
     
-    // TODO: When the framework implements main in order to begin rendering it may no longer be necessary to ask for the Content here, as it could be retrieved directly from the App, Window, or root Content implementation via default protocol function conformance (the way @main is currently used). That could mean that only one init would be needed here and it could be simpler.
+    // FIXME: Temp public.
+    public
     init<Content>(content: Content,
-                  platformContentProvider: @escaping (Content) -> PlatformContent,
+                  rootPlatformContent: PlatformContent,
                   platformExecutionScheduler: @escaping (@escaping () -> Void) -> Void)
     where Content : SContent {
         self.scheduler = platformExecutionScheduler
         
-        rootHost = AnySContent(content)
-            .makeRootHost(platformContentProvider: platformContentProvider)
+        rootHost = content.makeHost(parentPlatformContent: rootPlatformContent, parentHost: nil)
         
         performInitialMount()
     }
-    
-    // TODO: Need init for other element types.
     
     private
     func performInitialMount() {

@@ -26,6 +26,14 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
         self.content = content
     }    
 }
+// TODO: This likely should be removed after a lazy approach is implemented.
+extension SForEach: GroupedContent {
+    var children: [AnySContent] {
+        data.map { element in
+            AnySContent(SIdentifiableContent(content(element), id: element[keyPath: id]))
+        }
+    }
+}
 
 // MARK: Identifiable data
 public
@@ -99,10 +107,4 @@ struct AnyForEach: SContent {
     }
     
     var body: Never { fatalError() }
-}
-extension AnyForEach: AnyUIKitPrimitive {
-    
-    func makeRenderableContent() -> UIKitTargetRenderableContent {
-        UIKitForEach(primitive: self)
-    }
 }

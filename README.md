@@ -17,8 +17,8 @@
 
 ## Coding Goals
 ---
-### - Clarity over convention. If a convention is obviously going to be unclear to future programmers - don't use it. However, conventions within StellarUI must be consistent.
-### - Stability over speed. The turtoise beats the hare. Features should not be rushed if stability will be at risk. This is a long-term project with long-term goals. Even small instabilities can harm trust.
+### - Clarity over convention. This framework represents a new frontier. What that means is - if a convention is obviously going to be unclear to future programmers - don't use it. However, conventions within StellarUI must be consistent.
+### - Stability over speed. The turtoise beats the hare. Features should not be rushed if stability will be at risk. This is a long-term project with long-term goals. Even small instabilities can harm trust and cause big problems down the line.
 
 ## Non-goals
 ---

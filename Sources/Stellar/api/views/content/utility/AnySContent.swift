@@ -17,6 +17,8 @@ struct AnySContent: SPrimitiveContent {
     let typeConstructorName: String
     
     /// The wrapped `SContent`.
+    ///
+    /// This is a `var` to be accessible using a ReferenceWritableKeyPath.
     var content: Any
     
     /// The type of the `body` of the wrapped `SContent`.
@@ -29,15 +31,15 @@ struct AnySContent: SPrimitiveContent {
     let bodyProvider: (Any) -> AnySContent
     
     public
-    init<Content>(_ content: Content)
+    init<Content>(_ erasingContent: Content)
     where Content : SContent {
-        if let anyContent = content as? AnySContent {
+        if let anyContent = erasingContent as? AnySContent {
             self = anyContent
         }
         else {
             type = Content.self
-            self.typeConstructorName = Stellar.typeConstructorName(self.type)
-            self.content = content
+            self.typeConstructorName = Stellar.typeConstructorName(Content.self)
+            self.content = erasingContent
             bodyType = Content.Body.self
             bodyProvider = { content in
                 guard let content = content as? Content else {

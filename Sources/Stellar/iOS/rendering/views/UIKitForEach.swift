@@ -7,9 +7,9 @@
 
 import Foundation
 
+/* TODO: This may or may not be needed depending on how lazy content collections are implemented.
 /// Provides rendered ForEach content on-demand.
-final
-class UIKitForEach: UIKitTargetRenderableContent {
+struct UIKitForEach: PlatformContent {
     
     private
     var forEach: AnyForEach
@@ -18,6 +18,9 @@ class UIKitForEach: UIKitTargetRenderableContent {
         self.forEach = primitive
     }
     
+    func update(using host: PrimitiveViewHost) {
+        <#code#>
+    }
     func update(with primitive: AnyUIKitPrimitive) {
         guard let forEach = primitive as? AnyForEach else { fatalError() }
         self.forEach = forEach
@@ -69,3 +72,4 @@ class UIKitViewCollection: UIKitTargetRenderableContent {
         fatalError("TODO")
     }
 }
+*/

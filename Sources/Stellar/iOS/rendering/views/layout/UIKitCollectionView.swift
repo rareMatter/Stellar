@@ -9,13 +9,15 @@ import Foundation
 import UIKit
 
 final
-class UIKitCollectionView: UICollectionView, UIKitTargetRenderableContent, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate {
+class UIKitCollectionView: UICollectionView, UIKitContent, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate {
     
     /// The data source which drives state updates.
     private
     var collectionDataSource: UICollectionViewDiffableDataSource<UIKitSection, AnyHashable>!
     
-    init(primitive: UIKitListPrimitive) {
+    var modifiers: [UIKitContentModifier] = []
+    
+    init(modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero,
                    collectionViewLayout: UICollectionViewCompositionalLayout.list(using: .init(appearance: .insetGrouped)))
 
@@ -31,6 +33,8 @@ class UIKitCollectionView: UICollectionView, UIKitTargetRenderableContent, UICol
                                                          for: indexPath,
                                                          item: itemIdentifier)
         })
+        
+        applyModifiers(modifiers)
     }
     
     /// An init helper which sets up properties of self.
@@ -55,39 +59,21 @@ class UIKitCollectionView: UICollectionView, UIKitTargetRenderableContent, UICol
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(with primitive: AnyUIKitPrimitive) {
-        guard let listPrimitive = primitive as? UIKitListPrimitive else {
-            assertionFailure()
-            return
-        }
+    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+        switch primitiveContent.type {
+        case .section(let anySection):
+            let section = anySection.makeUIKitSection(modifiers: modifiers.uiKitModifiers())
+            addSection(section, sibling: sibling)
+            return section
         
-        updateSelections(listPrimitive.selectionValue ?? .init())
+        default:
+            fatalError()
+        }
     }
-    
-    func addChild(_ view: UIKitTargetRenderableContent,
-                  before siblingView: UIKitTargetRenderableContent?) {
-        
-        // TODO: Recognize UIKitForEach.
-        // Use data to form snapshot. If structs - copy-on-write semantics should apply. If not, only references will be created.
-        // When cells must be configured, use the section provided at that point to use its content for the cell.
-        // When headers and footers must be created, retrieve the section data...
-        
-        guard let forEach = view as? UIKitForEach else {
-            assertionFailure("Unexpected child added to \(self): \(view).")
-            return
-        }
-        
-        
-        // -- old --
-        guard let section = view as? UIKitSection else {
-            assertionFailure("Unexpected child added to \(self): \(view).")
-            return
-        }
-        
+    private func addSection(_ section: UIKitSection, sibling: PlatformContent?) {
         var snapshot = collectionDataSource.snapshot()
         
-        if let siblingView = siblingView,
-        let siblingSection = siblingView as? UIKitSection {
+        if let siblingSection = sibling as? UIKitSection {
             snapshot.insertSections([section],
                                     beforeSection: siblingSection)
         }
@@ -97,10 +83,17 @@ class UIKitCollectionView: UICollectionView, UIKitTargetRenderableContent, UICol
         
         collectionDataSource.apply(snapshot)
     }
-    func removeChild(_ view: UIKitTargetRenderableContent) {
-        guard let section = view as? UIKitSection else {
-            assertionFailure("Unexpected child added to \(self): \(view).")
-            return
+    
+    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+        guard case .list(let anyList) = primitiveContent.type else { fatalError() }
+        updateSelections(anyList.selectionSet)
+        applyModifiers(modifiers.uiKitModifiers())
+    }
+    
+    func removeChild(_ child: PlatformContent,
+                     for task: UnmountHostTask) {
+        guard let section = child as? UIKitSection else {
+            fatalError("Unexpected child added to \(self): \(child).")
         }
         
         var snapshot = collectionDataSource.snapshot()
@@ -132,5 +125,16 @@ extension UIKitCollectionView {
     
     func collectionView(_ collectionView: UICollectionView, performDropWith coordinator: UICollectionViewDropCoordinator) {
         // TODO:
+    }
+}
+extension UIKitCollectionView {
+    private func applyModifiers(_ modifiers: [UIKitContentModifier]) {
+        UIView.applyModifiers(modifiers, toView: self)
+    }
+}
+
+extension SListView: UIKitRenderable {
+    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+        UIKitCollectionView(modifiers: modifiers)
     }
 }

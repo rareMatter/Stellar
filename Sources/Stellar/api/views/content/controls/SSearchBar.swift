@@ -13,4 +13,12 @@ struct SSearchBar: SPrimitiveContent {
     let placeholderText: String
     let onSearch: (String) -> Void
     let onSearchEnded: () -> Void
+    
+    public
+    init(text: SBinding<String>, placeholderText: String = "", onSearch: @escaping (String) -> Void, onSearchEnded: @escaping () -> Void) {
+        self._text = text
+        self.placeholderText = placeholderText
+        self.onSearch = onSearch
+        self.onSearchEnded = onSearchEnded
+    }
 }

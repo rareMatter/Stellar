@@ -16,9 +16,10 @@ where Background : SContent {
     var alignment: SAlignment = .center
     
     func body(content: Content) -> some SContent {
-        BackgroundModifierContainer(content: content,
-                                    background: background,
-                                    alignment: alignment)
+        SZStack(alignment: alignment) {
+            content
+            background
+        }
     }
 }
 extension SBackgroundModifier: Equatable
@@ -47,12 +48,4 @@ extension SContent {
         background(content(),
                    alignment: alignment)
     }
-}
-
-/// A type which can appear in the content hierarchy.
-struct BackgroundModifierContainer<Content, Background>: SPrimitiveContent
-where Content : SContent, Background : SContent {
-    let content: Content
-    let background: Background
-    let alignment: SAlignment
 }

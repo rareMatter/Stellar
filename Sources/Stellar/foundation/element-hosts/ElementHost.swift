@@ -6,11 +6,14 @@
 //
 
 import Foundation
+import OrderedCollections
 
 // TODO: Revise host design. Attempt to replace inheritance tree with composition where it makes sense. This would allow removal of the implicit awareness of subclasses by the ancestor classes (there is at least one instance of this). This also avoids unnecessary overriding and dynamic dispatch.
 /// The base host for live elements, including the various types of `Descriptive Tree` content.
 ///
 /// Other host types inherit and specialize upon this one, depending on the type of `Descriptive Tree` element.
+// FIXME: Temp public.
+public
 class ElementHost {
     
     /// The type-erased element being hosted.
@@ -33,6 +36,8 @@ class ElementHost {
     }
     
     /// Convenient access to the type-erased content instance wrapped by `AnySContent` in the `content` property.
+    // FIXME: Temp public.
+    public
     var wrappedContent: Any {
         get { content.content }
         set { content.content = newValue }
@@ -52,6 +57,14 @@ class ElementHost {
     weak var parent: ElementHost?
     var children = [ElementHost]()
     
+    /// Modifiers applied to `modifiedContent`, if this instance is hosting modified content.
+    var modifiers: OrderedSet<AnySContentModifier> = []
+    
+    /// Modifiers inherited from this instances parent `ElementHost`, if any.
+    var inheritedModifiers: OrderedSet<AnySContentModifier> {
+        parent?.modifiers ?? []
+    }
+    
     // TODO: Need transaction.
     // TODO: Need environment values.
     // TODO: Need preference store.
@@ -70,13 +83,6 @@ class ElementHost {
         self.parent = parent
         
         updateEnvironment()
-    }
-    
-    convenience
-    init(content: AnySContent,
-         parent: ElementHost?) {
-        self.init(hostedElement: .content(content),
-                  parent: parent)
     }
     
     /// Injects the environment values into the hosted element.
@@ -158,43 +164,103 @@ extension ElementHost {
     }
 }
 
-// MARK: AnySContent factory method
-extension AnySContent {
+extension ElementHost {
+    // TODO: Do returned modifiers need to be reversed?
+    static func reduceModifiedContent(_ anyContent: AnySContent) -> (modifiers: OrderedSet<AnySContentModifier>, modifiedContent: AnySContent) {
+        var modifiers = OrderedSet<AnySContentModifier>()
+        let modifiedContent = Self.reduceModifiedContentRecursively(anyContent: anyContent, collection: &modifiers)
+        return (modifiers, modifiedContent)
+    }
     
-    /// Creates an element host type depending on the wrapped type.
+    /// Recursively reduces a modifier chain, stopping when content is encountered which is not a modifier.
+    private static func reduceModifiedContentRecursively(anyContent: AnySContent, collection: inout OrderedSet<AnySContentModifier>) -> AnySContent {
+        
+        // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the modified content is encountered.
+        guard let modifiedContent = anyContent.content as? AnySModifiedContent else {
+            return anyContent
+        }
+        
+        // Check for composed modifier bodies
+        if modifiedContent.anySModifier.bodyType != Never.self {
+            let content = modifiedContent.anySModifier.body(content: .init(modifier: modifiedContent.anySModifier, content: modifiedContent.anyContent))
+            return reduceModifiedContentRecursively(anyContent: content, collection: &collection)
+        }
+        // Accumulate modified content chains
+        else if let someModifiedContent = modifiedContent.anyContent.content as? SomeModifiedContent {
+            guard let modifiedContent = someModifiedContent as? AnySModifiedContent else { fatalError() }
+            collection.append(modifiedContent.anySModifier)
+            return reduceModifiedContentRecursively(anyContent: modifiedContent.anyContent, collection: &collection)
+        }
+        else {
+            // No chaining, primitive modifier.
+            collection.append(modifiedContent.anySModifier)
+            return modifiedContent.anyContent
+        }
+    }
+}
+
+fileprivate extension ElementHost {
+    /// Creates an element host type depending on the type of this content.
     ///
     /// - Parameters:
-    ///     - parentPlatformContent: The parent platform content or nil if it's the root platform content.
+    ///     - parentPlatformContent: The parent platform content.
     ///     - parentHost: The parent of the returned host or nil if it's the root host.
-    func makeHost(parentPlatformContent: PlatformContent?,
-                  parentHost: ElementHost?) -> ElementHost {
-        if type == SEmptyContent.self {
-            return EmptyElementHost(content: self,
+    static func makeHost(forContent content: AnySContent,
+                         parentPlatformContent: PlatformContent,
+                         parentHost: ElementHost?) -> ElementHost {
+        if content.content is SEmptyContent {
+            return EmptyElementHost(hostedElement: .content(content),
                                     parent: parentHost)
         }
-        else if bodyType == Never.self {
-            return PrimitiveViewHost(content: self,
+        else if content.bodyType is Never.Type {
+            return PrimitiveViewHost(content: content,
                                      parentPlatformContent: parentPlatformContent,
                                      parent: parentHost)
         }
         else {
-            return CompositeViewHost(content: self,
+            return CompositeViewHost(content: content,
                                      parentPlatformContent: parentPlatformContent,
                                      parent: parentHost)
         }
     }
+}
+
+// MARK: host factory functions
+extension SContent {
     
-    func makeRootHost<C>(platformContentProvider: @escaping (C) -> PlatformContent) -> ElementHost
-    where C : SContent {
-        // TODO: As of right now, the root content provided to the TreeReconciler could be a composite. Eventually, it will probably be required that it is an App.
-        guard bodyType == Never.self else {
-            fatalError("Expected a primitive content type for the root of the hierarchy.")
-        }
-        guard let typedContent = self.content as? C else {
-            fatalError("Type of generic parameter C must match the wrapped type of this instance.")
-        }
-        return PrimitiveViewHost(content: typedContent,
-                                 platformContentProvider: platformContentProvider,
-                                 parent: nil)
+    /// Creates an element host type depending on the type of this content.
+    ///
+    /// - Parameters:
+    ///     - parentPlatformContent: The parent platform content.
+    ///     - parentHost: The parent of the returned host or nil if it's the root host.
+    func makeHost(parentPlatformContent: PlatformContent,
+                  parentHost: ElementHost?) -> ElementHost {
+        ElementHost.makeHost(forContent: .init(self),
+                             parentPlatformContent: parentPlatformContent,
+                             parentHost: parentHost)
     }
+}
+
+extension AnySContent {
+    
+    /// Creates an element host type depending on the type of this content.
+    ///
+    /// - Parameters:
+    ///     - parentPlatformContent: The parent platform content.
+    ///     - parentHost: The parent of the returned host or nil if it's the root host.
+    func makeHost(parentPlatformContent: PlatformContent,
+                  parentHost: ElementHost?) -> ElementHost {
+        ElementHost.makeHost(forContent: self,
+                             parentPlatformContent: parentPlatformContent,
+                             parentHost: parentHost)
+    }
+}
+
+// FIXME: Temp public.
+/// A container of contextual data to be used when mounting `PlatformContent`.
+public
+struct HostMountingContext {
+    // TODO: Environment values.
+    // TODO: Transaction data.
+    // TODO: View traits.
 }

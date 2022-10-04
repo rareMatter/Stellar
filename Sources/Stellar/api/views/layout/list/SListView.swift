@@ -11,43 +11,21 @@ import UIKit
 import SwiftUI
 
 public
-struct SListView<Content, Selection>: SView, SContent
+struct SListView<Content, Selection>: SPrimitiveContent
 where Content : SContent, Selection : Hashable {
     
     /// The content of this list.
-    let contentProvider: Content
+    let content: Content
     /// The selection, if existing, in the list.
     let selection: _Selection?
-    
-    /// Renders `SContent` into `UIKit` renderable types.
-    /// TODO: This will be moved into app level framework code.
-    var renderer: UIKitRenderer { .init(content: self) }
-    
-    /// The controller which will perform rendering of this instance.
-    /// TODO: This will be removed when the framework is handling rendering of `SView` types.
-    let controller: NLViewController = .init(nibName: nil, bundle: nil)
     
     enum _Selection {
         case one(SBinding<Selection>)
         case many(SBinding<Set<Selection>>)
     }
     
-    public
-    var id: UUID = .init()
-    
-    public
-    var content: ViewHierarchyObject {
-        // Add the root view from the rendered target content to the root view controller.
-        guard let rootView = renderer.rootTarget.renderableContent as? UIView else {
-            fatalError("Root content is not a view.")
-        }
-        controller.view = rootView
-        
-        return controller
-    }
-    
-    public
-    var body: some SContent {
+    private
+    var sectionedContent: some SContent {
         // check content for any contents which are not in a section
         // normalize by placing any loose contents into implicit sections, while finding explicit sections.
         if let contentContainer = content as? _SContentContainer {
@@ -95,7 +73,32 @@ where Content : SContent, Selection : Hashable {
         }
         else {
             // Content has no children
-           return AnySContent(contentProvider)
+           return AnySContent(content)
         }
+    }
+}
+
+extension SListView: _SContentContainer {
+    var children: [AnySContent] { [.init(sectionedContent)] }
+}
+
+// FIXME: temp public
+public
+protocol AnyList {
+    var selectionSet: Set<AnyHashable> { get }
+}
+extension SListView: AnyList {
+    
+    public
+    var selectionSet: Set<AnyHashable> {
+        if let selection = self.selection {
+            switch selection {
+            case let .one(binding):
+                return .init(arrayLiteral: .init(binding.wrappedValue))
+            case let .many(binding):
+                return binding.wrappedValue
+            }
+        }
+        else { return .init() }
     }
 }
