@@ -36,7 +36,7 @@ struct SColor: SContent {
     }
     
     public
-    init(colorSpace: SColorSpace = .sRGB, _ resolveColor: @escaping (ColorScheme) -> PrimitiveColor) {
+    init(colorSpace: SColorSpace = .sRGB, _ resolveColor: @escaping (ColorScheme) -> SColor) {
         resolvedColor = .dynamic(.init(colorSpace: colorSpace, resolveColor))
     }
     
@@ -106,9 +106,9 @@ struct DynamicColor: SContent {
     let colorSpace: SColorSpace
     
     private
-    let resolveColor: (ColorScheme) -> PrimitiveColor
+    let resolveColor: (ColorScheme) -> SColor
     
-    init(colorSpace: SColorSpace, _ resolveColor: @escaping (ColorScheme) -> PrimitiveColor) {
+    init(colorSpace: SColorSpace, _ resolveColor: @escaping (ColorScheme) -> SColor) {
         self.resolveColor = resolveColor
         self.colorSpace = colorSpace
     }
@@ -122,7 +122,6 @@ struct DynamicColor: SContent {
 /// You do not need to use this type directly, instead create colors using `SColor`.
 ///
 /// The framework creates this type when needed on your behalf.
-public
 struct PrimitiveColor: SPrimitiveContent {
     
     static
