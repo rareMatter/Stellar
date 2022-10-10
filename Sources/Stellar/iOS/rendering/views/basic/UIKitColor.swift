@@ -11,7 +11,7 @@ import UIKit
 final
 class UIKitColor: UIView, UIKitContent {
     
-    init(color: SColor, modifiers: [UIKitContentModifier]) {
+    init(color: AnyColor, modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
         updateState(withColor: color)
         applyModifiers(modifiers)
@@ -33,12 +33,8 @@ class UIKitColor: UIView, UIKitContent {
     }
     
     private
-    func updateState(withColor color: SColor) {
-        backgroundColor = .makeColor(r: color.red,
-                                     g: color.green,
-                                     b: color.blue,
-                                     opacity: color.opacity,
-                                     colorSpace: color.colorSpace)
+    func updateState(withColor color: AnyColor) {
+        backgroundColor = .makeColor(color)
     }
     
     func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
@@ -51,7 +47,7 @@ extension UIKitColor {
     }
 }
 
-extension SColor: UIKitRenderable {
+extension PrimitiveColor: UIKitRenderable {
     public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitColor(color: self, modifiers: modifiers)
     }

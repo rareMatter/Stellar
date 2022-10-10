@@ -35,7 +35,7 @@ enum PrimitiveContentType {
 
     case text(SText)
     
-    case color(SColor)
+    case color(AnyColor)
     
     case button(AnyButton)
     

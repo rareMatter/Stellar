@@ -18,16 +18,16 @@ extension UIColor {
 extension UIColor {
     
     static
-    func makeColor(r: Double, g: Double, b: Double, opacity: Double, colorSpace: SColorSpace) -> UIColor {
+    func makeColor(_ anyColor: AnyColor) -> UIColor {
         // convert RGB values to UIColor RGB range [0, 1].
-        let mappedRGBValues = [r, g, b]
-            .map { rescale(value: $0, currentMax: SColor.allowedColorRange.upperBound, newMax: UIColor.allowedColorValueRange.upperBound) }
+        let mappedRGBValues = [anyColor.red, anyColor.green, anyColor.blue]
+            .map { rescale(value: $0, currentMax: anyColor.allowedColorRange.upperBound, newMax: UIColor.allowedColorValueRange.upperBound) }
         let red = CGFloat(mappedRGBValues[0])
         let green = CGFloat(mappedRGBValues[1])
         let blue = CGFloat(mappedRGBValues[2])
-        let opacity = CGFloat(opacity)
+        let opacity = CGFloat(anyColor.opacity)
         
-        switch colorSpace {
+        switch anyColor.colorSpace {
         case .displayP3:
             return .init(displayP3Red: red, green: green, blue: blue, alpha: opacity)
         case .sRGB:
