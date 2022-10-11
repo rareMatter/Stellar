@@ -21,14 +21,14 @@ extension SContextMenuButton {
     /// - Parameters:
     ///   - content: A group of menu items.
     ///   - label: A view describing the content of the menu.
-    init(content: () -> Content,
-         label: () -> Label) {
+    init(@SContentBuilder content: () -> Content,
+         @SContentBuilder label: () -> Label) {
         self.content = content()
         self.label = label()
     }
     
     init<S>(_ title: S,
-            content: () -> Content)
+            @SContentBuilder content: () -> Content)
     where Label == SText, S : StringProtocol {
         self.content = content()
         self.label = .init(title)
