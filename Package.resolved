@@ -11,6 +11,15 @@
         }
       },
       {
+        "package": "swift-collections",
+        "repositoryURL": "https://github.com/rareMatter/swift-collections",
+        "state": {
+          "branch": "ordered-set/more-insertions",
+          "revision": "a219a326a79d884d2b8dd74a9ecd3dc9f60322ee",
+          "version": null
+        }
+      },
+      {
         "package": "SwiftDate",
         "repositoryURL": "https://github.com/malcommac/SwiftDate.git",
         "state": {

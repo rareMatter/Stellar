@@ -7,6 +7,7 @@
 
 import Foundation
 
+// TODO: Why are these initializers public?
 /// `SContent created from a tuple of `SContent` values.
 /// This is not intended for direct use in your composed content.
 public

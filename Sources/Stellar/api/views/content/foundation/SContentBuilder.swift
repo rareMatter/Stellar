@@ -11,6 +11,7 @@ import Foundation
 public
 enum SContentBuilder {}
 
+// TODO: Why are these functions returning concrete types, instead of opaque?
 // MARK: conditionals
 public
 extension SContentBuilder {

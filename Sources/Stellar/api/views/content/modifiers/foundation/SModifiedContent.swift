@@ -8,6 +8,7 @@
 import Foundation
 
 // TODO: Rename to SModifiedElement.
+// TODO: Relocate SContent parts.
 public
 struct SModifiedContent<Content, Modifier> {
     public typealias Body = Never

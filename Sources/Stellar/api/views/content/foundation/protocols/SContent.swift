@@ -7,6 +7,7 @@
 
 import Foundation
 
+// TODO: body property needs @MainActor.
 /// A description of content used to create some Stellar views.
 ///
 /// - Important: Only use `struct` when making your content.
