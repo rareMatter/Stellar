@@ -59,7 +59,7 @@ class UIKitCollectionView: UICollectionView, UIKitContent, UICollectionViewDeleg
         fatalError("init(coder:) has not been implemented")
     }
     
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         switch primitiveContent.type {
         case .section(let anySection):
             let section = anySection.makeUIKitSection(modifiers: modifiers.uiKitModifiers())
@@ -84,7 +84,7 @@ class UIKitCollectionView: UICollectionView, UIKitContent, UICollectionViewDeleg
         collectionDataSource.apply(snapshot)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case .list(let anyList) = primitiveContent.type else { fatalError() }
         updateSelections(anyList.selectionSet)
         applyModifiers(modifiers.uiKitModifiers())

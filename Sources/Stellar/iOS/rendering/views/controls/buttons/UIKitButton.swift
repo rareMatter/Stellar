@@ -50,7 +50,7 @@ class UIKitButton: UIControl, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case let .button(anyButton) = primitiveContent.type else { fatalError() }
         if anyButton.actionHandler != tapHandlerContainer {
             tapGesture.handler = anyButton.actionHandler.t
@@ -59,9 +59,9 @@ class UIKitButton: UIControl, UIKitContent {
         // TODO: If children change, the size of this may need to update to accomodate. A generalized layout handling chain may need to be implemented. Or - review Dynamic Content handling implemented by Content Cell.
     }
     
-    public func addChild(for primitiveContent: PrimitiveContentContext,
+    public func addChild(for primitiveContent: PrimitiveContext,
                          preceedingSibling sibling: PlatformContent?,
-                         modifiers: [AnySContentModifier],
+                         modifiers: [Modifier],
                          context: HostMountingContext) -> PlatformContent? {
         
         // TODO: Need support for UIKitImage.

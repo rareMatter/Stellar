@@ -25,9 +25,9 @@ class UIKitSection: UIKitContent {
         content = .init(part: .content, modifiers: modifiers)
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) { fatalError() }
+    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
     
-    public func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    public func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
         switch primitiveContent.type {
         case .sectionPart(let anyPart):
@@ -93,11 +93,11 @@ class UIKitSectionPart: UIKitContent {
         self.modifiers = modifiers
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         fatalError()
     }
     
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
         let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
         guard let view = content as? UIView else { fatalError() }

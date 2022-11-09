@@ -58,7 +58,7 @@ class PrimitiveViewHost: ElementHost {
             self.platformContent = parentPlatformContent
             
             guard let platformContent = platformContent else {
-                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(content)")
+                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(anyContent.content)")
             }
             
             // modified content has already been unraveled using its children, so the resulting content is the child.
@@ -71,26 +71,26 @@ class PrimitiveViewHost: ElementHost {
             }
         }
         else {
-            if wrappedContent is GroupedContent {
+            if anyContent.content is GroupedContent {
                 // don't give GroupedContent types to the platform renderer
                 self.platformContent = parentPlatformContent
             }
             else {
                 // create platform content for this host using either the parent platform content or the provider
                 self.platformContent = parentPlatformContent
-                    .addChild(for: .init(value: wrappedContent), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
+                    .addChild(for: .init(value: anyContent.content), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
             }
             
             // abort if no platform content was provided by the platform for this host
             guard let platformContent = platformContent else {
-                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(content)")
+                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(anyContent)")
             }
             
             // create and mount children if the content provides any
-            guard !content.children.isEmpty else { return }
-            let isGroup = wrappedContent is GroupedContent
+            guard !anyContent.children.isEmpty else { return }
+            let isGroup = anyContent.content is GroupedContent
             
-            children = content.children.map {
+            children = anyContent.children.map {
                 $0.makeHost(parentPlatformContent: platformContent,
                             parentHost: self)
             }
@@ -114,9 +114,9 @@ class PrimitiveViewHost: ElementHost {
         updateEnvironment()
         processModifiedContent()
         
-        platformContent.update(withPrimitive: .init(value: modifiedContent ?? wrappedContent), modifiers: modifiers.elements)
+        platformContent.update(withPrimitive: .init(value: modifiedContent ?? anyContent.content), modifiers: modifiers.elements)
         
-        var contentChildren = modifiedContent != nil ? [modifiedContent!] : content.children
+        var contentChildren = modifiedContent != nil ? [modifiedContent!] : anyContent.children
         
         // perform updates for children
         switch (children.isEmpty, contentChildren.isEmpty) {
@@ -157,9 +157,9 @@ class PrimitiveViewHost: ElementHost {
                     let newChild: ElementHost
                     
                     // same types
-                    if childHost.content.typeConstructorName == childContent.typeConstructorName {
+                    if childHost.hostedElement.typeConstructorName == childContent.typeConstructorName {
 //                        childHost.environmentValues = environmentValues
-                        childHost.content = childContent
+                        childHost.hostedElement = .content(childContent)
                         childHost.updateEnvironment()
                         childHost.update(inReconciler: reconciler)
                         newChild = childHost
@@ -245,13 +245,13 @@ class PrimitiveViewHost: ElementHost {
     /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
     private
     func processModifiedContent() {
-        if wrappedContent is SomeModifiedContent {
-            guard wrappedContent is AnySModifiedContent else { fatalError() }
-            let result = Self.reduceModifiedContent(content)
+        if anyContent.content is SomeModifiedContent {
+            guard anyContent.content is AnySModifiedContent else { fatalError() }
+            let result = Self.reduceModifiedContent(anyContent)
             modifiedContent = result.modifiedContent
             
             modifiers = inheritedModifiers
-            modifiers.replaceAndAppend(contentsOf: result.modifiers)
+            modifiers.replaceAndAppend(contentsOf: result.modifiers.map { Modifier.content($0) })
         }
         else {
             modifiedContent = nil

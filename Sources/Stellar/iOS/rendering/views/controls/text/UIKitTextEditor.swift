@@ -20,7 +20,7 @@ class UIKitTextEditor: _TextView, UIKitContent {
         applyModifiers(modifiers)
     }
 
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let primitive = primitiveContent.value as? STextEditor else { fatalError() }
         updateState(with: primitive)
         applyModifiers(modifiers.uiKitModifiers())
@@ -36,7 +36,7 @@ class UIKitTextEditor: _TextView, UIKitContent {
         self.inputAccessoryView = primitive.inputAccessoryView
     }
     
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         fatalError()
     }
     

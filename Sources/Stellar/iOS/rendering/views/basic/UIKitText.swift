@@ -27,13 +27,13 @@ class UIKitText: UILabel, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let text = primitiveContent.value as? SText else { fatalError() }
         self.text = text.string
         applyModifiers(modifiers.uiKitModifiers())
     }
     
-    public func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    public func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         fatalError()
     }
     

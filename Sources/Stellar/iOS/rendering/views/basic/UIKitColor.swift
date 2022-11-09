@@ -22,13 +22,13 @@ class UIKitColor: UIView, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case let .color(color) = primitiveContent.type else { fatalError() }
         updateState(withColor: color)
         applyModifiers(modifiers.uiKitModifiers())
     }
     
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         fatalError()
     }
     

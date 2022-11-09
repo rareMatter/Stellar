@@ -86,7 +86,7 @@ extension UIKitContent {
     }
 }
 
-extension PrimitiveContentContext {
+extension PrimitiveContext {
     
     /// Creates a `UIKitRenderable` from self if possible.
     ///
@@ -129,17 +129,31 @@ extension AnySContentModifier {
         (modifier as? UIKitRenderableModifier)?.makeModifier()
     }
 }
+extension AnySSceneModifier {
+    func uiKitModifier() -> UIKitContentModifier? {
+        (modifier as? UIKitRenderableModifier)?.makeModifier()
+    }
+}
 // FIXME: temp public
 public
 extension Collection
-where Element == AnySContentModifier {
+where Element == Modifier {
     func uiKitModifiers() -> [UIKitContentModifier] {
-        compactMap { anyModifier in
-            guard let modifier = anyModifier.uiKitModifier() else {
+        compactMap { modifier in
+            let uiKitModifier: UIKitContentModifier?
+            
+            switch modifier {
+            case .scene(let anySceneModifier):
+                uiKitModifier = anySceneModifier.uiKitModifier()
+                
+            case .content(let anyContentModifier):
+                uiKitModifier = anyContentModifier.uiKitModifier()
+            }
+            guard let uiKitModifier = uiKitModifier else {
                 assertionFailure()
                 return nil
             }
-            return modifier
+            return uiKitModifier
         }
     }
 }

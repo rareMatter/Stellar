@@ -9,7 +9,7 @@ import Foundation
 
 protocol SSceneModifier {
     
-    associatedtype Body : SContent
+    associatedtype Body : SScene
     
     @SContentBuilder func body(content: Body) -> Self.Body
 }

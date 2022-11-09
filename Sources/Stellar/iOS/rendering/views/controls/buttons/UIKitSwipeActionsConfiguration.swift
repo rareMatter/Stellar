@@ -41,14 +41,14 @@ class UIKitSwipeActionsConfiguration: UIKitContent {
         applyModifiers(modifiers)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let config = primitiveContent.value as? UIKitSwipeActionsConfiguration else { fatalError() }
         edge = config.edge
         allowsFullSwipe = config.allowsFullSwipe
         applyModifiers(modifiers.uiKitModifiers())
     }
 
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
         let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
         

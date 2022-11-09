@@ -1,5 +1,5 @@
 //
-//  CompositeViewHost.swift
+//  CompositeSceneHost.swift
 //  
 //
 //  Created by Jesse Spencer on 10/25/21.
@@ -8,21 +8,18 @@
 import Foundation
 
 final
-class CompositeViewHost: CompositeElementHost {
+class CompositeSceneHost: CompositeElementHost {
     
-    override
-    func mount(beforeSibling sibling: PlatformContent?,
-               onParent parent: ElementHost?,
-               reconciler: TreeReconciler) {
+    override func mount(beforeSibling sibling: PlatformContent?, onParent parent: ElementHost?, reconciler: TreeReconciler) {
         super.prepareForMount()
         
         // tell the reconciler to process self's hosted content
         reconciler.processBody(of: self,
-                               hostedElement: \.anyContent.content)
+                               hostedElement: \.anyScene.wrappedScene)
         
         // create a child host for the body of self's hosted content after it has been processed
-        let childHostedContent = anyContent
-            .bodyProvider(anyContent.content)
+        let childHostedContent = anyScene
+            .bodyProvider(anyScene.wrappedScene)
         let childHost = childHostedContent
             .makeHost(parentPlatformContent: parentPlatformContent,
                       parentHost: self)
@@ -35,19 +32,18 @@ class CompositeViewHost: CompositeElementHost {
         
         // TODO: schedule post-render callbacks to handle appearance actions and update preferences.
         /*
-        reconciler.afterCurrentRender { [weak self] in
-            guard let self = self else { return }
-            
-        }
+         reconciler.afterCurrentRender { [weak self] in
+         guard let self = self else { return }
+         
+         }
          */
         
         super.mount(beforeSibling: sibling,
                     onParent: parent,
                     reconciler: reconciler)
     }
-    
-    override
-    func update(inReconciler reconciler: TreeReconciler) {
+
+    override func update(inReconciler reconciler: TreeReconciler) {
         // TODO: Handle transaction.
         // TODO: Update variadic views.
         
@@ -56,28 +52,26 @@ class CompositeViewHost: CompositeElementHost {
         // - when self's element is "renderer primitive", the element returned by the renderer would be added as a child here.
         // - when self's element is NOT "renderer primitive" and has a body, the 'render' function would call the body and that would be used here.
         reconciler.processBody(of: self,
-                               hostedElement: \.anyContent.content)
+                               hostedElement: \.anyScene.wrappedScene)
         
         // TODO: Why is the reconcile function asking this instance to handle child behaviors in closures?
         // reconcile state changes with child content
-        let childHostedContent = anyContent
-            .bodyProvider(anyContent.content)
+        let childHostedContent = anyScene
+            .bodyProvider(anyScene.wrappedScene)
         reconciler.reconcileChildren(for: self,
                                      withChild: childHostedContent,
                                      elementType: { $0.type },
                                      updateChildHost: {
             // TODO: ...
             //            childHost.environmentValues = environmentValues
-            $0.hostedElement = .content(.init(childHostedContent))
+            $0.hostedElement = .scene(.init(childHostedContent))
             //            childHost.transaction = transaction
         },
                                      mountChildElement: { $0.makeHost(parentPlatformContent: parentPlatformContent,
-                                                                             parentHost: self) })
+                                                                      parentHost: self) })
     }
     
-    override
-    func unmount(in reconciler: TreeReconciler,
-                 parentTask: UnmountTask?) {
+    override func unmount(in reconciler: TreeReconciler, parentTask: UnmountTask?) {
         super.unmount(in: reconciler,
                       parentTask: parentTask)
         
@@ -88,7 +82,7 @@ class CompositeViewHost: CompositeElementHost {
             // TODO: view traits.
             //            host.viewTraits = viewTraits
             childHost.unmount(in: reconciler,
-                         parentTask: parentTask)
+                              parentTask: parentTask)
         }
         
         // TODO: Call appearance action.

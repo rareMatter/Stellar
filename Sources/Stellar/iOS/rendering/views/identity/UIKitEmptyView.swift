@@ -19,8 +19,8 @@ final class UIKitEmptyView: UIView, UIKitContent {
         fatalError()
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {}
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {}
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         assertionFailure()
         return nil
     }

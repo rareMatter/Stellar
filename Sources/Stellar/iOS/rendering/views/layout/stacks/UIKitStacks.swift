@@ -14,7 +14,7 @@ class UIKitPrimitiveStackView: UIStackView, UIKitContent {
     
     var modifiers: [UIKitContentModifier] = []
     
-    public func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    public func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
         let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
         guard let view = content as? UIView else { fatalError() }
@@ -31,7 +31,7 @@ class UIKitPrimitiveStackView: UIStackView, UIKitContent {
         return content
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         fatalError()
     }
 
@@ -62,7 +62,7 @@ class UIKitHStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [AnySContentModifier]) {
         guard let anyHStack = primitiveContent.value as? AnyHStack else { fatalError() }
         updateState(with: anyHStack)
         applyModifiers(modifiers.uiKitModifiers())
@@ -107,7 +107,7 @@ class UIKitVStack: UIKitPrimitiveStackView {
     }
     
     // FIXME: Temp public.
-    public override func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    public override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [AnySContentModifier]) {
         guard let vStack = primitiveContent.value as? AnyVStack else { fatalError() }
         updateState(with: vStack)
         applyModifiers(modifiers.uiKitModifiers())

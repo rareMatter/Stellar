@@ -16,14 +16,14 @@ protocol PlatformContent {
     
     /// TODO
     /// - returns The content which was added to the rendered hierarchy or `nil` if none was added.
-    func addChild(for primitiveContent: PrimitiveContentContext,
+    func addChild(for primitiveContent: PrimitiveContext,
                   preceedingSibling sibling: PlatformContent?,
-                  modifiers: [AnySContentModifier],
+                  modifiers: [Modifier],
                   context: HostMountingContext) -> PlatformContent?
     
     /// Updates rendered state using the primitive content.
-    func update(withPrimitive primitiveContent: PrimitiveContentContext,
-                modifiers: [AnySContentModifier])
+    func update(withPrimitive primitiveContent: PrimitiveContext,
+                modifiers: [Modifier])
     
     /// Removes the child using the unmount task.
     func removeChild(_ child: PlatformContent,
@@ -31,7 +31,7 @@ protocol PlatformContent {
 }
 
 public
-enum PrimitiveContentType {
+enum PrimitiveKind {
 
     case text(SText)
     
@@ -51,30 +51,55 @@ enum PrimitiveContentType {
     case menuContent(AnyContextMenuButtonContent)
     
     case searchBar(SSearchBar)
-}
-
-public
-struct PrimitiveContentContext {
     
-    public
-    var type: PrimitiveContentType {
+    case windowGroup(AnySWindowGroup)
+    
+    init(_ value: Any) {
         if let text = value as? SText {
-            return .text(text)
+            self = .text(text)
+        }
+        else if let anyColor = value as? AnyColor {
+            self = .color(anyColor)
         }
         else if let anyButton = value as? AnyButton {
-            return .button(anyButton)
+            self = .button(anyButton)
         }
         else if let anyVStack = value as? AnyVStack {
-            return .vStack(anyVStack)
+            self = .vStack(anyVStack)
         }
         else if let anyHStack = value as? AnyHStack {
-            return .hStack(anyHStack)
+            self = .hStack(anyHStack)
         }
         else if let anyZStack = value as? AnyZStack {
-            return .zStack(anyZStack)
+            self = .zStack(anyZStack)
+        }
+        else if let anyList = value as? AnyList {
+            self = .list(anyList)
+        }
+        else if let anySection = value as? _AnySection {
+            self = .section(anySection)
+        }
+        else if let anyContextMenuButton = value as? AnyContextMenuButton {
+            self = .menu(anyContextMenuButton)
+        }
+        else if let anyContextMenuButtonContent = value as? AnyContextMenuButtonContent {
+            self = .menuContent(anyContextMenuButtonContent)
+        }
+        else if let searchBar = value as? SSearchBar {
+            self = .searchBar(searchBar)
+        }
+        else if let anyWindowGroup = value as? AnySWindowGroup {
+            self = .windowGroup(anyWindowGroup)
         }
         else { fatalError() }
     }
+}
+
+public
+struct PrimitiveContext {
+    
+    public
+    var type: PrimitiveKind { .init(value) }
     
     public
     let value: Any

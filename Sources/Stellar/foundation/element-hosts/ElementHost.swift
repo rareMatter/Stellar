@@ -17,15 +17,30 @@ public
 class ElementHost {
     
     /// The type-erased element being hosted.
-    private
     var hostedElement: ElementType
+    
     /// The type of the hosted element.
     var hostedElementType: Any.Type { hostedElement.type }
     
-    // -- type-casted element accessors
-    // TODO: Need other element types.
+    var anyApp: AnySApp {
+        get {
+            guard case let .app(app) = hostedElement else { fatalError() }
+            return app
+        }
+        set { hostedElement = .app(newValue) }
+    }
     
-    var content: AnySContent {
+    var anyScene: AnySScene {
+        get {
+            guard case let .scene(scene) = hostedElement else {
+                fatalError()
+            }
+            return scene
+        }
+        set { hostedElement = .scene(newValue) }
+    }
+    
+    var anyContent: AnySContent {
         get {
             if case let .content(content) = hostedElement {
                 return content
@@ -35,22 +50,6 @@ class ElementHost {
         set { hostedElement = .content(newValue) }
     }
     
-    /// Convenient access to the type-erased content instance wrapped by `AnySContent` in the `content` property.
-    // FIXME: Temp public.
-    public
-    var wrappedContent: Any {
-        get { content.content }
-        set { content.content = newValue }
-    }
-    
-    /// The type constructor name, which excludes generic parameters, of the hosted element.
-    var typeConstructorName: String {
-        switch hostedElement {
-            case .content(let anySContent):
-                return anySContent.typeConstructorName
-        }
-    }
-    
     // -- host tree
     
     /// The parent of this host, if it has one.
@@ -58,10 +57,10 @@ class ElementHost {
     var children = [ElementHost]()
     
     /// Modifiers applied to `modifiedContent`, if this instance is hosting modified content.
-    var modifiers: OrderedSet<AnySContentModifier> = []
+    var modifiers: OrderedSet<Modifier> = []
     
     /// Modifiers inherited from this instances parent `ElementHost`, if any.
-    var inheritedModifiers: OrderedSet<AnySContentModifier> {
+    var inheritedModifiers: OrderedSet<Modifier> {
         parent?.modifiers ?? []
     }
     
@@ -74,9 +73,6 @@ class ElementHost {
     var unmountTask: UnmountTask?
     
     // MARK: init
-    
-    // TODO: Need init for other element types.
-    
     init(hostedElement: ElementType,
          parent: ElementHost?) {
         self.hostedElement = hostedElement
@@ -155,7 +151,7 @@ extension ElementHost {
     /// - Note: If a host's content type is `GroupedContent`, it is skipped.
     func firstPrimitivePlatformContent() -> PlatformContent? {
         if let primitiveHost = self as? PrimitiveViewHost,
-           !(primitiveHost.content.type is GroupedContent.Type) {
+           !(primitiveHost.anyContent.content is GroupedContent.Type) {
             return primitiveHost.platformContent
         }
         else {
@@ -164,6 +160,7 @@ extension ElementHost {
     }
 }
 
+// MARK: Reducing modified content
 extension ElementHost {
     // TODO: Do returned modifiers need to be reversed?
     static func reduceModifiedContent(_ anyContent: AnySContent) -> (modifiers: OrderedSet<AnySContentModifier>, modifiedContent: AnySContent) {
@@ -199,6 +196,39 @@ extension ElementHost {
     }
 }
 
+// MARK: Reducing modified scenes
+extension ElementHost {
+    static func reduceModifiedScene(_ anyScene: AnySScene) -> (modifiers: OrderedSet<AnySSceneModifier>, modifiedScene: AnySScene) {
+        var modifiers = OrderedSet<AnySSceneModifier>()
+        let modifiedScene = Self.reduceModifiedSceneRecursively(anyScene: anyScene, collection: &modifiers)
+        return (modifiers, modifiedScene)
+    }
+    
+    private static func reduceModifiedSceneRecursively(anyScene: AnySScene, collection: inout OrderedSet<AnySSceneModifier>) -> AnySScene {
+        // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the modified content is encountered.
+        guard let modifiedScene = anyScene.wrappedScene as? AnySModifiedScene else {
+            return anyScene
+        }
+        
+        // Check for composed modifier bodies
+        if modifiedScene.anySModifier.bodyType != Never.self {
+            let scene = modifiedScene.anySModifier.body(content: modifiedScene.anyScene)
+            return reduceModifiedSceneRecursively(anyScene: scene, collection: &collection)
+        }
+        // Accumulate modified content chains
+        else if let someModifiedElement = modifiedScene as? SomeModifiedContent {
+            guard let modifiedScene = someModifiedElement as? AnySModifiedScene else { fatalError() }
+            collection.append(modifiedScene.anySModifier)
+            return reduceModifiedSceneRecursively(anyScene: modifiedScene.anyScene, collection: &collection)
+        }
+        else {
+            // No chaining, primitive modifier.
+            collection.append(modifiedScene.anySModifier)
+            return modifiedScene.anyScene
+        }
+    }
+}
+
 fileprivate extension ElementHost {
     /// Creates an element host type depending on the type of this content.
     ///
@@ -218,9 +248,24 @@ fileprivate extension ElementHost {
                                      parent: parentHost)
         }
         else {
-            return CompositeViewHost(content: content,
+            return CompositeViewHost(element: .content(content),
                                      parentPlatformContent: parentPlatformContent,
                                      parent: parentHost)
+        }
+    }
+}
+
+fileprivate extension ElementHost {
+    
+    static func makeHost(forScene scene: AnySScene,
+                         parentPlatformContent: PlatformContent,
+                         parentHost: ElementHost?) -> ElementHost {
+        // TODO: Add EmptyScene.
+        if scene.bodyType is Never.Type {
+            return PrimitiveSceneHost(scene: scene, parentPlatformContent: parentPlatformContent, parent: parentHost)
+        }
+        else {
+            return CompositeSceneHost(element: .scene(scene), parentPlatformContent: parentPlatformContent, parent: parentHost)
         }
     }
 }
@@ -256,6 +301,22 @@ extension AnySContent {
     }
 }
 
+extension SScene {
+    
+    func makeHost(parentPlatformContent: PlatformContent,
+                  parentHost: ElementHost?) -> ElementHost {
+        ElementHost.makeHost(forScene: .init(self), parentPlatformContent: parentPlatformContent, parentHost: parentHost)
+    }
+}
+
+extension AnySScene {
+    
+    func makeHost(parentPlatformContent: PlatformContent,
+                  parentHost: ElementHost?) -> ElementHost {
+        ElementHost.makeHost(forScene: self, parentPlatformContent: parentPlatformContent, parentHost: parentHost)
+    }
+}
+
 // FIXME: Temp public.
 /// A container of contextual data to be used when mounting `PlatformContent`.
 public
@@ -263,4 +324,10 @@ struct HostMountingContext {
     // TODO: Environment values.
     // TODO: Transaction data.
     // TODO: View traits.
+}
+
+public
+enum Modifier: Hashable, Equatable {
+    case content(AnySContentModifier)
+    case scene(AnySSceneModifier)
 }

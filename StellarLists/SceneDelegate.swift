@@ -90,11 +90,11 @@ class RootController: UIViewController, UIKitContent {
         ])
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         fatalError()
     }
     
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
         let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
         addChild(content, sibling: sibling)

@@ -18,7 +18,7 @@ struct AnySScene: PrimitiveScene {
     /// The wrapped `SScene`.
     ///
     /// This is a `var` to be accessible using a ReferenceWritableKeyPath.
-    var content: Any
+    var wrappedScene: Any
     
     /// The type of the `body` of the wrapped `SScene`.
     let bodyType: Any.Type
@@ -38,7 +38,7 @@ struct AnySScene: PrimitiveScene {
         else {
             type = S.self
             self.typeConstructorName = Stellar.typeConstructorName(S.self)
-            self.content = erasingContent
+            self.wrappedScene = erasingContent
             bodyType = S.Body.self
             bodyProvider = { scene in
                 guard let scene = scene as? S else {
@@ -47,5 +47,11 @@ struct AnySScene: PrimitiveScene {
                 return AnySScene(scene.body)
             }
         }
+    }
+}
+
+extension AnySScene: ContainerScene {
+    var children: [AnySScene] {
+        (wrappedScene as? ContainerScene)?.children ?? []
     }
 }

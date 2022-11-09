@@ -46,9 +46,9 @@ class UIKitContextMenu: UIControl, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) { fatalError() }
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
 
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
         switch primitiveContent.type {
         case .text(let text):
@@ -129,9 +129,9 @@ class UIKitContextMenuContent: UIKitContent {
         applyModifiers(modifiers)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) { fatalError() }
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
     
-    func addChild(for primitiveContent: PrimitiveContentContext, preceedingSibling sibling: PlatformContent?, modifiers: [AnySContentModifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
         switch primitiveContent.type {
         case .button, .menuContent:

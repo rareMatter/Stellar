@@ -28,12 +28,11 @@ class CompositeElementHost: ElementHost {
     /// - Note: These subscriptions are persistent and only removed when the composite element containing them is removed.
     var persistentSubsciptions = [AnyCancellable]()
     
-    init(content: AnySContent,
+    init(element: ElementType,
          parentPlatformContent: PlatformContent,
          parent: ElementHost?) {
         self.parentPlatformContent = parentPlatformContent
-        
-        super.init(hostedElement: .content(content), parent: parent)
+        super.init(hostedElement: element, parent: parent)
     }
 }
 extension CompositeElementHost: Hashable {

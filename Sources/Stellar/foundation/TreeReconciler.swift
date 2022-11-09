@@ -6,7 +6,6 @@
 //
 
 import Combine
-import SwiftUI
 
 /// The `Tree Reconciler` handles updating of the "Live Tree" (such as `PrimitiveViewHost`) when state changes are observed in the "Descriptive Tree" (`SContent` values), or other changes occur which require updates, such as user interactions or environment properties.
 ///
@@ -53,6 +52,18 @@ class TreeReconciler {
     /// reconciliation should be performed on the event loop following the one which received user interaction.
     private
     let scheduler: (@escaping () -> Void) -> Void
+    
+    init<A>(app: A,
+            rootPlatformContent: PlatformContent,
+            scheduler: @escaping (@escaping () -> Void) -> Void)
+    where A : SApp {
+        self.scheduler = scheduler
+        
+        self.rootHost = AppHost(element: .app(.init(app)), parentPlatformContent: rootPlatformContent, parent: nil)
+        
+        performInitialMount()
+        // TODO: publishing of scene phase, color scheme to app host.
+    }
     
     // FIXME: Temp public.
     public
@@ -204,18 +215,6 @@ class TreeReconciler {
         }
     }
     
-    // TODO: Need rendering for other element types.
-    
-    /*
-     func render(mountedApp: MountedApp<R>) -> _AnyScene {
-     mountedApp.app.bodyClosure(body(of: mountedApp, keyPath: \.app.app))
-     }
-     
-     func render(mountedScene: MountedScene<R>) -> _AnyScene.BodyResult {
-     mountedScene.scene.bodyClosure(body(of: mountedScene, keyPath: \.scene.scene))
-     }
-     */
-    
     /// Reconciles the host's children with an updated child element.
     ///
     /// Compares the existing composite host's child elements to the updated child element and either adds, replaces, or updates them in-place.
@@ -245,7 +244,7 @@ class TreeReconciler {
             let childBodyType = elementType(childElement)
             
             // new child has the same type as the existing child
-            if liveChild.typeConstructorName == typeConstructorName(childBodyType) {
+            if liveChild.hostedElement.typeConstructorName == typeConstructorName(childBodyType) {
                 updateChildHost(liveChild)
                 liveChild.update(inReconciler: self)
             }

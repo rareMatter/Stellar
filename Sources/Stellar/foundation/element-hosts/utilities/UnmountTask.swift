@@ -66,10 +66,11 @@ class UnmountTask {
 public
 final
 class UnmountHostTask: UnmountTask {
-    private(set) weak var host: PrimitiveViewHost!
+
+    private(set) weak var host: ElementHost!
     private unowned var reconciler: TreeReconciler
     
-    init(_ host: PrimitiveViewHost,
+    init(_ host: ElementHost,
          in reconciler: TreeReconciler,
          callback: @escaping () -> ()) {
         self.host = host

@@ -30,16 +30,16 @@ class UIKitZStack: UIView, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContentContext, modifiers: [AnySContentModifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let zStack = primitiveContent.value as? AnyZStack else { return }
         alignment = zStack.alignment
         spacing = zStack.spacing
         applyModifiers(modifiers.uiKitModifiers())
     }
     
-    func addChild(for primitiveContent: PrimitiveContentContext,
+    func addChild(for primitiveContent: PrimitiveContext,
                   preceedingSibling sibling: PlatformContent?,
-                  modifiers: [AnySContentModifier],
+                  modifiers: [Modifier],
                   context: HostMountingContext) -> PlatformContent? {
         guard let uiKitRenderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
         let content = uiKitRenderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
