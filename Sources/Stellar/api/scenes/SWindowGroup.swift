@@ -7,7 +7,17 @@
 
 import Foundation
 
-// TODO:
+public
+struct SWindowGroup<C>: PrimitiveScene, AnySWindowGroup
+where C : SContent {
+    
+    let content: C
+    
+    public
+    init(@SContentBuilder content: () -> C) {
+        self.content = content()
+    }
+}
 
 public
 protocol AnySWindowGroup {}
