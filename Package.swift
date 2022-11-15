@@ -4,15 +4,21 @@
 import PackageDescription
 
 let package = Package(
-    name: "Stellar",
+    name: "StellarUI",
     platforms: [
         .iOS(.v15)
     ],
     products: [
         // Products define the executables and libraries a package produces, and make them visible to other packages.
         .library(
-            name: "Stellar",
-            targets: ["Stellar"]),
+            name: "StellarUI",
+            targets: ["StellarUI"]),
+        .library(
+            name: "SwiftUIParts",
+            targets: ["SwiftUIParts"]),
+        .library(
+            name: "UIKitParts",
+            targets: ["UIKitParts"])
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
@@ -27,10 +33,36 @@ let package = Package(
         // Targets are the basic building blocks of a package. A target can define a module or a test suite.
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
-            name: "Stellar",
-            dependencies: ["SwiftDate", "SnapKit", .product(name: "Collections", package: "swift-collections")]),
+            name: "StellarUI",
+            dependencies: [
+                .target(name: "StellariOS", condition: .when(platforms: [.iOS]))
+            ]),
+        .target(
+            name: "StellarFoundation",
+            dependencies: [
+                .product(name: "SwiftDate", package: "SwiftDate"),
+                .product(name: "SnapKit", package: "SnapKit"),
+                .product(name: "Collections", package: "swift-collections")
+            ]),
+        .target(
+            name: "StellariOS",
+            dependencies: [
+                .target(name: "StellarFoundation")
+            ]),
+        .target(
+            name: "SwiftUIParts",
+            dependencies: [
+                .target(name: "UIKitParts"),
+                .product(name: "SnapKit", package: "SnapKit")
+            ]),
+        .target(
+            name: "UIKitParts",
+            dependencies: [
+                .target(name: "StellarFoundation"),
+                .product(name: "SnapKit", package: "SnapKit")
+            ]),
         .testTarget(
             name: "StellarTests",
-            dependencies: ["Stellar"]),
+            dependencies: ["StellarUI"]),
     ]
 )
