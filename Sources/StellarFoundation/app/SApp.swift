@@ -32,13 +32,15 @@ extension SApp {
     
     /// Application entry point.
     static func main() {
+        // TODO:
+        fatalError("TODO")
         // Create SApp instance and forward control.
         // Provide SApp instance to SAppDelegate statically to avoid subclassing UIApplication.
         SAppDelegate.app = AnySApp(app: Self.init())
-        let _ = UIApplicationMain(CommandLine.argc,
-                                  CommandLine.unsafeArgv,
-                                  nil,
-                                  NSStringFromClass(SAppDelegate.self))
+//        let _ = UIApplicationMain(CommandLine.argc,
+//                                  CommandLine.unsafeArgv,
+//                                  nil,
+//                                  NSStringFromClass(SAppDelegate.self))
     }
 }
 #endif
