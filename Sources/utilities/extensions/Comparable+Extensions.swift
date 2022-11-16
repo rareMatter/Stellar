@@ -8,8 +8,10 @@
 import Foundation
 
 extension Comparable {
+    
     /// "Clamps" (restricts by min or max) self to the closed range such that the number will not fall outside the clamping bounds.
     @discardableResult
+    public
     func clamp(to bound: ClosedRange<Self>) -> Self {
         if self < bound.lowerBound {
             return bound.lowerBound

@@ -32,7 +32,7 @@ struct AnySContentModifier: SContentModifier {
         }
         else {
             type = Modifier.self
-            typeConstructorName = Stellar.typeConstructorName(Modifier.self)
+            typeConstructorName = StellarFoundation.typeConstructorName(Modifier.self)
             modifier = erasingModifier
             bodyType = Modifier.Body.self
             bodyProvider = { contentModifierProxy in

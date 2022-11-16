@@ -17,7 +17,9 @@ import Foundation
 public
 struct SHashableClosure {
     
+    public
     let uuid: UUID
+    public
     let handler: () -> Void
     
     public
@@ -26,6 +28,7 @@ struct SHashableClosure {
         self.handler = handler
     }
     
+    public
     func callAsFunction() {
         handler()
     }
@@ -33,7 +36,8 @@ struct SHashableClosure {
 
 extension SHashableClosure: Hashable, Identifiable {
     
-    public var id: UUID {
+    public
+    var id: UUID {
         uuid
     }
     

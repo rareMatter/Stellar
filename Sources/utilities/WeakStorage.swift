@@ -8,7 +8,9 @@
 
 import Foundation
 
-final class Weak<T: AnyObject> {
+public
+final
+class Weak<T: AnyObject> {
 	weak var value: T?
 	init(value: T) {
 		self.value = value

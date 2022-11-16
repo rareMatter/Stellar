@@ -7,6 +7,7 @@
 
 import Foundation
 import UIKit
+import StellarFoundation
 
 final
 class UIKitCollectionView: UICollectionView, UIKitContent, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate {

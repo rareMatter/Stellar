@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import utilities
 
 /** A representation of a color which can be used as a view.
  
@@ -173,6 +174,8 @@ protocol AnyColor {
     var colorSpace: SColorSpace { get }
 }
 extension AnyColor {
+    public
     var allowedColorRange: ClosedRange<Double> { PrimitiveColor.allowedColorRange }
+    public
     var allowedOpacityRange: ClosedRange<Double> { PrimitiveColor.allowedOpacityRange }
 }

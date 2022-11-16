@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import utilities
 
 public
 struct SButton<Content>: SPrimitiveContent

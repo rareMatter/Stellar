@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import utilities
 
 struct ButtonContentConfiguration: SContentConfiguration, Hashable {
 

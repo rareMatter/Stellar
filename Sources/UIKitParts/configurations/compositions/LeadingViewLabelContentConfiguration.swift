@@ -8,6 +8,7 @@
 
 import UIKit
 import SnapKit
+import StellarFoundation
 
 /// Displays a leading view before a label.
 struct LeadingViewLabelContentConfiguration: SContentConfiguration, Equatable {

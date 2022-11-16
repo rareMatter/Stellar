@@ -7,6 +7,8 @@
 
 import Foundation
 import UIKit
+import StellarFoundation
+import UIKitParts
 
 final
 class UIKitColor: UIView, UIKitContent {

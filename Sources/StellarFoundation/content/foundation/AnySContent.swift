@@ -38,7 +38,7 @@ struct AnySContent: SPrimitiveContent {
         }
         else {
             type = Content.self
-            self.typeConstructorName = Stellar.typeConstructorName(Content.self)
+            self.typeConstructorName = StellarFoundation.typeConstructorName(Content.self)
             self.content = erasingContent
             bodyType = Content.Body.self
             bodyProvider = { content in

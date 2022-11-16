@@ -36,7 +36,7 @@ extension SApp {
         fatalError("TODO")
         // Create SApp instance and forward control.
         // Provide SApp instance to SAppDelegate statically to avoid subclassing UIApplication.
-        SAppDelegate.app = AnySApp(app: Self.init())
+//        SAppDelegate.app = AnySApp(app: Self.init())
 //        let _ = UIApplicationMain(CommandLine.argc,
 //                                  CommandLine.unsafeArgv,
 //                                  nil,

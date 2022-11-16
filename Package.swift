@@ -45,7 +45,8 @@ let package = Package(
         .target(
             name: "StellariOS",
             dependencies: [
-                .target(name: "StellarFoundation")
+                .target(name: "StellarFoundation"),
+                .target(name: "UIKitParts")
             ]),
         .target(
             name: "SwiftUIParts",
@@ -57,8 +58,10 @@ let package = Package(
             name: "UIKitParts",
             dependencies: [
                 .target(name: "StellarFoundation"),
+                .target(name: "utilities"),
                 .product(name: "SnapKit", package: "SnapKit")
             ]),
+        .target(name: "utilities"),
         .testTarget(
             name: "StellarTests",
             dependencies: ["StellarUI"]),

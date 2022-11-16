@@ -10,16 +10,6 @@ import Foundation
 final
 class PrimitiveSceneHost: ElementHost {
     
-    var anyScene: AnySScene {
-        get {
-            guard case let .scene(scene) = hostedElement else {
-                fatalError()
-            }
-            return scene
-        }
-        set { hostedElement = .scene(newValue) }
-    }
-    
     /// The parent platform content of the `PlatformContent` owned by this host.
     ///
     /// The `PlatformContent` tree does not have a one-to-one relationship with the host tree. Some hosts, such as composites, do not own a `PlatformContent` instance. Therefore, this property is passed down the host tree during mounting.

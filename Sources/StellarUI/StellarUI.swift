@@ -6,5 +6,5 @@
 //
 
 #if os(iOS)
-@_exported import Stellar_iOS
+@_exported import StellariOS
 #endif
