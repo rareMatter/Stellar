@@ -5,21 +5,19 @@
 //  Created by Jesse Spencer on 11/7/22.
 //
 
-import Foundation
-
 protocol AnySModifiedScene {
-    var anyScene: AnySScene { get }
-    var anySModifier: AnySSceneModifier { get }
+    var anyScene: any SScene { get }
+    var anySModifier: any SSceneModifier { get }
 }
 
-extension SModifiedContent: AnySModifiedScene
+extension ModifiedElement: AnySModifiedScene
 where Content : SScene, Modifier : SSceneModifier {
     
-    var anyScene: AnySScene {
-        AnySScene(content)
+    var anyScene: any SScene {
+        content
     }
     
-    var anySModifier: AnySSceneModifier {
-        AnySSceneModifier(modifier)
+    var anySModifier: any SSceneModifier {
+        modifier
     }
 }

@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 11/8/22.
 //
 
-import Foundation
-
 public
 struct SWindowGroup<C>: PrimitiveScene, AnySWindowGroup
 where C : SContent {

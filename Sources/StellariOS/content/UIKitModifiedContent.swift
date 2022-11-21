@@ -109,7 +109,7 @@ extension UIKitModifiedContent {
  */
 
 /*
-extension AnySModifiedContent {
+extension AnyModifiedContent {
     
     public func makeUIKitModifiedContent(addModifiedContent: @escaping (UIKitContent) -> Void) -> UIKitModifiedContent {
         UIKitModifiedContent(modifier: (anySModifier as! UIKitRenderableModifier).makeModifier(), addModifiedContent: addModifiedContent)

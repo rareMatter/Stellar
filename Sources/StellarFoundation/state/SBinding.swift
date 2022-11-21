@@ -5,9 +5,6 @@
 //  Created by Jesse Spencer on 9/26/21.
 //
 
-import Foundation
-import SwiftUI
-
 @propertyWrapper
 @dynamicMemberLookup
 public

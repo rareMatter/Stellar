@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 10/18/21.
 //
 
-import Foundation
-
 public
 extension SListView {
     

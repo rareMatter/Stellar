@@ -1,5 +1,5 @@
 //
-//  NLAppConfiguration.swift
+//  SApp.swift
 //  Stellar
 //
 //  Created by Jesse Spencer on 2/16/21.

@@ -5,40 +5,35 @@
 //  Created by Jesse Spencer on 11/11/21.
 //
 
-import Foundation
-
 public
-struct SVStack<Content>: SPrimitiveContent
-where Content : SContent {
+struct SVStack<C>: SPrimitiveContent, AnyVStack
+where C : SContent {
     
-    // FIXME: Temp public.
     public
     let alignment: SHorizontalAlignment
     public
     let spacing: Float
-    public
-    let content: Content
+    
+    let content: C
     
     public
     init(alignment: SHorizontalAlignment = .center,
          spacing: Float? = nil,
-         @SContentBuilder content: () -> Content) {
+         @SContentBuilder content: () -> C) {
         self.alignment = alignment
         self.spacing = spacing ?? defaultStackSpacing
         self.content = content()
     }
 }
 extension SVStack: _SContentContainer {
-    var children: [AnySContent] {
+    var children: [any SContent] {
         (content as? GroupedContent)?.children
-        ?? [AnySContent(content)]
+        ?? [content]
     }
 }
 
-// FIXME: Temp public.
 public
 protocol AnyVStack {
     var alignment: SHorizontalAlignment { get }
     var spacing: Float { get }
 }
-extension SVStack: AnyVStack {}

@@ -5,7 +5,6 @@
 //  Created by Jesse Spencer on 10/24/21.
 //
 
-import Foundation
 import Combine
 
 /// A host which is capable of storing dynamic properties declared by the composite content.

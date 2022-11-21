@@ -5,13 +5,9 @@
 //  Created by Jesse Spencer on 10/24/21.
 //
 
-import Foundation
-
 /// A content host whose hosted content is primitive.
 ///
 /// The lifecycle of this host is managed by the reconciler in order to provide `Descriptive Tree` hosting. Updates are handled through this type and other similar types in the `Live Tree` managed by the `TreeReconciler`.
-// FIXME: Temp public.
-public
 final
 class PrimitiveViewHost: ElementHost {
     
@@ -245,8 +241,8 @@ class PrimitiveViewHost: ElementHost {
     /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
     private
     func processModifiedContent() {
-        if anyContent.content is SomeModifiedContent {
-            guard anyContent.content is AnySModifiedContent else { fatalError() }
+        if anyContent.content is AnyModifiedElement {
+            guard anyContent.content is AnyModifiedContent else { fatalError() }
             let result = Self.reduceModifiedContent(anyContent)
             modifiedContent = result.modifiedContent
             

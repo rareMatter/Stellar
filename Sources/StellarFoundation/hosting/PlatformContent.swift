@@ -5,12 +5,9 @@
 //  Created by Jesse Spencer on 4/22/22.
 //
 
-import Foundation
-
 /// Content which can be displayed by a specific platform.
 ///
 /// A conforming type forms a hierarchy of content which can be used to render on a platform. Generally, these types are created by mapping a primitive `Content` type into a platform-specific conforming type.
-// FIXME: Temp public.
 public
 protocol PlatformContent {
     

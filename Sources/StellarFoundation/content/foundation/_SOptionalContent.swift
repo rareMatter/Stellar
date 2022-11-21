@@ -5,9 +5,6 @@
 //  Created by Jesse Spencer on 5/11/21.
 //
 
-import Foundation
-
-public
 struct _SOptionalContent<OptionalContent>: SPrimitiveContent
 where OptionalContent: SContent {
     

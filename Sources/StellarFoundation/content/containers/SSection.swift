@@ -5,9 +5,6 @@
 //  Created by Jesse Spencer on 10/5/21.
 //
 
-import Foundation
-import SwiftUI
-
 public
 struct SSection<Parent, Content, Footer>: SPrimitiveContent
 where Parent : SContent, Content : SContent, Footer : SContent {
@@ -29,20 +26,20 @@ extension SSection: _SContentContainer {
     var children: [AnySContent] { [.init(parent), .init(content), .init(footer)] }
 }
 
-// FIXME: temp public
 public
 enum SectionPartType {
     case parent, content, footer
 }
+public
 struct _SSectionPart<Content: SContent>: SPrimitiveContent {
     let content: Content
+    public
     let part: SectionPartType
 }
 extension _SSectionPart: _SContentContainer {
     var children: [AnySContent] { [.init(content)] }
 }
 
-// FIXME: temp public
 public
 protocol AnySectionPart {
     var part: SectionPartType { get }
@@ -50,7 +47,6 @@ protocol AnySectionPart {
 extension _SSectionPart: AnySectionPart {}
 
 // MARK: - internal recognition
-// FIXME: temp public
 public
 protocol _AnySection {}
 extension SSection: _AnySection {}

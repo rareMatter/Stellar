@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 10/24/21.
 //
 
-import Foundation
-
 /// A host for empty content.
 final
 class EmptyElementHost: ElementHost {

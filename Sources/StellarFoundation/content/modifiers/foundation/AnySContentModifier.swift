@@ -5,26 +5,28 @@
 //  Created by Jesse Spencer on 6/14/21.
 //
 
-import Foundation
-
-// FIXME: Temp public.
 public
 struct AnySContentModifier: SContentModifier {
     
     /// The type of the wrapped `SContentModifier`.
+    public
     let type: Any.Type
     
+    public
     let typeConstructorName: String
     
     /// The type-erased modifier.
+    public
     let modifier: Any
     
     /// The type of the `body` of the wrapped `SContentModifier`.
+    public
     let bodyType: Any.Type
     
     private
     let bodyProvider: (Content) -> AnySContent
     
+    public
     init<Modifier>(_ erasingModifier: Modifier)
     where Modifier : SContentModifier {
         if let anyModifier = erasingModifier as? AnySContentModifier {
@@ -44,8 +46,8 @@ struct AnySContentModifier: SContentModifier {
         }
     }
     
-    // FIXME: Temp public.
-    public func body(content: Content) -> AnySContent {
+    public
+    func body(content: Content) -> some SContent {
         bodyProvider(content)
     }
 }

@@ -16,7 +16,6 @@
 //
 
 /// A tree of cancellable in-progress unmounts.
-// FIXME: Temp public.
 public
 class UnmountTask {
     public internal(set) var isCancelled = false
@@ -62,7 +61,6 @@ class UnmountTask {
 }
 
 /// The state for the unmounting of a `PrimitiveViewHost` by a `Renderer`.
-// FIXME: Temp public.
 public
 final
 class UnmountHostTask: UnmountTask {

@@ -10,13 +10,14 @@ import Foundation
 /// A basic building block to use when composing content.
 ///
 /// The body of primitive content must be determined by a renderer.
-public
 protocol SPrimitiveContent: SContent
 where Self.Body == Never {}
 
-// MARK: default body
-public
-extension SPrimitiveContent {
+// MARK: default primitive body
+extension SContent
+where Body == Never {
+    
+    public
     var body: Never {
         primitiveBodyFailure(withType: String(reflecting: Self.self))
     }

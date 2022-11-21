@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 5/11/21.
 //
 
-import UIKit
-
 public
 struct SSearchBar: SPrimitiveContent {
     @SBinding var text: String

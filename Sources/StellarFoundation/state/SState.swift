@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 10/5/21.
 //
 
-import Foundation
-
 protocol ValueStorage {
     var getter: (() -> Any)? { get set }
     var anyInitialValue: Any { get }

@@ -5,7 +5,6 @@
 //  Created by Jesse Spencer on 5/11/21.
 //
 
-import UIKit
 import utilities
 
 public
@@ -31,7 +30,6 @@ extension SButton: _SContentContainer {
 }
 
 // MARK: - button type erasure
-// FIXME: temp public
 public
 protocol AnyButton {
     var actionHandler: SIdentifiableContainer<() -> Void> { get }

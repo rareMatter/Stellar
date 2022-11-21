@@ -5,7 +5,6 @@
 //  Created by Jesse Spencer on 9/13/21.
 //
 
-import Foundation
 import utilities
 
 /** A representation of a color which can be used as a view.
@@ -96,10 +95,12 @@ enum SColorSpace {
          sRGB
 }
 
-public enum ColorScheme {
+public
+enum ColorScheme {
     case dark, light
 }
 
+public
 struct DynamicColor: SContent {
     // TODO: Need color scheme from environment.
     
@@ -114,6 +115,7 @@ struct DynamicColor: SContent {
         self.colorSpace = colorSpace
     }
     
+    public
     var body: some SContent {
         // TODO: Provide environment property.
         resolveColor(.light)
@@ -123,14 +125,14 @@ struct DynamicColor: SContent {
 /// You do not need to use this type directly, instead create colors using `SColor`.
 ///
 /// The framework creates this type when needed on your behalf.
-struct PrimitiveColor: SPrimitiveContent {
+public
+struct PrimitiveColor: SPrimitiveContent, AnyColor {
     
     static
     let allowedColorRange = ClosedRange<Double>(uncheckedBounds: (0, 255))
     static
     let allowedOpacityRange = ClosedRange<Double>(uncheckedBounds: (0, 1))
     
-    // FIXME: temp public
     public
     let red: Double
     public
@@ -160,9 +162,7 @@ struct PrimitiveColor: SPrimitiveContent {
         self.colorSpace = colorSpace
     }
 }
-extension PrimitiveColor: AnyColor {}
 
-// FIXME: temp public
 public
 protocol AnyColor {
     var red: Double { get }

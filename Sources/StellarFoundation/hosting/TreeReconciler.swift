@@ -18,8 +18,7 @@ import Combine
 /// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The platform content instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
 // TODO: Investigate concurrent content updating.
-// FIXME: Temp public.
-public final
+final
 class TreeReconciler {
     
     struct Update: Hashable {
@@ -65,8 +64,6 @@ class TreeReconciler {
         // TODO: publishing of scene phase, color scheme to app host.
     }
     
-    // FIXME: Temp public.
-    public
     init<Content>(content: Content,
                   rootPlatformContent: PlatformContent,
                   platformExecutionScheduler: @escaping (@escaping () -> Void) -> Void)

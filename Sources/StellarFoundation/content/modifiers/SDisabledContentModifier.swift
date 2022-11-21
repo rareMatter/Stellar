@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 6/1/21.
 //
 
-import Foundation
-
 struct SDisabledContentModifier: SContentModifier {
     typealias Body = Never
     let isDisabled: Bool

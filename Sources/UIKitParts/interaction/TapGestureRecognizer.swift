@@ -8,13 +8,16 @@
 import UIKit
 
 /// A closure-based wrapper of `UITapGestureRecognizer.`
+public
 final
 class TapGestureRecognizer {
     
-    private(set)
+    public private(set)
     var tapGestureRecognizer: UITapGestureRecognizer!
+    public
     var handler: () -> Void
     
+    public
     init(_ handler: @escaping () -> Void) {
         self.handler = handler
         tapGestureRecognizer = .init(target: self, action: #selector(Self.handleTap))

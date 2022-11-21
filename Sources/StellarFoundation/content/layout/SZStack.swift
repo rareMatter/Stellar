@@ -5,13 +5,15 @@
 //  Created by Jesse Spencer on 1/14/22.
 //
 
-import Foundation
-
 public
-struct SZStack<C: SContent>: SPrimitiveContent {
+struct SZStack<C>: SPrimitiveContent, AnyZStack
+where C : SContent {
     
+    public
     let alignment: SAlignment
+    public
     let spacing: Float?
+    
     let content: C
     
     public
@@ -24,12 +26,12 @@ struct SZStack<C: SContent>: SPrimitiveContent {
     }
 }
 extension SZStack: _SContentContainer {
-    var children: [AnySContent] {
-        (content as? GroupedContent)?.children ?? [.init(content)]
+    var children: [any SContent] {
+        (content as? GroupedContent)?.children
+        ?? [content]
     }
 }
 
-// FIXME: temp public
 public
 protocol AnyZStack {
     var alignment: SAlignment { get }

@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 5/11/21.
 //
 
-import UIKit
-
 public
 struct SContextMenuButton<Label, Content>: SPrimitiveContent
 where Label : SContent, Content : SContent {
@@ -39,13 +37,13 @@ extension SContextMenuButton: _SContentContainer {
     var children: [AnySContent] { [.init(_SContextMenuButtonContent(content: content)), .init(label)] }
 }
 
-// FIXME: temp public
 public
 protocol AnyContextMenuButton {}
 extension SContextMenuButton: AnyContextMenuButton {}
 
 // MARK: - children wrapper types
 /// A wrapper used to specify the content of a context menu button primitive.
+public
 struct _SContextMenuButtonContent<Content>: SPrimitiveContent
 where Content : SContent {
     let content: Content

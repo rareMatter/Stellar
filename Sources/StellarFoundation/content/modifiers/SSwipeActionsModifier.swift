@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 11/22/21.
 //
 
-import Foundation
-
 struct SSwipeActionsModifier<Actions>: SContentModifier
 where Actions : SContent {
     let actions: Actions
@@ -20,12 +18,6 @@ where Actions : SContent {
     }
 }
 
-public
-enum SHorizontalEdge: Equatable, Hashable {
-    case leading
-    case trailing
-}
-
 struct SwipeActionsModifierContainer<Actions>: SPrimitiveContent
 where Actions : SContent {
     let actions: Actions
@@ -33,7 +25,7 @@ where Actions : SContent {
     let allowsFullSwipe: Bool
 }
 extension SwipeActionsModifierContainer: _SContentContainer {
-    var children: [AnySContent] { [.init(actions)] }
+    var children: [any SContent] { [actions] }
 }
 
 public

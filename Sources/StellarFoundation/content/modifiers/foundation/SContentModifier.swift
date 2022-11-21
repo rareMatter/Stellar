@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 6/1/21.
 //
 
-import Foundation
-
 public
 protocol SContentModifier {
     typealias Content = _SContentModifierProxy<Self>
@@ -18,9 +16,9 @@ public
 struct _SContentModifierProxy<Modifier>: SContent
 where Modifier : SContentModifier {
     let modifier: Modifier
-    let content: AnySContent
+    let content: any SContent
     
-    public var body: AnySContent {
+    public var body: any SContent {
         content
     }
 }

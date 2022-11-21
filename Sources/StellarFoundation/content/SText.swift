@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 1/17/22.
 //
 
-import Foundation
-
 public
 struct SText: SPrimitiveContent {
     let string: String

@@ -5,9 +5,8 @@
 //  Created by Jesse Spencer on 2/25/21.
 //
 
-import Foundation
-
 /// A type-erased SApp value.
+public
 struct AnySApp: SApp {
     
     var app: Any
@@ -23,10 +22,12 @@ struct AnySApp: SApp {
         bodyType = A.Body.self
     }
     
+    public
     init() {
         fatalError()
     }
     
+    public
     var body: some SScene {
         fatalError()
     }

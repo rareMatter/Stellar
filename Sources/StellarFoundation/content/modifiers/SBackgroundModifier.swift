@@ -5,9 +5,6 @@
 //  Created by Jesse Spencer on 11/19/21.
 //
 
-import Foundation
-import SwiftUI
-
 struct SBackgroundModifier<Background>: SContentModifier
 where Background : SContent {
     // TODO: ...

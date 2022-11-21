@@ -5,9 +5,8 @@
 //  Created by Jesse Spencer on 9/26/21.
 //
 
-import Foundation
-
 // TODO: This may be better formed by not being primitive and instead simply injecting the ID into the environment.
+public
 struct SIdentifiableContent<Content, ID>: SPrimitiveContent
 where Content: SContent, ID: Hashable {
     let content: Content
@@ -30,6 +29,8 @@ extension SIdentifiableContent: _SContentContainer {
     var children: [AnySContent] { [.init(content)] }
 }
 extension SIdentifiableContent: AnySIdentifiableContent {
+    public
     var anyIdentifier: AnyHashable { .init(id) }
+    public
     var anyContent: AnySContent { .init(content) }
 }

@@ -5,9 +5,6 @@
 //  Created by Jesse Spencer on 10/5/21.
 //
 
-import Foundation
-import SwiftUI
-
 public
 struct SOutlineGroup<Data, ID, Parent, Leaf, Subgroup>
 where Data : RandomAccessCollection, ID : Hashable {

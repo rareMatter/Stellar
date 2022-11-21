@@ -5,15 +5,12 @@
 //  Created by Jesse Spencer on 10/24/21.
 //
 
-import Foundation
 import OrderedCollections
 
 // TODO: Revise host design. Attempt to replace inheritance tree with composition where it makes sense. This would allow removal of the implicit awareness of subclasses by the ancestor classes (there is at least one instance of this). This also avoids unnecessary overriding and dynamic dispatch.
 /// The base host for live elements, including the various types of `Descriptive Tree` content.
 ///
 /// Other host types inherit and specialize upon this one, depending on the type of `Descriptive Tree` element.
-// FIXME: Temp public.
-public
 class ElementHost {
     
     /// The type-erased element being hosted.
@@ -173,7 +170,7 @@ extension ElementHost {
     private static func reduceModifiedContentRecursively(anyContent: AnySContent, collection: inout OrderedSet<AnySContentModifier>) -> AnySContent {
         
         // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the modified content is encountered.
-        guard let modifiedContent = anyContent.content as? AnySModifiedContent else {
+        guard let modifiedContent = anyContent.content as? AnyModifiedContent else {
             return anyContent
         }
         
@@ -183,8 +180,8 @@ extension ElementHost {
             return reduceModifiedContentRecursively(anyContent: content, collection: &collection)
         }
         // Accumulate modified content chains
-        else if let someModifiedContent = modifiedContent.anyContent.content as? SomeModifiedContent {
-            guard let modifiedContent = someModifiedContent as? AnySModifiedContent else { fatalError() }
+        else if let someModifiedContent = modifiedContent.anyContent.content as? AnyModifiedElement {
+            guard let modifiedContent = someModifiedContent as? AnyModifiedContent else { fatalError() }
             collection.append(modifiedContent.anySModifier)
             return reduceModifiedContentRecursively(anyContent: modifiedContent.anyContent, collection: &collection)
         }
@@ -216,7 +213,7 @@ extension ElementHost {
             return reduceModifiedSceneRecursively(anyScene: scene, collection: &collection)
         }
         // Accumulate modified content chains
-        else if let someModifiedElement = modifiedScene as? SomeModifiedContent {
+        else if let someModifiedElement = modifiedScene as? AnyModifiedElement {
             guard let modifiedScene = someModifiedElement as? AnySModifiedScene else { fatalError() }
             collection.append(modifiedScene.anySModifier)
             return reduceModifiedSceneRecursively(anyScene: modifiedScene.anyScene, collection: &collection)
@@ -317,7 +314,6 @@ extension AnySScene {
     }
 }
 
-// FIXME: Temp public.
 /// A container of contextual data to be used when mounting `PlatformContent`.
 public
 struct HostMountingContext {

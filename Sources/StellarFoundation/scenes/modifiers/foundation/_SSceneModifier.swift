@@ -5,17 +5,19 @@
 //  Created by Jesse Spencer on 11/3/22.
 //
 
-import Foundation
-
+public
 protocol SSceneModifier {
     
     associatedtype Body : SScene
     
-    @SContentBuilder func body(content: Body) -> Self.Body
+    @SSceneBuilder func body(content: any SScene) -> Self.Body
 }
 
+public
 extension SSceneModifier
 where Body == Never {
     
-    func body(content: Body) -> Self.Body {}
+    func body(content: any SScene) -> Self.Body {
+        fatalError()
+    }
 }

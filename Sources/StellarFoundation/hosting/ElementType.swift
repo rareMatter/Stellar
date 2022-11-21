@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 10/24/21.
 //
 
-import Foundation
-
 /// The possible type-erased element types.
 enum ElementType {
     

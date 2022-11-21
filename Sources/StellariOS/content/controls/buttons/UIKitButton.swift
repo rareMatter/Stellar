@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 import StellarFoundation
 import UIKitParts
+import utilities
 
 // FIXME: temp public.
 public

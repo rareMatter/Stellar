@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 11/1/22.
 //
 
-import Foundation
-
 public
 protocol SScene {
     /// The body type provided by this scene.

@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 11/7/22.
 //
 
-import Foundation
-
 final
 class PrimitiveSceneHost: ElementHost {
     
@@ -21,7 +19,7 @@ class PrimitiveSceneHost: ElementHost {
     
     /// If this instance is hosting modified content, this property will contain the instance of content that is modified. This is handed to the platform for rendering along with the applied modifiers.
     private
-    var modifiedContent: AnySScene? = nil
+    var modifiedContent: (any SScene)? = nil
     
     private
     var isModifiedContent: Bool { modifiedContent != nil }
@@ -29,7 +27,7 @@ class PrimitiveSceneHost: ElementHost {
     private
     var parentUnmountTask = UnmountTask()
     
-    init(scene: AnySScene,
+    init(scene: any SScene,
          parentPlatformContent: PlatformContent,
          parent: ElementHost?) {
         self.parentPlatformContent = parentPlatformContent
@@ -41,7 +39,7 @@ class PrimitiveSceneHost: ElementHost {
         
         processModifiedContent()
         
-        if let modifiedContent = modifiedContent {
+        if let modifiedContent {
             // modified content is not rendered
             self.platformContent = parentPlatformContent
             
@@ -220,8 +218,8 @@ class PrimitiveSceneHost: ElementHost {
     /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
     private
     func processModifiedContent() {
-        if anyScene.wrappedScene is SomeModifiedContent {
-            guard anyScene.wrappedScene is AnySModifiedContent else { fatalError() }
+        if anyScene.wrappedScene is AnyModifiedElement {
+            guard anyScene.wrappedScene is AnyModifiedContent else { fatalError() }
             let result = Self.reduceModifiedScene(anyScene)
             modifiedContent = result.modifiedScene
             

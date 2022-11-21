@@ -5,8 +5,7 @@
 //  Created by Jesse Spencer on 5/16/21.
 //
 
-import Foundation
-
+@available(*, deprecated, message: "Use compiler support instead.")
 public
 struct AnySContent: SPrimitiveContent {
     
@@ -52,7 +51,7 @@ struct AnySContent: SPrimitiveContent {
 }
 
 extension AnySContent: _SContentContainer {
-    var children: [AnySContent] {
+    var children: [any SContent] {
         (content as? _SContentContainer)?.children ?? []
     }
 }
