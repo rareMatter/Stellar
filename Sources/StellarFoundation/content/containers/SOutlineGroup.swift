@@ -27,45 +27,39 @@ where Parent : SContent, Leaf : SContent, Subgroup : SContent {
     public
     var body: some SContent {
         switch root {
-            case let .collection(data):
-                return AnySContent(
-                    SForEach(data, id: id) { item in
-                        SOutlineSubgroupChildren { () -> AnySContent in
-                            if let subgroup = item[keyPath: children] {
-                                return AnySContent(
-                                    SDisclosureGroup(content: {
-                                        SOutlineGroup(root: .collection(subgroup),
-                                                      children: children,
-                                                      id: id,
-                                                      content: content)
-                                    }, label: {
-                                        content(item)
-                                    })
-                                )
-                            }
-                            else {
-                                return AnySContent(content(item))
-                            }
-                        }
-                    }
-                )
-                
-            case let .single(root):
-                return AnySContent(
-                    SDisclosureGroup(content: {
-                        if let subgroup = root[keyPath: children] {
+        case let .collection(data):
+            SForEach(data, id: id) { item in
+                SOutlineSubgroupChildren { () -> any SContent in
+                    if let subgroup = item[keyPath: children] {
+                        SDisclosureGroup(content: {
                             SOutlineGroup(root: .collection(subgroup),
                                           children: children,
                                           id: id,
                                           content: content)
-                        }
-                        else {
-                            content(root)
-                        }
-                    }, label: {
-                        content(root)
-                    })
-                )
+                        }, label: {
+                            content(item)
+                        })
+                    }
+                    else {
+                        content(item)
+                    }
+                }
+            }
+            
+        case let .single(root):
+            SDisclosureGroup(content: {
+                if let subgroup = root[keyPath: children] {
+                    SOutlineGroup(root: .collection(subgroup),
+                                  children: children,
+                                  id: id,
+                                  content: content)
+                }
+                else {
+                    content(root)
+                }
+            }, label: {
+                content(root)
+            })
         }
     }
 }
@@ -204,12 +198,7 @@ where Data : RandomAccessCollection,
 
 /// Type-erased content representing the children in an outline subgroup.
 public
-struct SOutlineSubgroupChildren: SContent {
-    
-    let children: () -> AnySContent
-    
-    public
-    var body: some SContent {
-        children()
-    }
+struct SOutlineSubgroupChildren: SPrimitiveContent {
+    @SContentBuilder
+    let children: () -> any SContent
 }

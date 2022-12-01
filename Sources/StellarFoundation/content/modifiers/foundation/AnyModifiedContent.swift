@@ -7,19 +7,19 @@
 
 public
 protocol AnyModifiedContent {
-    var anyContent: AnySContent { get }
-    var anySModifier: AnySContentModifier { get }
+    var anyContent: any SContent { get }
+    var anySModifier: any SContentModifier { get }
 }
 
 // MARK: - type-erased modified content
 extension ModifiedElement: AnyModifiedContent
 where Content : SContent, Modifier : SContentModifier {
     
-    public var anyContent: AnySContent {
-        AnySContent(content)
+    public var anyContent: any SContent {
+        content
     }
     
-    public var anySModifier: AnySContentModifier {
-        AnySContentModifier(modifier)
+    public var anySModifier: any SContentModifier {
+        modifier
     }
 }

@@ -13,11 +13,10 @@ class CompositeSceneHost: CompositeElementHost {
         
         // tell the reconciler to process self's hosted content
         reconciler.processBody(of: self,
-                               hostedElement: \.anyScene.wrappedScene)
+                               hostedElement: \.hostedElementValue)
         
         // create a child host for the body of self's hosted content after it has been processed
-        let childHostedContent = anyScene
-            .bodyProvider(anyScene.wrappedScene)
+        let childHostedContent = anyScene.body
         let childHost = childHostedContent
             .makeHost(parentPlatformContent: parentPlatformContent,
                       parentHost: self)
@@ -50,19 +49,18 @@ class CompositeSceneHost: CompositeElementHost {
         // - when self's element is "renderer primitive", the element returned by the renderer would be added as a child here.
         // - when self's element is NOT "renderer primitive" and has a body, the 'render' function would call the body and that would be used here.
         reconciler.processBody(of: self,
-                               hostedElement: \.anyScene.wrappedScene)
+                               hostedElement: \.hostedElementValue)
         
         // TODO: Why is the reconcile function asking this instance to handle child behaviors in closures?
         // reconcile state changes with child content
-        let childHostedContent = anyScene
-            .bodyProvider(anyScene.wrappedScene)
+        let childHostedContent = anyScene.body
         reconciler.reconcileChildren(for: self,
                                      withChild: childHostedContent,
-                                     elementType: { $0.type },
+                                     elementType: { getType($0) },
                                      updateChildHost: {
             // TODO: ...
             //            childHost.environmentValues = environmentValues
-            $0.hostedElement = .scene(.init(childHostedContent))
+            $0.hostedElement = .scene(childHostedContent)
             //            childHost.transaction = transaction
         },
                                      mountChildElement: { $0.makeHost(parentPlatformContent: parentPlatformContent,

@@ -7,6 +7,6 @@
 
 public
 protocol AnySIdentifiableContent {
-    var anyIdentifier: AnyHashable { get }
-    var anyContent: AnySContent { get }
+    var anyIdentifier: any Hashable { get }
+    var anyContent: any SContent { get }
 }

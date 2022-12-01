@@ -34,16 +34,12 @@ where Label : SContent, Content : SContent {
         self.label = label()
         self.content = content
     }
-    // FIXME: content is not hidden.
+    
     public var body: some SContent {
         label
         
-        // display the content if the provided binding is true, or internal state is true.
-        if let isExpandedBinding = isExpandedBinding,
-           isExpandedBinding.wrappedValue {
-            content()
-        }
-        else if isExpanded {
+        if let isExpandedBinding,
+           isExpandedBinding.wrappedValue || isExpanded {
             content()
         }
     }

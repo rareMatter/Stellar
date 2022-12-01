@@ -32,3 +32,9 @@ where Body == Never {
         primitiveBodyFailure(withType: String(reflecting: Self.self))
     }
 }
+
+extension SContentModifier {
+    var isPrimitive: Bool {
+        Self.Body.self == Never.self
+    }
+}

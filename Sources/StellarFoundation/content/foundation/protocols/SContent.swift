@@ -19,3 +19,9 @@ protocol SContent {
     /// The body content produced by this content.
     @SContentBuilder var body: Self.Body { get }
 }
+
+extension SContent {
+    var typeConstructorName: String {
+        StellarFoundation.typeConstructorName(getType(self))
+    }
+}

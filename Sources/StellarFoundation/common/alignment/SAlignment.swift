@@ -5,8 +5,6 @@
 //  Created by Jesse Spencer on 11/19/21.
 //
 
-import Foundation
-
 public
 struct SAlignment: Equatable, Hashable {
     

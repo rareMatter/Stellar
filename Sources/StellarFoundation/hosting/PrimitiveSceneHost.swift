@@ -44,7 +44,7 @@ class PrimitiveSceneHost: ElementHost {
             self.platformContent = parentPlatformContent
             
             guard let platformContent = platformContent else {
-                fatalError("Platform content was not provided for a primitive host: \(self). Scene: \(anyScene.wrappedScene)")
+                fatalError("Platform content was not provided for a primitive host: \(self). Scene: \(anyScene)")
             }
             
             // modified content has already been unraveled using its children, so the resulting content is the child.
@@ -68,10 +68,10 @@ class PrimitiveSceneHost: ElementHost {
                 fatalError("Platform content was not provided for a primitive host: \(self). Scene: \(anyScene)")
             }
             
-            guard !anyScene.children.isEmpty else { return }
-            let isGroup = anyScene is GroupScene
+            guard let container = anyScene as? ContainerScene else { return }
+            let isGroup = container is GroupScene
             
-            children = anyScene.children.map {
+            children = container.children.map {
                 $0.makeHost(parentPlatformContent: platformContent, parentHost: self)
             }
             children.forEach { child in
@@ -91,10 +91,17 @@ class PrimitiveSceneHost: ElementHost {
         updateEnvironment()
         processModifiedContent()
         
-        platformContent.update(withPrimitive: .init(value: modifiedContent ?? anyScene.wrappedScene), modifiers: modifiers.elements)
+        platformContent.update(withPrimitive: .init(value: modifiedContent ?? anyScene), modifiers: modifiers.elements)
         
-        var sceneChildren = modifiedContent != nil ?
-        [modifiedContent!] : anyScene.children
+        var sceneChildren: [any SScene] = {
+            if let modifiedContent {
+                return [modifiedContent]
+            }
+            else if let container = anyScene as? ContainerScene {
+                return container.children
+            }
+            else { return [] }
+        }()
         
         // perform updates for children
         switch (children.isEmpty, sceneChildren.isEmpty) {
@@ -218,8 +225,8 @@ class PrimitiveSceneHost: ElementHost {
     /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
     private
     func processModifiedContent() {
-        if anyScene.wrappedScene is AnyModifiedElement {
-            guard anyScene.wrappedScene is AnyModifiedContent else { fatalError() }
+        if anyScene is AnyModifiedElement {
+            guard anyScene is AnyModifiedContent else { fatalError() }
             let result = Self.reduceModifiedScene(anyScene)
             modifiedContent = result.modifiedScene
             

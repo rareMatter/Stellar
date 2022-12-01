@@ -23,7 +23,7 @@ where Parent : SContent, Content : SContent, Footer : SContent {
     }
 }
 extension SSection: _SContentContainer {
-    var children: [AnySContent] { [.init(parent), .init(content), .init(footer)] }
+    var children: [any SContent] { [parent, content, footer] }
 }
 
 public
@@ -37,7 +37,7 @@ struct _SSectionPart<Content: SContent>: SPrimitiveContent {
     let part: SectionPartType
 }
 extension _SSectionPart: _SContentContainer {
-    var children: [AnySContent] { [.init(content)] }
+    var children: [any SContent] { [content] }
 }
 
 public

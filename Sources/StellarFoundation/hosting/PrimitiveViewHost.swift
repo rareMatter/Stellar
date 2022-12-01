@@ -22,7 +22,7 @@ class PrimitiveViewHost: ElementHost {
     
     /// If this instance is hosting modified content, this property will contain the instance of content that is modified. This is handed to the platform for rendering along with the applied modifiers.
     private
-    var modifiedContent: AnySContent? = nil
+    var modifiedContent: (any SContent)? = nil
     
     private
     var isModifiedContent: Bool { modifiedContent != nil }
@@ -30,7 +30,7 @@ class PrimitiveViewHost: ElementHost {
     private
     var parentUnmountTask = UnmountTask()
     
-    init(content: AnySContent,
+    init(content: any SContent,
          parentPlatformContent: PlatformContent,
          parent: ElementHost?) {
         self.parentPlatformContent = parentPlatformContent
@@ -49,12 +49,12 @@ class PrimitiveViewHost: ElementHost {
         //        self.transaction = transaction
         processModifiedContent()
         
-        if let modifiedContent = modifiedContent {
+        if let modifiedContent {
             // modified content is not rendered
             self.platformContent = parentPlatformContent
             
-            guard let platformContent = platformContent else {
-                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(anyContent.content)")
+            guard let platformContent else {
+                fatalError("Platform content was not provided for a primitive host: \(self). Content: \(anyContent)")
             }
             
             // modified content has already been unraveled using its children, so the resulting content is the child.
@@ -67,26 +67,26 @@ class PrimitiveViewHost: ElementHost {
             }
         }
         else {
-            if anyContent.content is GroupedContent {
+            if anyContent is GroupedContent {
                 // don't give GroupedContent types to the platform renderer
                 self.platformContent = parentPlatformContent
             }
             else {
                 // create platform content for this host using either the parent platform content or the provider
                 self.platformContent = parentPlatformContent
-                    .addChild(for: .init(value: anyContent.content), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
+                    .addChild(for: .init(value: anyContent), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
             }
             
             // abort if no platform content was provided by the platform for this host
-            guard let platformContent = platformContent else {
+            guard let platformContent else {
                 fatalError("Platform content was not provided for a primitive host: \(self). Content: \(anyContent)")
             }
             
             // create and mount children if the content provides any
-            guard !anyContent.children.isEmpty else { return }
-            let isGroup = anyContent.content is GroupedContent
+            guard let container = anyContent as? _SContentContainer else { return }
+            let isGroup = container is GroupedContent
             
-            children = anyContent.children.map {
+            children = container.children.map {
                 $0.makeHost(parentPlatformContent: platformContent,
                             parentHost: self)
             }
@@ -110,9 +110,17 @@ class PrimitiveViewHost: ElementHost {
         updateEnvironment()
         processModifiedContent()
         
-        platformContent.update(withPrimitive: .init(value: modifiedContent ?? anyContent.content), modifiers: modifiers.elements)
+        platformContent.update(withPrimitive: .init(value: modifiedContent ?? anyContent), modifiers: modifiers.elements)
         
-        var contentChildren = modifiedContent != nil ? [modifiedContent!] : anyContent.children
+        var contentChildren = {
+            if let modifiedContent {
+                return [modifiedContent]
+            }
+            else if let container = anyContent as? _SContentContainer {
+                return container.children
+            }
+            else { return [] }
+        }()
         
         // perform updates for children
         switch (children.isEmpty, contentChildren.isEmpty) {
@@ -241,8 +249,8 @@ class PrimitiveViewHost: ElementHost {
     /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
     private
     func processModifiedContent() {
-        if anyContent.content is AnyModifiedElement {
-            guard anyContent.content is AnyModifiedContent else { fatalError() }
+        if anyContent is AnyModifiedElement {
+            guard anyContent is AnyModifiedContent else { fatalError() }
             let result = Self.reduceModifiedContent(anyContent)
             modifiedContent = result.modifiedContent
             

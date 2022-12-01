@@ -26,7 +26,7 @@ extension SButton {
 }
 
 extension SButton: _SContentContainer {
-    var children: [AnySContent] { [.init(content)] }
+    var children: [any SContent] { [content] }
 }
 
 // MARK: - button type erasure

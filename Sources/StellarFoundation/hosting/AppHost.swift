@@ -13,9 +13,9 @@ class AppHost: CompositeElementHost {
         super.prepareForMount()
         
         reconciler.processBody(of: self,
-                               hostedElement: \.anyApp.app)
+                               hostedElement: \.hostedElementValue)
         
-        let childHostedContent = anyApp.bodyClosure(anyApp.app)
+        let childHostedContent = anyApp.body
         let childHost = childHostedContent.makeHost(parentPlatformContent: parentPlatformContent, parentHost: self)
         
         children = [childHost]
@@ -42,16 +42,15 @@ class AppHost: CompositeElementHost {
         // TODO: Update variadic views.
         
         reconciler.processBody(of: self,
-                               hostedElement: \.anyApp.app)
+                               hostedElement: \.hostedElementValue)
         
-        let childHostedContent = anyApp
-            .bodyClosure(anyApp.app)
+        let childHostedContent = anyApp.body
         reconciler.reconcileChildren(for: self,
                                      withChild: childHostedContent,
-                                     elementType: { $0.type }, updateChildHost: {
+                                     elementType: { getType($0) }, updateChildHost: {
             // TODO: ...
             //            childHost.environmentValues = environmentValues
-            $0.hostedElement = .scene(.init(childHostedContent))
+            $0.hostedElement = .scene(childHostedContent)
             //            childHost.transaction = transaction
         }, mountChildElement: {
             $0.makeHost(parentPlatformContent: parentPlatformContent, parentHost: self)

@@ -21,3 +21,9 @@ where Body == Never {
         fatalError()
     }
 }
+
+extension SSceneModifier {
+    var isPrimitive: Bool {
+        Self.Body.self == Never.self
+    }
+}

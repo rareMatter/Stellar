@@ -5,6 +5,7 @@
 //  Created by Jesse Spencer on 5/11/21.
 //
 
+public
 struct _SConditionalContent<TrueContent, FalseContent>: SPrimitiveContent
 where TrueContent: SContent, FalseContent: SContent {
     
@@ -18,12 +19,12 @@ where TrueContent: SContent, FalseContent: SContent {
 
 extension _SConditionalContent: _SContentContainer {
     
-    var children: [AnySContent] {
+    var children: [any SContent] {
         switch storage {
             case .trueContent(let content):
-                return [AnySContent(content)]
+                return [content]
             case .falseContent(let content):
-                return [AnySContent(content)]
+                return [content]
         }
     }
 }

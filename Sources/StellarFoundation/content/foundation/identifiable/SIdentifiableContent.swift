@@ -26,11 +26,11 @@ where Content: SContent, ID: Hashable {
      */
 }
 extension SIdentifiableContent: _SContentContainer {
-    var children: [AnySContent] { [.init(content)] }
+    var children: [any SContent] { [content] }
 }
 extension SIdentifiableContent: AnySIdentifiableContent {
     public
-    var anyIdentifier: AnyHashable { .init(id) }
+    var anyIdentifier: any Hashable { id }
     public
-    var anyContent: AnySContent { .init(content) }
+    var anyContent: any SContent { content }
 }

@@ -58,7 +58,7 @@ class TreeReconciler {
     where A : SApp {
         self.scheduler = scheduler
         
-        self.rootHost = AppHost(element: .app(.init(app)), parentPlatformContent: rootPlatformContent, parent: nil)
+        self.rootHost = AppHost(element: .app(app), parentPlatformContent: rootPlatformContent, parent: nil)
         
         performInitialMount()
         // TODO: publishing of scene phase, color scheme to app host.

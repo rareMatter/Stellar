@@ -17,10 +17,10 @@ where OptionalContent: SContent {
 }
 
 extension _SOptionalContent: _SContentContainer {
-    var children: [AnySContent] {
+    var children: [any SContent] {
         switch storage {
             case let .existing(content):
-                return [AnySContent(content)]
+                return [content]
             default:
                 return []
         }

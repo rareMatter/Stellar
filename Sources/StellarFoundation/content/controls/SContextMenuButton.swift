@@ -34,7 +34,7 @@ extension SContextMenuButton {
 }
 
 extension SContextMenuButton: _SContentContainer {
-    var children: [AnySContent] { [.init(_SContextMenuButtonContent(content: content)), .init(label)] }
+    var children: [any SContent] { [_SContextMenuButtonContent(content: content), label] }
 }
 
 public
@@ -49,7 +49,7 @@ where Content : SContent {
     let content: Content
 }
 extension _SContextMenuButtonContent: _SContentContainer {
-    var children: [AnySContent] { [.init(content)] }
+    var children: [any SContent] { [content] }
 }
 
 // FIXME: temp public

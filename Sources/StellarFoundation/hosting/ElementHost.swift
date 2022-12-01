@@ -6,6 +6,7 @@
 //
 
 import OrderedCollections
+import utilities
 
 // TODO: Revise host design. Attempt to replace inheritance tree with composition where it makes sense. This would allow removal of the implicit awareness of subclasses by the ancestor classes (there is at least one instance of this). This also avoids unnecessary overriding and dynamic dispatch.
 /// The base host for live elements, including the various types of `Descriptive Tree` content.
@@ -16,10 +17,33 @@ class ElementHost {
     /// The type-erased element being hosted.
     var hostedElement: ElementType
     
+    var hostedElementValue: Any {
+        get {
+            switch hostedElement {
+            case .app(let sApp):
+                return sApp
+            case .scene(let sScene):
+                return sScene
+            case .content(let sContent):
+                return sContent
+            }
+        }
+        set {
+            switch hostedElement {
+            case .app:
+                hostedElement = .app(newValue as! any SApp)
+            case .scene:
+                hostedElement = .scene(newValue as! any SScene)
+            case .content:
+                hostedElement = .content(newValue as! any SContent)
+            }
+        }
+    }
+    
     /// The type of the hosted element.
     var hostedElementType: Any.Type { hostedElement.type }
     
-    var anyApp: AnySApp {
+    var anyApp: any SApp {
         get {
             guard case let .app(app) = hostedElement else { fatalError() }
             return app
@@ -27,7 +51,7 @@ class ElementHost {
         set { hostedElement = .app(newValue) }
     }
     
-    var anyScene: AnySScene {
+    var anyScene: any SScene {
         get {
             guard case let .scene(scene) = hostedElement else {
                 fatalError()
@@ -37,7 +61,7 @@ class ElementHost {
         set { hostedElement = .scene(newValue) }
     }
     
-    var anyContent: AnySContent {
+    var anyContent: any SContent {
         get {
             if case let .content(content) = hostedElement {
                 return content
@@ -112,7 +136,7 @@ class ElementHost {
         }
         
         if case let .content(content) = hostedElement,
-           content.type is GroupedContent.Type {
+           content is GroupedContent {
             // TODO: set transition phase.
         }
         else {
@@ -148,7 +172,7 @@ extension ElementHost {
     /// - Note: If a host's content type is `GroupedContent`, it is skipped.
     func firstPrimitivePlatformContent() -> PlatformContent? {
         if let primitiveHost = self as? PrimitiveViewHost,
-           !(primitiveHost.anyContent.content is GroupedContent.Type) {
+           !(primitiveHost.anyContent is GroupedContent) {
             return primitiveHost.platformContent
         }
         else {
@@ -160,69 +184,79 @@ extension ElementHost {
 // MARK: Reducing modified content
 extension ElementHost {
     // TODO: Do returned modifiers need to be reversed?
-    static func reduceModifiedContent(_ anyContent: AnySContent) -> (modifiers: OrderedSet<AnySContentModifier>, modifiedContent: AnySContent) {
-        var modifiers = OrderedSet<AnySContentModifier>()
+    static func reduceModifiedContent(_ anyContent: any SContent) -> (modifiers: OrderedSet<HashableProxy<any SContentModifier, String>>, modifiedContent: any SContent) {
+        var modifiers = OrderedSet<HashableProxy<any SContentModifier, String>>()
         let modifiedContent = Self.reduceModifiedContentRecursively(anyContent: anyContent, collection: &modifiers)
         return (modifiers, modifiedContent)
     }
     
     /// Recursively reduces a modifier chain, stopping when content is encountered which is not a modifier.
-    private static func reduceModifiedContentRecursively(anyContent: AnySContent, collection: inout OrderedSet<AnySContentModifier>) -> AnySContent {
+    private static func reduceModifiedContentRecursively(anyContent: any SContent, collection: inout OrderedSet<HashableProxy<any SContentModifier, String>>) -> any SContent {
         
         // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the modified content is encountered.
-        guard let modifiedContent = anyContent.content as? AnyModifiedContent else {
+        guard let modifiedContent = anyContent as? AnyModifiedContent else {
             return anyContent
         }
         
         // Check for composed modifier bodies
-        if modifiedContent.anySModifier.bodyType != Never.self {
-            let content = modifiedContent.anySModifier.body(content: .init(modifier: modifiedContent.anySModifier, content: modifiedContent.anyContent))
+        if !modifiedContent.anySModifier.isPrimitive {
+            let content = bodyOfContentModifier(modifiedContent.anySModifier, content: modifiedContent.anyContent)
             return reduceModifiedContentRecursively(anyContent: content, collection: &collection)
         }
         // Accumulate modified content chains
-        else if let someModifiedContent = modifiedContent.anyContent.content as? AnyModifiedElement {
+        else if let someModifiedContent = modifiedContent.anyContent as? AnyModifiedElement {
             guard let modifiedContent = someModifiedContent as? AnyModifiedContent else { fatalError() }
-            collection.append(modifiedContent.anySModifier)
+            collection.append(.init(value: modifiedContent.anySModifier, hashableValue: typeConstructorName(getType(modifiedContent.anySModifier))))
             return reduceModifiedContentRecursively(anyContent: modifiedContent.anyContent, collection: &collection)
         }
         else {
             // No chaining, primitive modifier.
-            collection.append(modifiedContent.anySModifier)
+            collection.append(.init(value: modifiedContent.anySModifier, hashableValue: typeConstructorName(getType(modifiedContent.anySModifier))))
             return modifiedContent.anyContent
         }
+    }
+    
+    private static func bodyOfContentModifier<M>(_ modifier: M, content: any SContent) -> some SContent
+    where M: SContentModifier {
+        modifier.body(content: .init(modifier: modifier, content: content))
     }
 }
 
 // MARK: Reducing modified scenes
 extension ElementHost {
-    static func reduceModifiedScene(_ anyScene: AnySScene) -> (modifiers: OrderedSet<AnySSceneModifier>, modifiedScene: AnySScene) {
-        var modifiers = OrderedSet<AnySSceneModifier>()
+    static func reduceModifiedScene(_ anyScene: any SScene) -> (modifiers: OrderedSet<HashableProxy<any SSceneModifier, String>>, modifiedScene: any SScene) {
+        var modifiers = OrderedSet<HashableProxy<any SSceneModifier, String>>()
         let modifiedScene = Self.reduceModifiedSceneRecursively(anyScene: anyScene, collection: &modifiers)
         return (modifiers, modifiedScene)
     }
     
-    private static func reduceModifiedSceneRecursively(anyScene: AnySScene, collection: inout OrderedSet<AnySSceneModifier>) -> AnySScene {
+    private static func reduceModifiedSceneRecursively(anyScene: any SScene, collection: inout OrderedSet<HashableProxy<any SSceneModifier, String>>) -> any SScene {
         // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the modified content is encountered.
-        guard let modifiedScene = anyScene.wrappedScene as? AnySModifiedScene else {
+        guard let modifiedScene = anyScene as? AnySModifiedScene else {
             return anyScene
         }
         
         // Check for composed modifier bodies
-        if modifiedScene.anySModifier.bodyType != Never.self {
+        if !modifiedScene.anySModifier.isPrimitive {
             let scene = modifiedScene.anySModifier.body(content: modifiedScene.anyScene)
             return reduceModifiedSceneRecursively(anyScene: scene, collection: &collection)
         }
         // Accumulate modified content chains
         else if let someModifiedElement = modifiedScene as? AnyModifiedElement {
             guard let modifiedScene = someModifiedElement as? AnySModifiedScene else { fatalError() }
-            collection.append(modifiedScene.anySModifier)
+            collection.append(.init(value: modifiedScene.anySModifier, hashableValue: typeConstructorName(getType(modifiedScene.anySModifier))))
             return reduceModifiedSceneRecursively(anyScene: modifiedScene.anyScene, collection: &collection)
         }
         else {
             // No chaining, primitive modifier.
-            collection.append(modifiedScene.anySModifier)
+            collection.append(.init(value: modifiedScene.anySModifier, hashableValue: typeConstructorName(getType(modifiedScene.anySModifier))))
             return modifiedScene.anyScene
         }
+    }
+    
+    private static func bodyOfSceneModifier<M>(_ modifier: M, content: any SScene) -> some SScene
+    where M: SSceneModifier {
+        modifier.body(content: content)
     }
 }
 
@@ -232,14 +266,15 @@ fileprivate extension ElementHost {
     /// - Parameters:
     ///     - parentPlatformContent: The parent platform content.
     ///     - parentHost: The parent of the returned host or nil if it's the root host.
-    static func makeHost(forContent content: AnySContent,
+    static func makeHost<C>(forContent content: C,
                          parentPlatformContent: PlatformContent,
-                         parentHost: ElementHost?) -> ElementHost {
-        if content.content is SEmptyContent {
+                         parentHost: ElementHost?) -> ElementHost
+    where C: SContent {
+        if content is SEmptyContent {
             return EmptyElementHost(hostedElement: .content(content),
                                     parent: parentHost)
         }
-        else if content.bodyType is Never.Type {
+        else if C.Body.self is Never.Type {
             return PrimitiveViewHost(content: content,
                                      parentPlatformContent: parentPlatformContent,
                                      parent: parentHost)
@@ -254,11 +289,12 @@ fileprivate extension ElementHost {
 
 fileprivate extension ElementHost {
     
-    static func makeHost(forScene scene: AnySScene,
+    static func makeHost<S>(forScene scene: S,
                          parentPlatformContent: PlatformContent,
-                         parentHost: ElementHost?) -> ElementHost {
+                         parentHost: ElementHost?) -> ElementHost
+    where S: SScene {
         // TODO: Add EmptyScene.
-        if scene.bodyType is Never.Type {
+        if S.Body.self is Never.Type {
             return PrimitiveSceneHost(scene: scene, parentPlatformContent: parentPlatformContent, parent: parentHost)
         }
         else {
@@ -277,21 +313,6 @@ extension SContent {
     ///     - parentHost: The parent of the returned host or nil if it's the root host.
     func makeHost(parentPlatformContent: PlatformContent,
                   parentHost: ElementHost?) -> ElementHost {
-        ElementHost.makeHost(forContent: .init(self),
-                             parentPlatformContent: parentPlatformContent,
-                             parentHost: parentHost)
-    }
-}
-
-extension AnySContent {
-    
-    /// Creates an element host type depending on the type of this content.
-    ///
-    /// - Parameters:
-    ///     - parentPlatformContent: The parent platform content.
-    ///     - parentHost: The parent of the returned host or nil if it's the root host.
-    func makeHost(parentPlatformContent: PlatformContent,
-                  parentHost: ElementHost?) -> ElementHost {
         ElementHost.makeHost(forContent: self,
                              parentPlatformContent: parentPlatformContent,
                              parentHost: parentHost)
@@ -299,14 +320,6 @@ extension AnySContent {
 }
 
 extension SScene {
-    
-    func makeHost(parentPlatformContent: PlatformContent,
-                  parentHost: ElementHost?) -> ElementHost {
-        ElementHost.makeHost(forScene: .init(self), parentPlatformContent: parentPlatformContent, parentHost: parentHost)
-    }
-}
-
-extension AnySScene {
     
     func makeHost(parentPlatformContent: PlatformContent,
                   parentHost: ElementHost?) -> ElementHost {
@@ -324,6 +337,6 @@ struct HostMountingContext {
 
 public
 enum Modifier: Hashable, Equatable {
-    case content(AnySContentModifier)
-    case scene(AnySSceneModifier)
+    case content(HashableProxy<any SContentModifier, String>)
+    case scene(HashableProxy<any SSceneModifier, String>)
 }

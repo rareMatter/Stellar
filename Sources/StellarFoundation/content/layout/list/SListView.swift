@@ -18,63 +18,9 @@ where Content : SContent, Selection : Hashable {
         case one(SBinding<Selection>)
         case many(SBinding<Set<Selection>>)
     }
-    
-    private
-    var sectionedContent: some SContent {
-        // check content for any contents which are not in a section
-        // normalize by placing any loose contents into implicit sections, while finding explicit sections.
-        if let contentContainer = content as? _SContentContainer {
-            
-            // Content has children. Check for SSections and other content.
-            var sections = [any SContent]()
-            var otherContents = [any SContent]()
-            
-            for child in contentContainer.children {
-                if child is _AnySection {
-                    if !otherContents.isEmpty {
-                        // if other contents has been found, create a section for it
-                        sections.append(SSection(content: {
-                            SForEach(Array(otherContents.enumerated()),
-                                     id: \.offset) { _, content in content }
-                        }))
-                        otherContents = []
-                    }
-                    sections.append(child)
-                }
-                else {
-                    // non-sectioned content: add it to otherContents to be implicitly sectioned
-                    if !child.children.isEmpty {
-                        // the child is another content container: add its children to otherContents
-                        otherContents.append(contentsOf: child.children)
-                    }
-                    else {
-                        // add the child to otherContents
-                        otherContents.append(child)
-                    }
-                }
-            }
-            // if any other contents remain, create a section for it
-            if !otherContents.isEmpty {
-                sections.append(.init(SSection(content: {
-                    SForEach(Array(otherContents.enumerated()),
-                             id: \.offset) { _, content in content }
-                })))
-            }
-            
-            return AnySContent(SForEach(Array(sections.enumerated()),
-                            id: \.offset) { _, content in
-               content
-            })
-        }
-        else {
-            // Content has no children
-           return AnySContent(content)
-        }
-    }
 }
-
 extension SListView: _SContentContainer {
-    var children: [any SContent] { [sectionedContent] }
+    var children: [any SContent] { [content] }
 }
 
 public

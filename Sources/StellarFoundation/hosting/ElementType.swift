@@ -8,15 +8,15 @@
 /// The possible type-erased element types.
 enum ElementType {
     
-    case app(AnySApp)
-    case scene(AnySScene)
-    case content(AnySContent)
+    case app(any SApp)
+    case scene(any SScene)
+    case content(any SContent)
     
     var type: Any.Type {
         switch self {
-        case let .app(app): return app.type
-        case let .scene(scene): return scene.type
-        case let .content(content): return content.type
+        case let .app(app): return getType(app)
+        case let .scene(scene): return getType(scene)
+        case let .content(content): return getType(content)
         }
     }
     
@@ -28,10 +28,10 @@ enum ElementType {
             fatalError()
             
         case .scene(let scene):
-            return scene.typeConstructorName
+            return StellarFoundation.typeConstructorName(getType(scene))
             
-        case .content(let anySContent):
-            return anySContent.typeConstructorName
+        case .content(let anyContent):
+            return StellarFoundation.typeConstructorName(getType(anyContent))
         }
     }
 }

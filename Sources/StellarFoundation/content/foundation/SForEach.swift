@@ -28,7 +28,7 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
 extension SForEach: GroupedContent {
     var children: [any SContent] {
         data.map { element in
-            AnySContent(SIdentifiableContent(content(element), id: element[keyPath: id]))
+            SIdentifiableContent(content(element), id: element[keyPath: id])
         }
     }
 }
@@ -85,7 +85,7 @@ struct AnyForEach: SContent {
     /// The wrapped content type.
     let contentType: Any.Type
     
-    let content: (_ datum: Any) -> AnySContent
+    let content: (_ datum: Any) -> any SContent
     let data: [Any]
     let id: AnyKeyPath
     
@@ -98,7 +98,7 @@ struct AnyForEach: SContent {
             guard let matchingDatum = forEach.data.first(where: { element in
                 element[keyPath: forEach.id] == (datum[keyPath: forEach.id as AnyKeyPath] as? ID)
             }) else { fatalError() }
-            return .init(forEach.content(matchingDatum))
+            return forEach.content(matchingDatum)
         }
         self.data = Array(forEach.data.map({ $0 as Any }))
         self.id = forEach.id

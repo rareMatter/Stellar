@@ -14,3 +14,9 @@ protocol SScene {
     /// The body of the scene.
     @SSceneBuilder var body: Self.Body { get }
 }
+
+extension SScene {
+    var typeConstructorName: String {
+        StellarFoundation.typeConstructorName(getType(self))
+    }
+}
