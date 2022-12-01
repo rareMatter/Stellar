@@ -76,7 +76,7 @@ where Data.Index == Int {
 // MARK: type erasure
 
 /// A type-erased ForEach which forwards all calls to the wrapped instance.
-struct AnyForEach: SContent {
+struct AnyForEach: SPrimitiveContent {
     
     /// The wrapped data type.
     let dataType: Any.Type
@@ -103,6 +103,4 @@ struct AnyForEach: SContent {
         self.data = Array(forEach.data.map({ $0 as Any }))
         self.id = forEach.id
     }
-    
-    var body: some SContent { fatalError() }
 }
