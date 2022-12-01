@@ -7,10 +7,10 @@
 
 public
 struct SSearchBar: SPrimitiveContent {
-    @SBinding var text: String
-    let placeholderText: String
-    let onSearch: (String) -> Void
-    let onSearchEnded: () -> Void
+    @SBinding public var text: String
+    public let placeholderText: String
+    public let onSearch: (String) -> Void
+    public let onSearchEnded: () -> Void
     
     public
     init(text: SBinding<String>, placeholderText: String = "", onSearch: @escaping (String) -> Void, onSearchEnded: @escaping () -> Void) {

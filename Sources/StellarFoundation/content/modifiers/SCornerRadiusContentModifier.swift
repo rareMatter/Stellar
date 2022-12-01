@@ -5,10 +5,11 @@
 //  Created by Jesse Spencer on 9/23/21.
 //
 
+public
 struct SCornerRadiusModifier: SContentModifier {
-    typealias Body = Never
-    let cornerRadius: Double
-    let antialiased: Bool
+    public typealias Body = Never
+    public let cornerRadius: Double
+    public let antialiased: Bool
 }
 
 public

@@ -10,6 +10,7 @@ import UIKit
 import Combine
 
 /// A text view which accepts handlers for interactions.
+open
 class _TextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier, SRespondable {
 
     // -- respondable
@@ -21,29 +22,31 @@ class _TextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier
     let _sizeChangePublisher: PassthroughSubject<Any, Never> = .init()
     
     // -- editing
-    var shouldBeginEditing: TextViewRequestHandler = { _ in true }
-    var shouldEndEditing: TextViewRequestHandler = { _ in true }
+    public var shouldBeginEditing: TextViewRequestHandler = { _ in true }
+    public var shouldEndEditing: TextViewRequestHandler = { _ in true }
     
-    let didBeginEditingPublisher = PassthroughSubject<UITextView, Never>()
-    var didBeginEditing: TextViewEventHandler = { _ in }
+    public let didBeginEditingPublisher = PassthroughSubject<UITextView, Never>()
+    public var didBeginEditing: TextViewEventHandler = { _ in }
     
-    let didEndEditingPublisher = PassthroughSubject<UITextView, Never>()
-    var didEndEditing: TextViewEventHandler = { _ in }
+    public let didEndEditingPublisher = PassthroughSubject<UITextView, Never>()
+    public var didEndEditing: TextViewEventHandler = { _ in }
     
     // -- changes
-    let didChangePublisher = PassthroughSubject<UITextView, Never>()
-    var didChange: TextViewEventHandler = { _ in }
+    public let didChangePublisher = PassthroughSubject<UITextView, Never>()
+    public var didChange: TextViewEventHandler = { _ in }
     
-    let didChangeSelectionPublisher = PassthroughSubject<UITextView, Never>()
-    var didChangeSelection: TextViewEventHandler = { _ in }
+    public let didChangeSelectionPublisher = PassthroughSubject<UITextView, Never>()
+    public var didChangeSelection: TextViewEventHandler = { _ in }
     
     // -- init
+    public
     override
     init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
         delegate = self
     }
     
+    public
     convenience
     init() {
         self.init(frame: .zero, textContainer: nil)
@@ -56,7 +59,7 @@ class _TextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier
     
     // MARK: - first responder messages
     
-    override
+    open override
     func becomeFirstResponder() -> Bool {
         let didRespond = super.becomeFirstResponder()
         /*
@@ -68,7 +71,7 @@ class _TextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier
         return didRespond
     }
     
-    override
+    open override
     func resignFirstResponder() -> Bool {
         let didResign = super.resignFirstResponder()
         /* This method is called by UIKit during view creation and therefore can be called without a matching precursor call to becomeFirstResponder(). Therefore is publishing is done here it is misleading to clients.
@@ -85,31 +88,31 @@ class _TextView: KMPlaceholderTextView, UITextViewDelegate, SDynamicSizeNotifier
 extension _TextView {
     // -- editing
     
-    func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+    public func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
         shouldBeginEditing(textView)
     }
-    func textViewDidBeginEditing(_ textView: UITextView) {
+    public func textViewDidBeginEditing(_ textView: UITextView) {
         didBeginEditing(textView)
         didBeginEditingPublisher.send(textView)
     }
     
-    func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
+    public func textViewShouldEndEditing(_ textView: UITextView) -> Bool {
         shouldEndEditing(textView)
     }
-    func textViewDidEndEditing(_ textView: UITextView) {
+    public func textViewDidEndEditing(_ textView: UITextView) {
         didEndEditing(textView)
         didEndEditingPublisher.send(textView)
     }
     
     // -- changes
     
-    func textViewDidChange(_ textView: UITextView) {
+    public func textViewDidChange(_ textView: UITextView) {
         didChange(textView)
         didChangePublisher.send(textView)
         _sizeChangePublisher.send(self)
     }
     
-    func textViewDidChangeSelection(_ textView: UITextView) {
+    public func textViewDidChangeSelection(_ textView: UITextView) {
         didChangeSelection(textView)
         didChangeSelectionPublisher.send(textView)
     }
@@ -156,6 +159,7 @@ extension _TextView {
 }
 
 // MARK: - typealiases
+public
 extension _TextView {
     typealias TextViewRequestHandler = (_ textView: UITextView) -> Bool
     typealias TextViewEventHandler = (UITextView) -> Void

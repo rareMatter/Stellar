@@ -5,7 +5,7 @@
 //  Created by Jesse Spencer on 11/4/21.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
 
 final
@@ -106,7 +106,7 @@ extension UIKitZStack {
 }
 
 extension SZStack: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitZStack(alignment: alignment, spacing: spacing, modifiers: modifiers)
     }
 }

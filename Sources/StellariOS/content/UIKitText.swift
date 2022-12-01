@@ -5,11 +5,9 @@
 //  Created by Jesse Spencer on 1/17/22.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
 
-// FIXME: temp public
-public
 final
 class UIKitText: UILabel, UIKitContent {
     
@@ -27,17 +25,17 @@ class UIKitText: UILabel, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let text = primitiveContent.value as? SText else { fatalError() }
         self.text = text.string
         applyModifiers(modifiers.uiKitModifiers())
     }
     
-    public func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         fatalError()
     }
     
-    public func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
         fatalError()
     }
 }
@@ -56,11 +54,11 @@ extension UIKitText {
 
 extension SText: UIKitRenderable {
     
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         makeUIKitText(modifiers: modifiers)
     }
     
-    public func makeUIKitText(modifiers: [UIKitContentModifier]) -> UIKitText {
+    func makeUIKitText(modifiers: [UIKitContentModifier]) -> UIKitText {
         UIKitText(string: string, modifiers: modifiers)
     }
 }

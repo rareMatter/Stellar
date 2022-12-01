@@ -5,10 +5,9 @@
 //  Created by Jesse Spencer on 3/8/22.
 //
 
+import StellarFoundation
 import UIKit
 
-// FIXME: temp public
-public
 final
 class UIKitSection: UIKitContent {
     
@@ -25,9 +24,9 @@ class UIKitSection: UIKitContent {
         content = .init(part: .content, modifiers: modifiers)
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
     
-    public func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
         switch primitiveContent.type {
         case .sectionPart(let anyPart):
@@ -52,7 +51,6 @@ class UIKitSection: UIKitContent {
         }
     }
     
-    public
     func removeChild(_ child: PlatformContent,
                 for task: UnmountHostTask) {
         guard let content = child as? UIKitContent else { fatalError() }
@@ -70,12 +68,10 @@ class UIKitSection: UIKitContent {
     }
 }
 extension UIKitSection: Hashable {
-    public
     static
     func == (lhs: UIKitSection, rhs: UIKitSection) -> Bool {
         lhs.id == rhs.id
     }
-    public
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -116,8 +112,7 @@ extension AnySectionPart {
 }
 
 extension _AnySection {
-    // FIXME: Temp public.
-    public func makeUIKitSection(modifiers: [UIKitContentModifier]) -> UIKitSection {
+    func makeUIKitSection(modifiers: [UIKitContentModifier]) -> UIKitSection {
         UIKitSection(modifiers: modifiers)
     }
 }

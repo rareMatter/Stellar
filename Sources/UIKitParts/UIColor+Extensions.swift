@@ -5,10 +5,11 @@
 //  Created by Jesse Spencer on 9/14/21.
 //
 
-import UIKit
 import StellarFoundation
+import UIKit
 import utilities
 
+public
 extension UIColor {
     
     static
@@ -17,6 +18,7 @@ extension UIColor {
     }
 }
 
+public
 extension UIColor {
     
     static

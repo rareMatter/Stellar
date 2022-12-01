@@ -5,8 +5,9 @@
 //  Created by Jesse Spencer on 1/17/22.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
+import UIKitParts
 
 final
 class UIKitContextMenu: UIControl, UIKitContent {
@@ -174,7 +175,7 @@ extension AnyContextMenuButton {
     }
 }
 extension SContextMenuButton: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitContextMenu(modifiers: modifiers)
     }
 }

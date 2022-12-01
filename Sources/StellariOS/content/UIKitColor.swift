@@ -5,9 +5,8 @@
 //  Created by Jesse Spencer on 1/18/22.
 //
 
-import Foundation
-import UIKit
 import StellarFoundation
+import UIKit
 import UIKitParts
 
 final
@@ -50,7 +49,7 @@ extension UIKitColor {
 }
 
 extension PrimitiveColor: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitColor(color: self, modifiers: modifiers)
     }
 }

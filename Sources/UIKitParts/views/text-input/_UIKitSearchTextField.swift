@@ -9,6 +9,7 @@ import Foundation
 import UIKit
 
 /// A text field which accepts closure handlers for interactions.
+open
 class _UIKitSearchTextField: UISearchTextField, UITextFieldDelegate, UISearchTextFieldDelegate {
     
     private
@@ -17,17 +18,19 @@ class _UIKitSearchTextField: UISearchTextField, UITextFieldDelegate, UISearchTex
     }
     
     // MARK: handlers
+    public
     var textDidChange: (_ text: String) -> Void = { _ in }
+    public
     var onReturn: (_ text: String) -> Void = { _ in }
     
     // MARK: delegation
     
-    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+    public func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
         textDidChange(searchText)
         return true
     }
     
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         onReturn(searchText)
         return true
     }

@@ -5,9 +5,10 @@
 //  Created by Jesse Spencer on 6/1/21.
 //
 
+public
 struct SDisabledContentModifier: SContentModifier {
-    typealias Body = Never
-    let isDisabled: Bool
+    public typealias Body = Never
+    public let isDisabled: Bool
 }
 
 public

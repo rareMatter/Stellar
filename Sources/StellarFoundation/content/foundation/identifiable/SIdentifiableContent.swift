@@ -10,8 +10,9 @@ public
 struct SIdentifiableContent<Content, ID>: SPrimitiveContent
 where Content: SContent, ID: Hashable {
     let content: Content
-    let id: ID
+    public let id: ID
     
+    public
     init(_ content: Content, id: ID) {
         self.content = content
         self.id = id

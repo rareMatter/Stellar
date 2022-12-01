@@ -5,8 +5,9 @@
 //  Created by Jesse Spencer on 2/24/22.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
+import UIKitParts
 
 final
 class UIKitSearchBar: _UIKitSearchTextField, UIKitContent {
@@ -53,7 +54,7 @@ extension UIKitSearchBar {
 }
 
 extension SSearchBar: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitSearchBar(primitive: self, modifiers: modifiers)
     }
 }

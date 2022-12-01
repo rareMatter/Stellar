@@ -5,10 +5,11 @@
 //  Created by Jesse Spencer on 9/30/22.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
 
-final class UIKitEmptyView: UIView, UIKitContent {
+final
+class UIKitEmptyView: UIView, UIKitContent {
     
     init() {
         super.init(frame: .zero)
@@ -30,7 +31,7 @@ final class UIKitEmptyView: UIView, UIKitContent {
 }
 
 extension SEmptyContent: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitEmptyView()
     }
 }

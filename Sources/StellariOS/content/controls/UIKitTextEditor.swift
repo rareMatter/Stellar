@@ -5,8 +5,9 @@
 //  Created by Jesse Spencer on 1/18/22.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
+import UIKitParts
 
 final
 class UIKitTextEditor: _TextView, UIKitContent {
@@ -33,7 +34,6 @@ class UIKitTextEditor: _TextView, UIKitContent {
         self.didChange = { textView in
             primitive.onTextChange(textView.text)
         }
-        self.inputAccessoryView = primitive.inputAccessoryView
     }
     
     func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
@@ -51,7 +51,7 @@ extension UIKitTextEditor {
 }
 
 extension STextEditor: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitTextEditor(primitive: self, modifiers: modifiers)
     }
 }

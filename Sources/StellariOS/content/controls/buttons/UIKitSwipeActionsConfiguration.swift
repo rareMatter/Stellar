@@ -5,7 +5,7 @@
 //  Created by Jesse Spencer on 1/20/22.
 //
 
-import Foundation
+import StellarFoundation
 import UIKit
 
 final

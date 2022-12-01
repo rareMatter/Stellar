@@ -7,9 +7,9 @@
 
 public
 struct STextEditor: SPrimitiveContent {
-    @SBinding var text: String
-    let placeholderText: String
-    let onTextChange: (String) -> Void
+    @SBinding public var text: String
+    public let placeholderText: String
+    public let onTextChange: (String) -> Void
     
     public
     init(text: SBinding<String>,

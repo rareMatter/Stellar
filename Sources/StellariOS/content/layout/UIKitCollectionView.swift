@@ -5,9 +5,8 @@
 //  Created by Jesse Spencer on 3/3/22.
 //
 
-import Foundation
-import UIKit
 import StellarFoundation
+import UIKit
 
 final
 class UIKitCollectionView: UICollectionView, UIKitContent, UICollectionViewDelegate, UICollectionViewDragDelegate, UICollectionViewDropDelegate {
@@ -135,7 +134,7 @@ extension UIKitCollectionView {
 }
 
 extension SList: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitCollectionView(modifiers: modifiers)
     }
 }

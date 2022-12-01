@@ -5,9 +5,10 @@
 //  Created by Jesse Spencer on 6/7/21.
 //
 
+public
 struct STapHandlerModifier: SContentModifier {
-    typealias Body = Never
-    let tapHandler: () -> Void
+    public typealias Body = Never
+    public let tapHandler: () -> Void
 }
 
 public

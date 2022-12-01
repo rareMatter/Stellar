@@ -11,8 +11,6 @@ import StellarFoundation
 import UIKitParts
 import utilities
 
-// FIXME: temp public.
-public
 final
 class UIKitButton: UIControl, UIKitContent {
     
@@ -53,7 +51,7 @@ class UIKitButton: UIControl, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case let .button(anyButton) = primitiveContent.type else { fatalError() }
         if anyButton.actionHandler != tapHandlerContainer {
             tapGesture.handler = anyButton.actionHandler.t
@@ -62,7 +60,7 @@ class UIKitButton: UIControl, UIKitContent {
         // TODO: If children change, the size of this may need to update to accomodate. A generalized layout handling chain may need to be implemented. Or - review Dynamic Content handling implemented by Content Cell.
     }
     
-    public func addChild(for primitiveContent: PrimitiveContext,
+    func addChild(for primitiveContent: PrimitiveContext,
                          preceedingSibling sibling: PlatformContent?,
                          modifiers: [Modifier],
                          context: HostMountingContext) -> PlatformContent? {
@@ -86,7 +84,7 @@ class UIKitButton: UIControl, UIKitContent {
                         before: sibling as? UIView)
     }
     
-    public func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
         if child is UIKitText {
             guard let text = text else {
                 assertionFailure("Unexpected child removal in \(Self.self). Child: \(child). Child will not be removed.")
@@ -113,11 +111,11 @@ extension UIKitButton {
 }
 
 extension SButton: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         makeUIKitButton(modifiers: modifiers)
     }
     
-    public func makeUIKitButton(modifiers: [UIKitContentModifier]) -> UIKitButton {
+    func makeUIKitButton(modifiers: [UIKitContentModifier]) -> UIKitButton {
         UIKitButton(tapHandlerContainer: actionHandler, modifiers: modifiers)
     }
 }

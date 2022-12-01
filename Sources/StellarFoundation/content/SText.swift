@@ -7,6 +7,7 @@
 
 public
 struct SText: SPrimitiveContent {
+    public
     let string: String
 }
 public

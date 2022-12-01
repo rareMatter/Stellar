@@ -5,16 +5,15 @@
 //  Created by Jesse Spencer on 11/4/21.
 //
 
+import StellarFoundation
 import UIKit
 
 /// A subclass of `UIStackView` which provides common behaviors for VStack and HStack.
-// FIXME: Temp public.
-public
 class UIKitPrimitiveStackView: UIStackView, UIKitContent {
     
     var modifiers: [UIKitContentModifier] = []
     
-    public func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
+    func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         guard let renderable = primitiveContent.value as? UIKitRenderable else { fatalError() }
         let content = renderable.makeRenderableContent(modifiers: modifiers.uiKitModifiers())
         guard let view = content as? UIView else { fatalError() }
@@ -31,12 +30,12 @@ class UIKitPrimitiveStackView: UIStackView, UIKitContent {
         return content
     }
     
-    public func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         fatalError()
     }
-
-    public func removeChild(_ child: PlatformContent,
-                for task: UnmountHostTask) {
+    
+    func removeChild(_ child: PlatformContent,
+                     for task: UnmountHostTask) {
         guard let view = child as? UIView else { fatalError() }
         view.removeFromSuperview()
     }
@@ -62,7 +61,7 @@ class UIKitHStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [AnySContentModifier]) {
+    override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let anyHStack = primitiveContent.value as? AnyHStack else { fatalError() }
         updateState(with: anyHStack)
         applyModifiers(modifiers.uiKitModifiers())
@@ -83,17 +82,14 @@ class UIKitHStack: UIKitPrimitiveStackView {
 }
 
 extension SHStack: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitHStack(primitive: self, modifiers: modifiers)
     }
 }
 
-public
 final
 class UIKitVStack: UIKitPrimitiveStackView {
     
-    // FIXME: Temp public.
-    public
     init(primitive: AnyVStack, modifiers: [UIKitContentModifier]) {
         super.init(frame: .zero)
         axis = .vertical
@@ -106,8 +102,7 @@ class UIKitVStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    // FIXME: Temp public.
-    public override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [AnySContentModifier]) {
+    override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let vStack = primitiveContent.value as? AnyVStack else { fatalError() }
         updateState(with: vStack)
         applyModifiers(modifiers.uiKitModifiers())
@@ -129,7 +124,7 @@ class UIKitVStack: UIKitPrimitiveStackView {
 }
 
 extension SVStack: UIKitRenderable {
-    public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
+    func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitVStack(primitive: self, modifiers: modifiers)
     }
 }

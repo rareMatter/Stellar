@@ -13,15 +13,11 @@ import utilities
 /// A marker protocol used for rendering API primitives into UIKit types.
 ///
 /// This is mostly used in layout containers such as stacks which can accept almost any child content types.
-// FIXME: This is temporarily public.
-public
 protocol UIKitRenderable {
     func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent
 }
 
 /// Content which is displayable on UIKit.
-// FIXME: Temp public.
-public
 protocol UIKitContent: AnyObject, PlatformContent {}
 
 // TODO: Move me.
@@ -113,8 +109,6 @@ extension PrimitiveContext {
     }
 }
 
-// FIXME: Temp public.
-public
 enum UIKitContentModifier: Hashable {
     // MARK: appearance
     case cornerRadius(value: CGFloat, antialiased: Bool)
@@ -127,18 +121,17 @@ enum UIKitContentModifier: Hashable {
     case identifier(AnyHashable)
 }
 
-extension AnySContentModifier {
+extension SContentModifier {
     func uiKitModifier() -> UIKitContentModifier? {
-        (modifier as? UIKitRenderableModifier)?.makeModifier()
+        (self as? UIKitRenderableModifier)?.makeModifier()
     }
 }
-extension AnySSceneModifier {
+extension SSceneModifier {
     func uiKitModifier() -> UIKitContentModifier? {
-        (modifier as? UIKitRenderableModifier)?.makeModifier()
+        (self as? UIKitRenderableModifier)?.makeModifier()
     }
 }
-// FIXME: temp public
-public
+
 extension Collection
 where Element == Modifier {
     func uiKitModifiers() -> [UIKitContentModifier] {
@@ -147,10 +140,10 @@ where Element == Modifier {
             
             switch modifier {
             case .scene(let anySceneModifier):
-                uiKitModifier = anySceneModifier.uiKitModifier()
+                uiKitModifier = anySceneModifier.value.uiKitModifier()
                 
             case .content(let anyContentModifier):
-                uiKitModifier = anyContentModifier.uiKitModifier()
+                uiKitModifier = anyContentModifier.value.uiKitModifier()
             }
             guard let uiKitModifier = uiKitModifier else {
                 assertionFailure()
@@ -161,8 +154,6 @@ where Element == Modifier {
     }
 }
 
-// FIXME: Temp public.
-public
 protocol UIKitRenderableModifier {
     func makeModifier() -> UIKitContentModifier
 }

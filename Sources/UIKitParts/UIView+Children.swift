@@ -8,6 +8,7 @@
 import UIKit
 
 // MARK: - Standard UIView rendering functions for any general cases
+public
 extension UIView {
     
     // Children
