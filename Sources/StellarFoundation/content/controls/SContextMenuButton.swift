@@ -52,7 +52,6 @@ extension _SContextMenuButtonContent: _SContentContainer {
     var children: [any SContent] { [content] }
 }
 
-// FIXME: temp public
 public
 protocol AnyContextMenuButtonContent {}
 extension _SContextMenuButtonContent: AnyContextMenuButtonContent {}
