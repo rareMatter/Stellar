@@ -43,7 +43,7 @@ struct AList: SContent {
     
     /*
     var content: ViewHierarchyObject {
-        SListView(0...9) { row in
+        SList(0...9) { row in
             switch row {
                 case 0:
                     SLeadingViewLabel(text: "Centered Leading view Centered Leading view Centered Leading view Centered Leading view",

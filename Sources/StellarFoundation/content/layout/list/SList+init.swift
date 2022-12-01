@@ -1,12 +1,12 @@
 //
-//  SListView+init.swift
+//  SList+init.swift
 //  
 //
 //  Created by Jesse Spencer on 10/18/21.
 //
 
 public
-extension SListView {
+extension SList {
     
     // MARK: - Creating a List with Arbitrary Content
     

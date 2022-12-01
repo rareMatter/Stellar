@@ -134,7 +134,7 @@ extension UIKitCollectionView {
     }
 }
 
-extension SListView: UIKitRenderable {
+extension SList: UIKitRenderable {
     public func makeRenderableContent(modifiers: [UIKitContentModifier]) -> UIKitContent {
         UIKitCollectionView(modifiers: modifiers)
     }

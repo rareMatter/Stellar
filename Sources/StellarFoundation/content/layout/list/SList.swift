@@ -1,12 +1,12 @@
 //
-//  SListView.swift
+//  SList.swift
 //  
 //
 //  Created by Jesse Spencer on 2/28/21.
 //
 
 public
-struct SListView<Content, Selection>: SPrimitiveContent
+struct SList<Content, Selection>: SPrimitiveContent
 where Content : SContent, Selection : Hashable {
     
     /// The content of this list.
@@ -19,7 +19,7 @@ where Content : SContent, Selection : Hashable {
         case many(SBinding<Set<Selection>>)
     }
 }
-extension SListView: _SContentContainer {
+extension SList: _SContentContainer {
     var children: [any SContent] { [content] }
 }
 
@@ -27,7 +27,7 @@ public
 protocol AnyList {
     var selectionSet: Set<AnyHashable> { get }
 }
-extension SListView: AnyList {
+extension SList: AnyList {
     
     public
     var selectionSet: Set<AnyHashable> {
