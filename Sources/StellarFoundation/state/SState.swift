@@ -12,7 +12,7 @@ protocol ValueStorage {
 
 protocol WritableValueStorage: ValueStorage {
     // TODO: Needs Transaction param.
-    var setter: ((Any) -> ())? { get set }
+    var setter: ((Any) -> Void)? { get set }
 }
 
 @propertyWrapper

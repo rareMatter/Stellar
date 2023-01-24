@@ -17,21 +17,20 @@ import Combine
 ///
 /// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The platform content instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
-// TODO: Investigate concurrent content updating.
-final
-class TreeReconciler {
+public
+struct TreeReconciler {
     
     struct Update: Hashable {
-        let host: CompositeElementHost
+        let host: _CompositeElementHost
         // TODO:
         // let transaction: Transaction
         
         func hash(into hasher: inout Hasher) {
-            hasher.combine(host)
+            hasher.combine(host.state)
         }
         static
         func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.host == rhs.host
+            lhs.host.state == rhs.host.state
         }
     }
     
@@ -41,8 +40,9 @@ class TreeReconciler {
     private
     var updateQueue = [Update]()
     
-    /// The root of the `Host Tree`.
-    let rootHost: ElementHost
+    typealias HostTreeNode = TreeNode<_Host>
+    private
+    let hostTreeRoot: HostTreeNode
     
     /// A platform-specific event loop scheduler.
     ///
@@ -52,53 +52,99 @@ class TreeReconciler {
     private
     let scheduler: (@escaping () -> Void) -> Void
     
-    init<A>(app: A,
-            rootPlatformContent: PlatformContent,
-            scheduler: @escaping (@escaping () -> Void) -> Void)
-    where A : SApp {
+    public
+    init(app: any SApp,
+         rootPlatformContent: PlatformContent,
+         scheduler: @escaping (@escaping () -> Void) -> Void) {
         self.scheduler = scheduler
         
-        self.rootHost = AppHost(element: .app(app), parentPlatformContent: rootPlatformContent, parent: nil)
+        let appHost = _AppHost(anyApp: app, state: .init())
+        hostTreeRoot = .init(host: appHost)
         
-        performInitialMount()
+        performMount()
         // TODO: publishing of scene phase, color scheme to app host.
     }
     
-    init<Content>(content: Content,
-                  rootPlatformContent: PlatformContent,
-                  platformExecutionScheduler: @escaping (@escaping () -> Void) -> Void)
-    where Content : SContent {
+    public
+    init(content: any SContent,
+         rootPlatformContent: PlatformContent,
+         platformExecutionScheduler: @escaping (@escaping () -> Void) -> Void) {
         self.scheduler = platformExecutionScheduler
         
-        rootHost = content.makeHost(parentPlatformContent: rootPlatformContent, parentHost: nil)
+        let contentHost = content.makeHost(parentPlatformContent: rootPlatformContent, parentHost: nil)
+        hostTreeRoot = .init(host: contentHost)
         
-        performInitialMount()
+        performMount()
     }
     
+    /// Performs a recursive mounting process of the descriptive tree onto a host tree. During the process the platform is allowed to create renderable elements.
     private
-    func performInitialMount() {
-        rootHost.mount(beforeSibling: nil,
-                              onParent: nil,
-                              reconciler: self)
+    mutating
+    func performMount() {
+        // TODO: This will now perform mounting for the entire tree, as the reconciler takes ownership of the host tree.
+        recursiveMount(node: hostTreeRoot,
+                       beforeSibling: nil)
         performPostrenderCallbacks()
     }
     
-    // MARK: - enqueuing updates and reconciling
-    
-    /// Updates the host's storage and schedules a render update.
     private
-    func enqueueStorageUpdate(for host: CompositeElementHost,
-                              id: Int,
-                              updateHandler: (inout Any) -> Void) {
-        updateHandler(&host.storage[id])
-        enqueueUpdate(for: host)
+    mutating
+    func recursiveMount(node: HostTreeNode, beforeSibling sibling: PlatformContent?) {
+        
+        if var mutableCompositeElementHost = node.value as? _MutableCompositeElementHost {
+            processBody(of: &mutableCompositeElementHost)
+        }
+        
+        let elementBody = node.value.elementBody
+        // TODO: This may be an appropriate spot to tell the host to mount, if hosts need to perform their own mounting behaviors.
+        node.value.mount()
+        let childHost = makeHost(for: elementBody)
+        let childNode = HostTreeNode(value: childHost, children: [])
+        if let sibling {
+            // TODO: Insert the new host before the sibling.
+        }
+        else {
+            node.children.append(childNode)
+        }
+        
+        recursiveMount(node: childNode, beforeSibling: nil)
     }
     
-    /// Adds the host to the render queue.
+    /// Creates a host appropriate for the type of element.
+    func makeHost(for element: Any) -> _Host {
+        // empties
+        if let emptyContent = element as? SEmptyContent {
+            return _EmptyElementHost(element: .content(emptyContent))
+        }
+        // primitives
+        else if let primitiveContent = element as? any SContent,
+                primitiveContent.body.self is Never {
+            
+        }
+        else if let primitiveScene = element as? any SScene,
+                primitiveScene.body.self is Never {
+            
+        }
+        // composites
+        else if let app = element as? any SApp {
+            return _AppHost(anyApp: app, state: .init())
+        }
+        else if let scene = element as? any SScene {
+            return _CompositeSceneHost(anyScene: scene, state: .init())
+        }
+        else if let content = element as? any SContent {
+            return _CompositeContentHost(anyContent: content, state: .init())
+        }
+        else { fatalError() }
+    }
+    
+    // MARK: - enqueuing updates
+    
+    /// Enqueues an update for the host.
     ///
     /// If a rendering has already been scheduled within this event loop, the host is simply added to the existing queue.
     private
-    func enqueueUpdate(for host: CompositeElementHost) {
+    func enqueueUpdate(for host: _CompositeElementHost) {
         let shouldSchedule = updateQueue.isEmpty
         updateQueue.append(.init(host: host))
         
@@ -106,7 +152,7 @@ class TreeReconciler {
         scheduler { [weak self] in self?.updateStateAndReconcile() }
     }
     
-    /// Traverses the render queue and performs updates.
+    /// Performs enqueued updates.
     private
     func updateStateAndReconcile() {
         let queue = updateQueue
@@ -124,43 +170,37 @@ class TreeReconciler {
     private
     func initStorage(id: Int,
                      for property: PropertyInfo,
-                     of host: CompositeElementHost,
-                     bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) {
+                     element: inout Any,
+                     mutableState: MutableReference<CompositeElementState>,
+                     enqueueStorageUpdate: (Any) -> Void) {
 
-        var storage = property.get(from: host[keyPath: bodyKeyPath]) as! ValueStorage
+        var storage = property.get(from: element) as! ValueStorage
         
-        if host.storage.count == id {
-            host.storage.append(storage.anyInitialValue)
+        if mutableState.storage.count == id {
+            mutableState.storage.append(storage.anyInitialValue)
         }
         
         if storage.getter == nil {
-            storage.getter = { host.storage[id] }
+            storage.getter = { mutableState.storage[id] }
             
             guard var writableStorage = storage as? WritableValueStorage else {
-                return property.set(value: storage, on: &host[keyPath: bodyKeyPath])
+                return property.set(value: storage, on: &element)
             }
             
             // TODO: Need Transaction param.
-            writableStorage.setter = { [weak self, weak host] newValue in
-                guard let host = host else { return }
-                self?.enqueueStorageUpdate(for: host, id: id, updateHandler: { $0 = newValue })
-            }
+            writableStorage.setter = { enqueueStorageUpdate($0) }
             
-            property.set(value: writableStorage, on: &host[keyPath: bodyKeyPath])
+            property.set(value: writableStorage, on: &element)
         }
     }
     
     /// ...
     private
     func initTransientSubscription(for property: PropertyInfo,
-                                   of host: CompositeElementHost,
-                                   bodyKeyPath: ReferenceWritableKeyPath<CompositeElementHost, Any>) {
-        let observed = property.get(from: host[keyPath: bodyKeyPath]) as! SObservedProperty
-        
-        observed
+                                   of host: inout _MutableCompositeElementHost) {
+        (property.get(from: host.hostedElement) as! SObservedProperty)
             .objectWillChange
-            .sink { [weak self, weak host] _ in
-                guard let host = host else { return }
+            .sink { [weak self] _ in
                 self?.enqueueUpdate(for: host)
             }
             .store(in: &host.transientSubscriptions)
@@ -176,22 +216,21 @@ class TreeReconciler {
     }
      */
     
-    // MARK: - rendering and composite processing
+    // MARK: - composite processing
     
     /// Updates the host's environment and inspects the hosted element at the key path to set up the host's value storage and transient subscriptions.
-    func processBody(of host: CompositeElementHost,
-                     hostedElement: ReferenceWritableKeyPath<CompositeElementHost, Any>) {
+    func processBody(of host: inout _MutableCompositeElementHost) {
         
         host.updateEnvironment()
         
-        guard let typeInfo = typeInfo(of: host.hostedElementType)
+        guard let typeInfo = typeInfo(of: getType(host.hostedElement))
         else {
             // TODO: If type info cannot be determined, it's likely that a class type was provided and the client should be informed in some way.
             fatalError()
         }
         
         var stateIdx = 0
-        let dynamicProperties = typeInfo.dynamicProperties(in: &host[keyPath: hostedElement])
+        let dynamicProperties = typeInfo.dynamicProperties(in: &host.hostedElement)
         
         host.transientSubscriptions = []
         
@@ -200,17 +239,21 @@ class TreeReconciler {
             if property.type is ValueStorage.Type {
                 initStorage(id: stateIdx,
                             for: property,
-                            of: host,
-                            bodyKeyPath: hostedElement)
+                            element: &host.hostedElement,
+                            mutableState: host.mutableState) { newValue in
+                    host.storage[stateIdx] = newValue
+                    enqueueUpdate(for: host)
+                }
                 stateIdx += 1
             }
             if property.type is SObservedProperty.Type {
                 initTransientSubscription(for: property,
-                                          of: host,
-                                          bodyKeyPath: hostedElement)
+                                          of: &host)
             }
         }
     }
+    
+    // MARK: tree reconciliation
     
     /// Reconciles the host's children with an updated child element.
     ///

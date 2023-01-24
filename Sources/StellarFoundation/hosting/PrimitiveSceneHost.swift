@@ -4,8 +4,7 @@
 //
 //  Created by Jesse Spencer on 11/7/22.
 //
-
-final
+// TODO: All renderable scenes should be lazily rendered, giving the platform full control over when a rendered scene instance is produced.
 class PrimitiveSceneHost: ElementHost {
     
     /// The parent platform content of the `PlatformContent` owned by this host.
@@ -15,7 +14,15 @@ class PrimitiveSceneHost: ElementHost {
     let parentPlatformContent: PlatformContent
     
     /// Platform content of this host, supplied by the platform after mounting.
-    var platformContent: PlatformContent?
+    var platformContent: PlatformContent? {
+        didSet {
+            performLazyMount()
+        }
+    }
+    
+    /// Performs mounting when called, created when the `mount` function is called. This allows lazy rendering.
+    private
+    var lazyMountHandler: (() -> Void)?
     
     /// If this instance is hosting modified content, this property will contain the instance of content that is modified. This is handed to the platform for rendering along with the applied modifiers.
     private
@@ -27,7 +34,7 @@ class PrimitiveSceneHost: ElementHost {
     private
     var parentUnmountTask = UnmountTask()
     
-    init(scene: any SScene,
+    init(scene: any PrimitiveScene,
          parentPlatformContent: PlatformContent,
          parent: ElementHost?) {
         self.parentPlatformContent = parentPlatformContent
@@ -43,7 +50,7 @@ class PrimitiveSceneHost: ElementHost {
             // modified content is not rendered
             self.platformContent = parentPlatformContent
             
-            guard let platformContent = platformContent else {
+            guard let platformContent else {
                 fatalError("Platform content was not provided for a primitive host: \(self). Scene: \(anyScene)")
             }
             
@@ -56,26 +63,28 @@ class PrimitiveSceneHost: ElementHost {
             }
         }
         else {
-            if anyScene is GroupedContent {
-                self.platformContent = parentPlatformContent
-            }
-            else {
-                self.platformContent = parentPlatformContent
-                    .addChild(for: .init(value: anyScene), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
-            }
-            
-            guard let platformContent = platformContent else {
-                fatalError("Platform content was not provided for a primitive host: \(self). Scene: \(anyScene)")
-            }
-            
-            guard let container = anyScene as? ContainerScene else { return }
-            let isGroup = container is GroupScene
-            
-            children = container.children.map {
-                $0.makeHost(parentPlatformContent: platformContent, parentHost: self)
-            }
-            children.forEach { child in
-                child.mount(beforeSibling: isGroup ? sibling : nil, onParent: self, reconciler: reconciler)
+            lazyMountHandler = { [unowned self] in
+                if anyScene is GroupedContent {
+                    self.platformContent = parentPlatformContent
+                }
+                else {
+                    self.platformContent = parentPlatformContent
+                        .addChild(for: .init(value: anyScene), preceedingSibling: sibling, modifiers: modifiers.elements, context: .init())
+                }
+                
+                guard let platformContent = platformContent else {
+                    fatalError("Platform content was not provided for a primitive host: \(self). Scene: \(anyScene)")
+                }
+                
+                guard let container = anyScene as? ContainerScene else { return }
+                let isGroup = container is GroupScene
+                
+                children = container.children.map {
+                    $0.makeHost(parentPlatformContent: platformContent, parentHost: self)
+                }
+                children.forEach { child in
+                    child.mount(beforeSibling: isGroup ? sibling : nil, onParent: self, reconciler: reconciler)
+                }
             }
         }
         
@@ -222,7 +231,7 @@ class PrimitiveSceneHost: ElementHost {
         parentUnmountTask = .init()
     }
     
-    /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, replacing any inherited modifiers.
+    /// Checks if the hosted content is modified content, unwraps the modified content chain and stores the modifiers in self, overriding any inherited modifiers.
     private
     func processModifiedContent() {
         if anyScene is AnyModifiedElement {
@@ -237,5 +246,14 @@ class PrimitiveSceneHost: ElementHost {
             modifiedContent = nil
             modifiers = []
         }
+    }
+    
+    func performLazyMount() {
+        guard let lazyMountHandler else {
+            assertionFailure()
+            return
+        }
+        lazyMountHandler()
+        self.lazyMountHandler = nil
     }
 }
