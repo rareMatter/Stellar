@@ -5,7 +5,7 @@
 //  Created by Jesse Spencer on 11/3/22.
 //
 
-protocol PrimitiveScene: SScene
+protocol PrimitiveScene: SScene, PrimitiveElement
 where Self.Body == Never {}
 
 // MARK: default body

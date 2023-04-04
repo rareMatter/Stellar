@@ -6,10 +6,27 @@
 //
 
 public
-protocol SContentModifier {
+protocol SContentModifier: ElementModifier {
+    
     typealias Content = _SContentModifierProxy<Self>
     associatedtype Body: SContent
-    @SContentBuilder func body(content: Content) -> Self.Body
+    
+    @SContentBuilder func body(content: Self.Content) -> Self.Body
+}
+extension SContentModifier {
+    public
+    func _body(element: CompositeElement) -> CompositeElement {
+        guard let content = element as? Content else { fatalError() }
+        return body(content: .init(modifier: self, content: content))
+    }
+}
+
+protocol PrimitiveContentModifier: SContentModifier, PrimitiveModifier
+where Body == Never {}
+extension PrimitiveContentModifier {
+    func body(content: Content) -> Never {
+        primitiveBodyFailure(withType: String(reflecting: Self.self))
+    }
 }
 
 public
@@ -20,21 +37,5 @@ where Modifier : SContentModifier {
     
     public var body: any SContent {
         content
-    }
-}
-
-// MARK: - default primitive body
-public
-extension SContentModifier
-where Body == Never {
-
-    func body(content: Content) -> Self.Body {
-        primitiveBodyFailure(withType: String(reflecting: Self.self))
-    }
-}
-
-extension SContentModifier {
-    var isPrimitive: Bool {
-        Self.Body.self == Never.self
     }
 }

@@ -5,6 +5,7 @@
 //  Created by Jesse Spencer on 6/1/21.
 //
 
+// TODO: This type should probably be renamed to something like ModifierBox.
 public
 struct ModifiedElement<Content, Modifier> {
     public typealias Body = Never
@@ -20,8 +21,23 @@ struct ModifiedElement<Content, Modifier> {
 
 // MARK: Type-erased recognition
 public
-protocol AnyModifiedElement {}
-extension ModifiedElement: AnyModifiedElement {}
+protocol AnyModifiedElement: PrimitiveElement {
+    var anyElement: CompositeElement { get }
+    var anyModifier: ElementModifier { get }
+}
+extension ModifiedElement: AnyModifiedElement
+where Content : CompositeElement, Modifier : ElementModifier {
+    
+    public
+    var anyElement: CompositeElement {
+        content
+    }
+    
+    public
+    var anyModifier: ElementModifier {
+        modifier
+    }
+}
 
 // MARK: content modification function
 public

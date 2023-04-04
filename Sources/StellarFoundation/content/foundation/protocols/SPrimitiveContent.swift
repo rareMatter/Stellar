@@ -10,7 +10,7 @@ import Foundation
 /// A basic building block to use when composing content.
 ///
 /// The body of primitive content must be determined by a renderer.
-protocol SPrimitiveContent: SContent
+protocol SPrimitiveContent: SContent, PrimitiveElement
 where Self.Body == Never {}
 
 // MARK: default primitive body

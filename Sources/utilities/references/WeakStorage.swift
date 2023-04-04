@@ -11,11 +11,13 @@ import Foundation
 public
 final
 class Weak<T: AnyObject> {
-	weak var value: T?
-	init(value: T) {
+    
+	weak
+    public
+    var value: T?
+    
+    public
+    init(_ value: T) {
 		self.value = value
-	}
-	static func weak<T: AnyObject>(_ value: T) -> Weak<T> {
-		.init(value: value)
 	}
 }

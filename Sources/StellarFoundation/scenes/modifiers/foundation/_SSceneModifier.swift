@@ -6,24 +6,25 @@
 //
 
 public
-protocol SSceneModifier {
+protocol SSceneModifier: ElementModifier {
     
     associatedtype Body : SScene
     
     @SSceneBuilder func body(content: any SScene) -> Self.Body
 }
-
-public
-extension SSceneModifier
-where Body == Never {
-    
-    func body(content: any SScene) -> Self.Body {
-        fatalError()
+extension SSceneModifier {
+    public
+    func _body(element: CompositeElement) -> CompositeElement {
+        guard let scene = element as? Body else { fatalError() }
+        return body(content: scene)
     }
 }
 
-extension SSceneModifier {
-    var isPrimitive: Bool {
-        Self.Body.self == Never.self
+public
+protocol PrimitiveSceneModifier: SSceneModifier, PrimitiveModifier
+where Body == Never {}
+extension PrimitiveSceneModifier {
+    func body(content: any SScene) -> Self.Body {
+        fatalError()
     }
 }

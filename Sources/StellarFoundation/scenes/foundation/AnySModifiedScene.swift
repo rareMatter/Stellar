@@ -13,7 +13,7 @@ protocol AnySModifiedScene {
 extension ModifiedElement: AnySModifiedScene
 where Content : SScene, Modifier : SSceneModifier {
     
-    var anyScene: any SScene {
+    public var anyScene: any SScene {
         content
     }
     

@@ -6,6 +6,8 @@
 //
 
 import Combine
+import OrderedCollections
+import utilities
 
 /// The `Tree Reconciler` handles updating of the "Live Tree" (such as `PrimitiveViewHost`) when state changes are observed in the "Descriptive Tree" (`SContent` values), or other changes occur which require updates, such as user interactions or environment properties.
 ///
@@ -17,20 +19,20 @@ import Combine
 ///
 /// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The platform content instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
+// TODO: This might be more aptly named HostTreeManager or such.
+@MainActor
 public
-struct TreeReconciler {
+final
+class TreeReconciler {
     
-    struct Update: Hashable {
-        let host: _CompositeElementHost
+    struct Update {
+        let node: HostTreeNode
         // TODO:
         // let transaction: Transaction
         
-        func hash(into hasher: inout Hasher) {
-            hasher.combine(host.state)
-        }
         static
-        func == (lhs: Self, rhs: Self) -> Bool {
-            lhs.host.state == rhs.host.state
+        func update(_ node: HostTreeNode) -> Self {
+            .init(node: node)
         }
     }
     
@@ -40,7 +42,6 @@ struct TreeReconciler {
     private
     var updateQueue = [Update]()
     
-    typealias HostTreeNode = TreeNode<_Host>
     private
     let hostTreeRoot: HostTreeNode
     
@@ -50,17 +51,14 @@ struct TreeReconciler {
     /// To make updates non-blocking of the current cycle,
     /// reconciliation should be performed on the event loop following the one which received user interaction.
     private
-    let scheduler: (@escaping () -> Void) -> Void
+    let scheduler: (@escaping @autoclosure () -> Void) -> Void
     
     public
     init(app: any SApp,
          rootPlatformContent: PlatformContent,
-         scheduler: @escaping (@escaping () -> Void) -> Void) {
+         scheduler: @escaping (@escaping @autoclosure () -> Void) -> Void) {
         self.scheduler = scheduler
-        
-        let appHost = _AppHost(anyApp: app, state: .init())
-        hostTreeRoot = .init(host: appHost)
-        
+        hostTreeRoot = HostTreeNode(value: HostingContainer(host: makeHost(for: app, parentRenderedElement: rootPlatformContent), renderedElement: nil, renderContext: RenderContext(modifiers: OrderedSet())))
         performMount()
         // TODO: publishing of scene phase, color scheme to app host.
     }
@@ -70,72 +68,154 @@ struct TreeReconciler {
          rootPlatformContent: PlatformContent,
          platformExecutionScheduler: @escaping (@escaping () -> Void) -> Void) {
         self.scheduler = platformExecutionScheduler
-        
-        let contentHost = content.makeHost(parentPlatformContent: rootPlatformContent, parentHost: nil)
-        hostTreeRoot = .init(host: contentHost)
-        
+        hostTreeRoot = HostTreeNode(value: HostingContainer(host: makeHost(for: content, parentRenderedElement: rootPlatformContent), renderContext: RenderContext(modifiers: OrderedSet())))
         performMount()
     }
     
     /// Performs a recursive mounting process of the descriptive tree onto a host tree. During the process the platform is allowed to create renderable elements.
     private
-    mutating
     func performMount() {
-        // TODO: This will now perform mounting for the entire tree, as the reconciler takes ownership of the host tree.
-        recursiveMount(node: hostTreeRoot,
-                       beforeSibling: nil)
+        recursiveMount(node: hostTreeRoot)
         performPostrenderCallbacks()
     }
     
     private
-    mutating
-    func recursiveMount(node: HostTreeNode, beforeSibling sibling: PlatformContent?) {
+    func recursiveMount(node: HostTreeNode) {
+        // render
+        let renderOutput = node.value.host.render(with: node.value.renderContext, enqueueUpdate: enqueueUpdate(for: node))
         
-        if var mutableCompositeElementHost = node.value as? _MutableCompositeElementHost {
-            processBody(of: &mutableCompositeElementHost)
-        }
+        // store properties of render output need by children and render children.
+        node.value.renderedElement = renderOutput.renderedElement
+        node.value.renderContext = .init(modifiers: renderOutput.modifiers)
         
-        let elementBody = node.value.elementBody
-        // TODO: This may be an appropriate spot to tell the host to mount, if hosts need to perform their own mounting behaviors.
-        node.value.mount()
-        let childHost = makeHost(for: elementBody)
-        let childNode = HostTreeNode(value: childHost, children: [])
-        if let sibling {
-            // TODO: Insert the new host before the sibling.
+        node.children = renderOutput.children.map {
+            return HostTreeNode(parent: node, value: .init(host: makeHost(for: $0, parentRenderedElement: node.value.renderedElement), renderContext: RenderContext(modifiers: renderOutput.modifiers)))
         }
-        else {
-            node.children.append(childNode)
+        node.children.forEach { child in
+            recursiveMount(node: child)
         }
+    }
+    
+    private
+    func recursiveUpdate(_ node: HostTreeNode) {
+        // TODO: Update environment.
+//        childNode.value.host.updateEnvironment()
+        // update host
+        let output = node.value.host.update(with: node.value.renderContext, enqueueUpdate: enqueueUpdate(for: node))
         
-        recursiveMount(node: childNode, beforeSibling: nil)
+        // TODO: Is this necessary?
+        node.value.renderedElement = output.renderedElement
+        node.value.renderContext = .init(modifiers: output.modifiers)
+        
+        reconcileHostChildren(node, newChildElements: output.children)
+    }
+    
+    /// Recursively dismantles the tree.
+    ///
+    /// - Important: Does not prune the tree. It is up to the caller to prune the dismantled subtree at the root.
+    private
+    func recursiveDismantle(_ node: HostTreeNode) {
+        node.value.host.dismantle(with: node.value.renderContext)
+        node.children.forEach { childNode in
+            recursiveDismantle(childNode)
+        }
+    }
+    
+    private
+    func reconcileHostChildren(_ node: HostTreeNode, newChildElements: [CompositeElement]) {
+        
+        var newChildElements = newChildElements
+        
+        switch (node.children.isEmpty, newChildElements.isEmpty) {
+        case (false, true):
+            // all existing children were removed
+            node.children.forEach { childNode in
+                recursiveDismantle(childNode)
+            }
+            node.children = []
+            
+        case (true, false):
+            // children were added
+            node.children = newChildElements.map { element in
+                HostTreeNode(parent: node, value: HostingContainer(host: makeHost(for: element, parentRenderedElement: node.value.renderedElement), renderContext: node.value.renderContext))
+            }
+            node.children.forEach { node in
+                recursiveMount(node: node)
+            }
+            
+        case (true, true):
+            // children were changed, reconcile differences
+            var children = [_Host]()
+            
+            // compare each existing and new child.
+            // replace if types differ, otherwise update.
+            while let childNode = node.children.first,
+                  let childElement = newChildElements.first {
+                let newChildHost: _Host
+                
+                // same types
+                if typeConstructorName(getType(childNode.value.host.element)) == typeConstructorName(getType(childElement)) {
+                    // TODO: update child host environment
+                    // replace existing element
+                    childNode.value.host.element = childElement
+                    recursiveUpdate(childNode)
+                    newChildHost = childNode.value.host
+                }
+                // differing types,
+                // create a new element host, render, then dismantle the old child.
+                else {
+                    newChildHost = makeHost(for: childElement, parentRenderedElement: node.value.renderedElement)
+                    recursiveMount(node: HostTreeNode(parent: node, value: HostingContainer(host: newChildHost, renderContext: node.value.renderContext)))
+                    recursiveDismantle(childNode)
+                }
+                
+                children.append(newChildHost)
+                node.children.removeFirst()
+                newChildElements.removeFirst()
+            }
+            
+            if !node.children.isEmpty {
+                // more existing host children than new children, dismantle them
+                node.children.forEach { childNode in
+                    recursiveDismantle(childNode)
+                }
+            }
+            else {
+                // render any remaining children
+                newChildElements.forEach { childElement in
+                    let newChild: _Host = makeHost(for: childElement, parentRenderedElement: node.value.renderedElement)
+                    recursiveMount(node: HostTreeNode(parent: node, value: HostingContainer(host: newChild, renderContext: node.value.renderContext)))
+                    children.append(newChild)
+                }
+            }
+            
+            node.children = children.map { child in
+                HostTreeNode(parent: node, value: HostingContainer(host: child, renderContext: node.value.renderContext))
+            }
+            
+        case (false, false):
+            // no children to update
+            break
+        }
     }
     
     /// Creates a host appropriate for the type of element.
-    func makeHost(for element: Any) -> _Host {
-        // empties
-        if let emptyContent = element as? SEmptyContent {
-            return _EmptyElementHost(element: .content(emptyContent))
+    func makeHost(for element: CompositeElement, parentRenderedElement: PlatformContent?) -> _Host {
+        // empty
+        if let empty = element as? EmptyElement {
+            return _EmptyElementHost(element: empty)
         }
         // primitives
-        else if let primitiveContent = element as? any SContent,
-                primitiveContent.body.self is Never {
-            
+        else if let modifiedElement = element as? AnyModifiedElement {
+            return __ModifiedElementHost(modifiedElement: modifiedElement)
         }
-        else if let primitiveScene = element as? any SScene,
-                primitiveScene.body.self is Never {
-            
+        else if let primitive = element as? PrimitiveElement {
+            return __PrimitiveElementHost(element: primitive, parentRenderedElement: parentRenderedElement!)
         }
         // composites
-        else if let app = element as? any SApp {
-            return _AppHost(anyApp: app, state: .init())
+        else {
+            return __CompositeElementHost(element: element)
         }
-        else if let scene = element as? any SScene {
-            return _CompositeSceneHost(anyScene: scene, state: .init())
-        }
-        else if let content = element as? any SContent {
-            return _CompositeContentHost(anyContent: content, state: .init())
-        }
-        else { fatalError() }
     }
     
     // MARK: - enqueuing updates
@@ -144,68 +224,29 @@ struct TreeReconciler {
     ///
     /// If a rendering has already been scheduled within this event loop, the host is simply added to the existing queue.
     private
-    func enqueueUpdate(for host: _CompositeElementHost) {
-        let shouldSchedule = updateQueue.isEmpty
-        updateQueue.append(.init(host: host))
+    func enqueueUpdate(for node: HostTreeNode) {
+        updateQueue.append(.update(node))
         
-        guard shouldSchedule else { return }
-        scheduler { [weak self] in self?.updateStateAndReconcile() }
+        guard updateQueue.isEmpty else { return }
+        
+        let weakRef = Weak(self)
+        scheduler(weakRef.value!.updateStateAndReconcile())
     }
     
-    /// Performs enqueued updates.
+    /// Performs queued updates.
     private
     func updateStateAndReconcile() {
         let queue = updateQueue
         updateQueue.removeAll()
         
-        for render in queue {
-            render.host.update(inReconciler: self)
+        // TODO: This needs to reconcile child nodes, which will no longer be handled by the hosts. Pass render context down.
+        queue.forEach { update in
+            recursiveUpdate(update.node)
         }
         
         performPostrenderCallbacks()
     }
-    
-    // MARK: - storage and subscriptions
-    
-    private
-    func initStorage(id: Int,
-                     for property: PropertyInfo,
-                     element: inout Any,
-                     mutableState: MutableReference<CompositeElementState>,
-                     enqueueStorageUpdate: (Any) -> Void) {
-
-        var storage = property.get(from: element) as! ValueStorage
         
-        if mutableState.storage.count == id {
-            mutableState.storage.append(storage.anyInitialValue)
-        }
-        
-        if storage.getter == nil {
-            storage.getter = { mutableState.storage[id] }
-            
-            guard var writableStorage = storage as? WritableValueStorage else {
-                return property.set(value: storage, on: &element)
-            }
-            
-            // TODO: Need Transaction param.
-            writableStorage.setter = { enqueueStorageUpdate($0) }
-            
-            property.set(value: writableStorage, on: &element)
-        }
-    }
-    
-    /// ...
-    private
-    func initTransientSubscription(for property: PropertyInfo,
-                                   of host: inout _MutableCompositeElementHost) {
-        (property.get(from: host.hostedElement) as! SObservedProperty)
-            .objectWillChange
-            .sink { [weak self] _ in
-                self?.enqueueUpdate(for: host)
-            }
-            .store(in: &host.transientSubscriptions)
-    }
-    
     /* TODO: Need EnvironmentValues and AppHost.
     private
     func initPersistentSubscription<T: Equatable>(for publisher: AnyPublisher<T, Never>,
@@ -216,53 +257,16 @@ struct TreeReconciler {
     }
      */
     
-    // MARK: - composite processing
-    
-    /// Updates the host's environment and inspects the hosted element at the key path to set up the host's value storage and transient subscriptions.
-    func processBody(of host: inout _MutableCompositeElementHost) {
-        
-        host.updateEnvironment()
-        
-        guard let typeInfo = typeInfo(of: getType(host.hostedElement))
-        else {
-            // TODO: If type info cannot be determined, it's likely that a class type was provided and the client should be informed in some way.
-            fatalError()
-        }
-        
-        var stateIdx = 0
-        let dynamicProperties = typeInfo.dynamicProperties(in: &host.hostedElement)
-        
-        host.transientSubscriptions = []
-        
-        for property in dynamicProperties {
-            // set up state and subscriptions
-            if property.type is ValueStorage.Type {
-                initStorage(id: stateIdx,
-                            for: property,
-                            element: &host.hostedElement,
-                            mutableState: host.mutableState) { newValue in
-                    host.storage[stateIdx] = newValue
-                    enqueueUpdate(for: host)
-                }
-                stateIdx += 1
-            }
-            if property.type is SObservedProperty.Type {
-                initTransientSubscription(for: property,
-                                          of: &host)
-            }
-        }
-    }
-    
     // MARK: tree reconciliation
     
     /// Reconciles the host's children with an updated child element.
     ///
     /// Compares the existing composite host's child elements to the updated child element and either adds, replaces, or updates them in-place.
     func reconcileChildren<Element>(for host: CompositeElementHost,
-                            withChild childElement: Element,
-                            elementType: (Element) -> Any.Type,
-                            updateChildHost: (ElementHost) -> Void,
-                            mountChildElement: (Element) -> ElementHost) {
+                                    withChild childElement: Element,
+                                    elementType: (Element) -> Any.Type,
+                                    updateChildHost: (ElementHost) -> Void,
+                                    mountChildElement: (Element) -> ElementHost) {
         
         // FIXME: for now without properly handling `Group` and `TupleView` mounted composite views
         // have only a single element in `mountedChildren`, but this will change when

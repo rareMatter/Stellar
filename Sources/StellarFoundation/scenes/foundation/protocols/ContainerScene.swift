@@ -5,6 +5,6 @@
 //  Created by Jesse Spencer on 11/3/22.
 //
 
-protocol ContainerScene {
-    var children: [any SScene] { get }
-}
+import utilities
+
+protocol ContainerScene: CollectionBox where Object == any SScene {}

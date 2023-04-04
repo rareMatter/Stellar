@@ -6,7 +6,7 @@
 //
 
 public
-protocol SScene {
+protocol SScene: CompositeElement {
     /// The body type provided by this scene.
     associatedtype Body : SScene
     

@@ -6,9 +6,15 @@
 //
 
 // MARK: content and primitive content conformance
+public
 extension ModifiedElement: SContent, SPrimitiveContent
 where Content : SContent, Modifier : SContentModifier {}
 
 // MARK: modifier chains
-extension ModifiedElement: SContentModifier
-where Content : SContentModifier, Modifier : SContentModifier {}
+public
+extension ModifiedElement: ElementModifier, SContentModifier
+where Content : SContentModifier, Modifier : SContentModifier {
+    public func body(content: Self.Content) -> Self.Body {
+        fatalError()
+    }
+}

@@ -12,7 +12,7 @@ import Foundation
 ///
 /// - Important: Only use `struct` when making your content.
 public
-protocol SContent {
+protocol SContent: CompositeElement {
     /// The body content type provided by this content.
     associatedtype Body: SContent
     

@@ -8,7 +8,7 @@
 
 /// A description of your app. A type conforming to this protocol defines the app entry point using the `@main` attribute, declared on the conforming type. There should be only one type which uses `@main` and conforms to this protocol.
 public
-protocol SApp {
+protocol SApp: CompositeElement {
     
     associatedtype Body : SScene
     
