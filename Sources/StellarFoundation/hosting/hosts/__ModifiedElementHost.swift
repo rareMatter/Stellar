@@ -5,8 +5,10 @@
 //  Created by Jesse Spencer on 4/3/23.
 //
 
-final
-class __ModifiedElementHost: _Host {
+import OrderedCollections
+import utilities
+
+struct __ModifiedElementHost: _Host {
     
     var element: CompositeElement {
         get { modifiedElement }
@@ -31,20 +33,24 @@ class __ModifiedElementHost: _Host {
         self.modifiedElement = modifiedElement
     }
     
+    mutating
     func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
         _processContent(context: context)
         return .init(renderedElement: nil, children: elementChildren, modifiers: modifiers)
     }
     
+    mutating
     func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
         <#code#>
     }
     
+    mutating
     func dismantle(with context: RenderContext) {
         <#code#>
     }
     
     
+    mutating
     func _processContent(context: RenderContext) {
         let result = reduceModifiedElement(modifiedElement)
         unwrappedElement = result.element
@@ -53,6 +59,7 @@ class __ModifiedElementHost: _Host {
     }
     
     private
+    mutating
     func reduceModifiedElement(_ element: AnyModifiedElement) -> (modifiers: OrderedSet<HashableProxy<ElementModifier, String>>, element: CompositeElement) {
         
         func reduceModifiedElementRecursively(element: CompositeElement, collection: inout OrderedSet<HashableProxy<ElementModifier, String>>) -> CompositeElement {

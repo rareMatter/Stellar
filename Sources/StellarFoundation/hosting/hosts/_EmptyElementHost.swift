@@ -5,8 +5,7 @@
 //  Created by Jesse Spencer on 4/3/23.
 //
 
-final
-class _EmptyElementHost: _PrimitiveElementHost {
+struct _EmptyElementHost: _PrimitiveElementHost {
     
     var element: CompositeElement
     var elementChildren: [CompositeElement] { [] }

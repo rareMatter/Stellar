@@ -7,8 +7,7 @@
 
 import utilities
 
-final
-class __PrimitiveElementHost: _PrimitiveElementHost {
+struct __PrimitiveElementHost: _PrimitiveElementHost {
     
     var element: CompositeElement
     var parentRenderedElement: PlatformContent
@@ -28,6 +27,7 @@ class __PrimitiveElementHost: _PrimitiveElementHost {
         self.renderedElement = renderedElement
     }
     
+    mutating
     func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
         // GroupingElements are not rendered, so the parent rendered element is simply passed down.
         if element is any GroupingElement {
@@ -41,10 +41,12 @@ class __PrimitiveElementHost: _PrimitiveElementHost {
         return .init(renderedElement: renderedElement, children: elementChildren, modifiers: context.modifiers)
     }
     
+    mutating
     func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
         <#code#>
     }
     
+    mutating
     func dismantle(with context: RenderContext) {
         <#code#>
     }

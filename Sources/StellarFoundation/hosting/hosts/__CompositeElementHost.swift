@@ -5,8 +5,7 @@
 //  Created by Jesse Spencer on 4/3/23.
 //
 
-final
-class __CompositeElementHost: _MutableCompositeElementHost {
+struct __CompositeElementHost: _MutableCompositeElementHost {
     
     var element: CompositeElement
     var state: CompositeElementState
@@ -21,11 +20,13 @@ class __CompositeElementHost: _MutableCompositeElementHost {
         self.state = state
     }
     
+    mutating
     func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
         processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
         return .init(renderedElement: nil, children: [element._body], modifiers: .init())
     }
     
+    mutating
     func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
         processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
         return .init(renderedElement: nil, children: [element._body], modifiers: .init())
@@ -39,6 +40,7 @@ class __CompositeElementHost: _MutableCompositeElementHost {
     
     /// Updates the host's environment and inspects the hosted element at the key path to set up the host's value storage and transient subscriptions.
     private
+    mutating
     func processCompositeElement(renderContext: RenderContext, enqueueUpdate: () -> Void) {
         updateEnvironment()
         

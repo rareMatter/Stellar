@@ -5,6 +5,8 @@
 //  Created by Jesse Spencer on 3/31/23.
 //
 
+import utilities
+
 /// A modifier that can be applied to an element.
 public
 protocol ElementModifier {

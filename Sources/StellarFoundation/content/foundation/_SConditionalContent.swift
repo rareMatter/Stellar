@@ -19,6 +19,7 @@ where TrueContent: SContent, FalseContent: SContent {
 
 extension _SConditionalContent: _SContentContainer {
     
+    public
     var children: [any SContent] {
         switch storage {
             case .trueContent(let content):
