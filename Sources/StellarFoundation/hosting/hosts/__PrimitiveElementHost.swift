@@ -43,11 +43,41 @@ struct __PrimitiveElementHost: _PrimitiveElementHost {
     
     mutating
     func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
-        <#code#>
+        // TODO:
+        /*
+         parentUnmountTask.cancel()
+         parentUnmountTask.completeImmediately()
+         parentUnmountTask = .init()
+         */
+        /*
+         updateEnvironment()
+         */
+        renderedElement?.update(with: .init(value: element), modifiers: context.modifiers.map({ hashProxy in
+            Modifier(hashProxy)
+        }))
+        
+        return .init(renderedElement: nil, children: elementChildren, modifiers: context.modifiers)
     }
     
     mutating
     func dismantle(with context: RenderContext) {
-        <#code#>
+        // TODO: Move to reconciler.
+        /*
+         guard let platformContent = platformContent else { return }
+         
+         let task = UnmountHostTask(self,
+         in: reconciler) {
+         self.children.forEach { childHost in
+         childHost.unmount(in: reconciler,
+         parentTask: self.unmountTask)
+         }
+         }
+         
+         task.isCancelled = parentTask?.isCancelled ?? false
+         unmountTask = task
+         parentTask?.childTasks.append(task)
+         parentPlatformContent.removeChild(platformContent,
+         for: task)
+         */
     }
 }

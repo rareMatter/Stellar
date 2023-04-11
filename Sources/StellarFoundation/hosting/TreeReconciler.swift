@@ -20,6 +20,8 @@ import utilities
 /// The Tree Reconciler will delegate to a platform-specific Renderer which needs to provide a rendered (or renderable) translation that the platform can display on-screen. The platform content instances will be requested or updated whenever changes occur and the Live Tree needs to be reconciled with the Descriptive Tree's state in order to update the rendered hierarchy.
 ///
 // TODO: This might be more aptly named HostTreeManager or such.
+#warning("Ensure environment is updated in hosts, hosted elements.")
+#warning("Resource Location: HostUtility. Avoids exposing types as public.")
 @MainActor
 public
 final
@@ -58,7 +60,7 @@ class TreeReconciler {
          rootPlatformContent: PlatformContent,
          scheduler: @escaping (@escaping @autoclosure () -> Void) -> Void) {
         self.scheduler = scheduler
-        hostTreeRoot = HostTreeNode(value: HostingContainer(host: makeHost(for: app, parentRenderedElement: rootPlatformContent), renderedElement: nil, renderContext: RenderContext(modifiers: OrderedSet())))
+        hostTreeRoot = HostTreeNode(value: HostingContainer(host: HostUtility.makeHost(for: app, parentRenderedElement: rootPlatformContent), renderedElement: nil, renderContext: RenderContext(modifiers: OrderedSet())))
         performMount()
         // TODO: publishing of scene phase, color scheme to app host.
     }
@@ -66,9 +68,9 @@ class TreeReconciler {
     public
     init(content: any SContent,
          rootPlatformContent: PlatformContent,
-         platformExecutionScheduler: @escaping (@escaping () -> Void) -> Void) {
+         platformExecutionScheduler: @escaping (@escaping @autoclosure () -> Void) -> Void) {
         self.scheduler = platformExecutionScheduler
-        hostTreeRoot = HostTreeNode(value: HostingContainer(host: makeHost(for: content, parentRenderedElement: rootPlatformContent), renderContext: RenderContext(modifiers: OrderedSet())))
+        hostTreeRoot = HostTreeNode(value: HostingContainer(host: HostUtility.makeHost(for: content, parentRenderedElement: rootPlatformContent), renderContext: RenderContext(modifiers: OrderedSet())))
         performMount()
     }
     
@@ -82,14 +84,17 @@ class TreeReconciler {
     private
     func recursiveMount(node: HostTreeNode) {
         // render
-        let renderOutput = node.value.host.render(with: node.value.renderContext, enqueueUpdate: enqueueUpdate(for: node))
+        let renderOutput = node.value.host.render(with: node.value.renderContext) { [weak self] in
+            guard let self else { return }
+            self.enqueueUpdate(for: node)
+        }
         
         // store properties of render output need by children and render children.
         node.value.renderedElement = renderOutput.renderedElement
         node.value.renderContext = .init(modifiers: renderOutput.modifiers)
         
         node.children = renderOutput.children.map {
-            return HostTreeNode(parent: node, value: .init(host: makeHost(for: $0, parentRenderedElement: node.value.renderedElement), renderContext: RenderContext(modifiers: renderOutput.modifiers)))
+            return HostTreeNode(parent: node, value: .init(host: HostUtility.makeHost(for: $0, parentRenderedElement: node.value.renderedElement), renderContext: RenderContext(modifiers: renderOutput.modifiers)))
         }
         node.children.forEach { child in
             recursiveMount(node: child)
@@ -101,7 +106,10 @@ class TreeReconciler {
         // TODO: Update environment.
 //        childNode.value.host.updateEnvironment()
         // update host
-        let output = node.value.host.update(with: node.value.renderContext, enqueueUpdate: enqueueUpdate(for: node))
+        let output = node.value.host.update(with: node.value.renderContext) { [weak self] in
+            guard let self else { return }
+            self.enqueueUpdate(for: node)
+        }
         
         // TODO: Is this necessary?
         node.value.renderedElement = output.renderedElement
@@ -137,7 +145,7 @@ class TreeReconciler {
         case (true, false):
             // children were added
             node.children = newChildElements.map { element in
-                HostTreeNode(parent: node, value: HostingContainer(host: makeHost(for: element, parentRenderedElement: node.value.renderedElement), renderContext: node.value.renderContext))
+                HostTreeNode(parent: node, value: HostingContainer(host: HostUtility.makeHost(for: element, parentRenderedElement: node.value.renderedElement), renderContext: node.value.renderContext))
             }
             node.children.forEach { node in
                 recursiveMount(node: node)
@@ -145,7 +153,7 @@ class TreeReconciler {
             
         case (true, true):
             // children were changed, reconcile differences
-            var children = [_Host]()
+            var newChildren = [_Host]()
             
             // compare each existing and new child.
             // replace if types differ, otherwise update.
@@ -164,12 +172,17 @@ class TreeReconciler {
                 // differing types,
                 // create a new element host, render, then dismantle the old child.
                 else {
-                    newChildHost = makeHost(for: childElement, parentRenderedElement: node.value.renderedElement)
+                    newChildHost = HostUtility.makeHost(for: childElement, parentRenderedElement: node.value.renderedElement)
+                    /* TODO: Mount with sibling?
+                     newChild.mount(beforeSibling: childHost.firstPrimitivePlatformContent(),
+                     onParent: self,
+                     reconciler: reconciler)
+                     */
                     recursiveMount(node: HostTreeNode(parent: node, value: HostingContainer(host: newChildHost, renderContext: node.value.renderContext)))
                     recursiveDismantle(childNode)
                 }
                 
-                children.append(newChildHost)
+                newChildren.append(newChildHost)
                 node.children.removeFirst()
                 newChildElements.removeFirst()
             }
@@ -183,38 +196,19 @@ class TreeReconciler {
             else {
                 // render any remaining children
                 newChildElements.forEach { childElement in
-                    let newChild: _Host = makeHost(for: childElement, parentRenderedElement: node.value.renderedElement)
+                    let newChild: _Host = HostUtility.makeHost(for: childElement, parentRenderedElement: node.value.renderedElement)
                     recursiveMount(node: HostTreeNode(parent: node, value: HostingContainer(host: newChild, renderContext: node.value.renderContext)))
-                    children.append(newChild)
+                    newChildren.append(newChild)
                 }
             }
             
-            node.children = children.map { child in
+            node.children = newChildren.map { child in
                 HostTreeNode(parent: node, value: HostingContainer(host: child, renderContext: node.value.renderContext))
             }
             
         case (false, false):
             // no children to update
             break
-        }
-    }
-    
-    /// Creates a host appropriate for the type of element.
-    func makeHost(for element: CompositeElement, parentRenderedElement: PlatformContent?) -> _Host {
-        // empty
-        if let empty = element as? EmptyElement {
-            return _EmptyElementHost(element: empty)
-        }
-        // primitives
-        else if let modifiedElement = element as? AnyModifiedElement {
-            return __ModifiedElementHost(modifiedElement: modifiedElement)
-        }
-        else if let primitive = element as? PrimitiveElement {
-            return __PrimitiveElementHost(element: primitive, parentRenderedElement: parentRenderedElement!)
-        }
-        // composites
-        else {
-            return __CompositeElementHost(element: element)
         }
     }
     

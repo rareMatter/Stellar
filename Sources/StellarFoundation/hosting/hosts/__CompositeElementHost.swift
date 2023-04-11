@@ -5,8 +5,9 @@
 //  Created by Jesse Spencer on 4/3/23.
 //
 
-struct __CompositeElementHost: _MutableCompositeElementHost {
-    
+final
+class __CompositeElementHost: _MutableCompositeElementHost {
+
     var element: CompositeElement
     var state: CompositeElementState
     
@@ -20,29 +21,45 @@ struct __CompositeElementHost: _MutableCompositeElementHost {
         self.state = state
     }
     
-    mutating
-    func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
+    func render(with context: RenderContext, enqueueUpdate: @autoclosure @escaping () -> Void) -> RenderOutput {
+        processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
+        // TODO: schedule post-render callbacks to handle appearance actions and update preferences.
+        /*
+         reconciler.afterCurrentRender { [weak self] in
+         guard let self = self else { return }
+         
+         }
+         */
+        return .init(renderedElement: nil, children: [element._body], modifiers: .init())
+    }
+    
+    func update(with context: RenderContext, enqueueUpdate: @autoclosure @escaping () -> Void) -> RenderOutput {
+        // TODO: Handle transaction.
+        // TODO: Update variadic views.
         processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
         return .init(renderedElement: nil, children: [element._body], modifiers: .init())
     }
     
-    mutating
-    func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
-        processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
-        return .init(renderedElement: nil, children: [element._body], modifiers: .init())
+    func dismantle(with context: RenderContext) {
+        /* TODO: Move to reconciler.
+         // TODO: transaction.
+         
+         // unmount children
+         children.forEach { childHost in
+         // TODO: view traits.
+         //            host.viewTraits = viewTraits
+         childHost.unmount(in: reconciler,
+         parentTask: parentTask)
+         }
+         
+         // TODO: Call appearance action.
+         */
     }
-    
-    func updateEnvironment() {
-        <#code#>
-    }
-    
-    func dismantle(with context: RenderContext) {}
     
     /// Updates the host's environment and inspects the hosted element at the key path to set up the host's value storage and transient subscriptions.
     private
-    mutating
-    func processCompositeElement(renderContext: RenderContext, enqueueUpdate: () -> Void) {
-        updateEnvironment()
+    func processCompositeElement(renderContext: RenderContext, enqueueUpdate: @escaping () -> Void) {
+        #warning("Environment should be updated before this runs.")
         
         var stateIdx = 0
         let elementUpdateResult = updateDynamicProperties(in: element)
@@ -53,8 +70,9 @@ struct __CompositeElementHost: _MutableCompositeElementHost {
         for property in elementUpdateResult.dynamicProperties {
             // set up state and subscriptions
             if property.type is ValueStorage.Type {
-                initStorage(id: stateIdx, for: property, element: &element, mutableState: &mutableState) { newValue in
-                    mutableState.storage[stateIdx] = newValue
+                initStorage(id: stateIdx, for: property) { [weak self] newValue in
+                    guard let self else { return }
+                    self.mutableState.storage[stateIdx] = newValue
                     enqueueUpdate()
                 }
                 stateIdx += 1
@@ -74,9 +92,7 @@ struct __CompositeElementHost: _MutableCompositeElementHost {
     private
     func initStorage(id: Int,
                      for property: PropertyInfo,
-                     element: inout any CompositeElement,
-                     mutableState: inout CompositeElementState,
-                     enqueueStorageUpdate: (Any) -> Void) {
+                     enqueueStorageUpdate: @escaping (Any) -> Void) {
         var storage = property.get(from: element) as! ValueStorage
         
         if mutableState.storage.count == id {
@@ -84,10 +100,14 @@ struct __CompositeElementHost: _MutableCompositeElementHost {
         }
         
         if storage.getter == nil {
-            storage.getter = { mutableState.storage[id] }
+            storage.getter = { [weak self] in
+                guard let self else { return }
+                return self.mutableState.storage[id]
+            }
             
             guard var writableStorage = storage as? WritableValueStorage else {
-                return property.set(value: storage, on: &element)
+                property.set(value: storage, on: &element)
+                return
             }
             
             // TODO: Need Transaction param.

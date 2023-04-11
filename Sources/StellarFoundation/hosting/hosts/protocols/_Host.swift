@@ -9,10 +9,10 @@ protocol _Host {
     var element: CompositeElement { get set }
     
     @MainActor
-    mutating func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput
+    mutating func render(with context: RenderContext, enqueueUpdate: @escaping () -> Void) -> RenderOutput
     
     @MainActor
-    mutating func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput
+    mutating func update(with context: RenderContext, enqueueUpdate: @escaping () -> Void) -> RenderOutput
     
     @MainActor
     mutating func dismantle(with context: RenderContext)

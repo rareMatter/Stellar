@@ -41,15 +41,13 @@ struct __ModifiedElementHost: _Host {
     
     mutating
     func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
-        <#code#>
+        _processContent(context: context)
+        return .init(renderedElement: nil, children: elementChildren, modifiers: modifiers)
     }
     
     mutating
-    func dismantle(with context: RenderContext) {
-        <#code#>
-    }
-    
-    
+    func dismantle(with context: RenderContext) {}
+        
     mutating
     func _processContent(context: RenderContext) {
         let result = reduceModifiedElement(modifiedElement)
@@ -69,7 +67,7 @@ struct __ModifiedElementHost: _Host {
                 return element
             }
             
-#warning("Bug")
+            #warning("Bug")
             // FIXME: This likely fails for certain cases. Unwrapping of chained modifiers should probably be handled first, before resolving composed modifiers and accumulating primitive modifiers.
             // primitive
             if modifiedElement.anyModifier is PrimitiveModifier {

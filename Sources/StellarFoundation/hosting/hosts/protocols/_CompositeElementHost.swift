@@ -7,7 +7,6 @@
 
 @dynamicMemberLookup
 protocol _CompositeElementHost: _Host {
-    mutating func updateEnvironment()
     var state: CompositeElementState { get }
 }
 extension _CompositeElementHost {
