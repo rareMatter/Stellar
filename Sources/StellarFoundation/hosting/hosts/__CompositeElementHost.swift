@@ -21,7 +21,7 @@ class __CompositeElementHost: _MutableCompositeElementHost {
         self.state = state
     }
     
-    func render(with context: RenderContext, enqueueUpdate: @autoclosure @escaping () -> Void) -> RenderOutput {
+    func render(with context: RenderContext, enqueueUpdate: @autoclosure @escaping () -> Void) -> RenderOutput? {
         processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
         // TODO: schedule post-render callbacks to handle appearance actions and update preferences.
         /*
@@ -30,17 +30,17 @@ class __CompositeElementHost: _MutableCompositeElementHost {
          
          }
          */
-        return .init(renderedElement: nil, children: [element._body], modifiers: .init())
+        return .init(renderedElement: nil, modifiers: nil, children: [element._body])
     }
     
-    func update(with context: RenderContext, enqueueUpdate: @autoclosure @escaping () -> Void) -> RenderOutput {
+    func update(with context: RenderContext, enqueueUpdate: @autoclosure @escaping () -> Void) -> RenderOutput? {
         // TODO: Handle transaction.
         // TODO: Update variadic views.
         processCompositeElement(renderContext: context, enqueueUpdate: enqueueUpdate)
-        return .init(renderedElement: nil, children: [element._body], modifiers: .init())
+        return .init(renderedElement: nil, modifiers: nil, children: [element._body])
     }
     
-    func dismantle(with context: RenderContext) {
+    func dismantle(with context: DismantleContext) {
         /* TODO: Move to reconciler.
          // TODO: transaction.
          

@@ -23,7 +23,7 @@ struct __ModifiedElementHost: _Host {
     private(set)
     var unwrappedElement: CompositeElement? = nil
     private(set)
-    var modifiers: OrderedSet<HashableProxy<ElementModifier, String>> = .init()
+    var modifiers: OrderedSet<ModifierHashProxy> = .init()
     
     var elementChildren: [CompositeElement] {
         unwrappedElement != nil ? [unwrappedElement!] : []
@@ -34,19 +34,19 @@ struct __ModifiedElementHost: _Host {
     }
     
     mutating
-    func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
+    func render(with context: RenderContext, enqueueUpdate: @escaping () -> Void) -> RenderOutput? {
         _processContent(context: context)
-        return .init(renderedElement: nil, children: elementChildren, modifiers: modifiers)
+        return .init(renderedElement: nil, modifiers: modifiers, children: elementChildren)
     }
     
     mutating
-    func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
+    func update(with context: RenderContext, enqueueUpdate: @escaping () -> Void) -> RenderOutput? {
         _processContent(context: context)
-        return .init(renderedElement: nil, children: elementChildren, modifiers: modifiers)
+        return .init(renderedElement: nil, modifiers: modifiers, children: elementChildren)
     }
     
     mutating
-    func dismantle(with context: RenderContext) {}
+    func dismantle(with context: DismantleContext) {}
         
     mutating
     func _processContent(context: RenderContext) {
@@ -59,36 +59,36 @@ struct __ModifiedElementHost: _Host {
     private
     mutating
     func reduceModifiedElement(_ element: AnyModifiedElement) -> (modifiers: OrderedSet<HashableProxy<ElementModifier, String>>, element: CompositeElement) {
-        
-        func reduceModifiedElementRecursively(element: CompositeElement, collection: inout OrderedSet<HashableProxy<ElementModifier, String>>) -> CompositeElement {
-            
-            // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the wrapped element is encountered.
-            guard let modifiedElement = element as? AnyModifiedElement else {
-                return element
-            }
-            
-            #warning("Bug")
-            // FIXME: This likely fails for certain cases. Unwrapping of chained modifiers should probably be handled first, before resolving composed modifiers and accumulating primitive modifiers.
-            // primitive
-            if modifiedElement.anyModifier is PrimitiveModifier {
-                collection.append(.init(value: modifiedElement.anyModifier, hashableValue: typeConstructorName(getType(modifiedElement.anyModifier))))
-                return modifiedElement.anyElement
-            }
-            // chained modifier
-            // TODO: Should ModifiedElement reduce chains automatically in its init? Was this considered before and if so why was it not implemented? Possibly because type information would be lost before rendering.
-            else if let wrappedModifiedElement = modifiedElement.anyElement as? AnyModifiedElement {
-                collection.append(.init(value: wrappedModifiedElement.anyModifier, hashableValue: typeConstructorName(getType(wrappedModifiedElement))))
-                return reduceModifiedElementRecursively(element: wrappedModifiedElement.anyElement, collection: &collection)
-            }
-            // composed modifier
-            else {
-                let content = modifiedElement.anyModifier._body(element: modifiedElement.anyElement)
-                return reduceModifiedElementRecursively(element: content, collection: &collection)
-            }
-        }
-        
+        // TODO: Do returned modifiers need to be reversed?
         var modifiers = OrderedSet<HashableProxy<ElementModifier, String>>()
         let element = reduceModifiedElementRecursively(element: element, collection: &modifiers)
         return (modifiers, element)
+    }
+    private
+    func reduceModifiedElementRecursively(element: CompositeElement, collection: inout OrderedSet<HashableProxy<ElementModifier, String>>) -> CompositeElement {
+        
+        // Recursively unravel modifier chain, accumulating primitive modifiers and calling modifier bodies. End recursion when the wrapped element is encountered.
+        guard let modifiedElement = element as? AnyModifiedElement else {
+            return element
+        }
+        
+        #warning("Bug")
+        // FIXME: This likely fails for certain cases. Unwrapping of chained modifiers should probably be handled first, before resolving composed modifiers and accumulating primitive modifiers.
+        // primitive
+        if modifiedElement.anyModifier is PrimitiveModifier {
+            collection.append(.init(value: modifiedElement.anyModifier, hashableValue: typeConstructorName(getType(modifiedElement.anyModifier))))
+            return modifiedElement.anyElement
+        }
+        // chained modifier
+        // TODO: Should ModifiedElement reduce chains automatically in its init? Was this considered before and if so why was it not implemented? Possibly because type information would be lost before rendering.
+        else if let wrappedModifiedElement = modifiedElement.anyElement as? AnyModifiedElement {
+            collection.append(.init(value: wrappedModifiedElement.anyModifier, hashableValue: typeConstructorName(getType(wrappedModifiedElement))))
+            return reduceModifiedElementRecursively(element: wrappedModifiedElement.anyElement, collection: &collection)
+        }
+        // composed modifier
+        else {
+            let content = modifiedElement.anyModifier._body(element: modifiedElement.anyElement)
+            return reduceModifiedElementRecursively(element: content, collection: &collection)
+        }
     }
 }

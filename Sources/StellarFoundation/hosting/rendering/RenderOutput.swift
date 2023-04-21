@@ -8,7 +8,8 @@
 import OrderedCollections
 
 struct RenderOutput {
+    // TODO: Need preference store here?
     let renderedElement: PlatformContent?
+    let modifiers: OrderedSet<ModifierHashProxy>?
     let children: [CompositeElement]
-    let modifiers: OrderedSet<ModifierHashProxy>
 }

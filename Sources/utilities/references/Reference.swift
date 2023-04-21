@@ -5,9 +5,16 @@
 //  Created by Jesse Spencer on 2/20/23.
 //
 
+// TODO: property wrapper does not seem to be allowed for classes.
 @dynamicMemberLookup
+@propertyWrapper
 public
 class Reference<Value> {
+    
+    public
+    var wrappedValue: Value {
+        value
+    }
     
     public
     var value: Value

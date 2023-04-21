@@ -22,8 +22,7 @@ protocol PlatformContent {
                 modifiers: [Modifier])
     
     /// Removes the child using the unmount task.
-    func removeChild(_ child: PlatformContent,
-                     for task: UnmountHostTask)
+    func removeChild(_ child: PlatformContent)
 }
 
 public
@@ -103,4 +102,12 @@ struct PrimitiveContext {
     init(value: Any) {
         self.value = value
     }
+}
+
+/// A container of contextual data to be used when mounting `PlatformContent`.
+public
+struct HostMountingContext {
+    // TODO: Environment values.
+    // TODO: Transaction data.
+    // TODO: View traits.
 }

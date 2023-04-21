@@ -11,7 +11,7 @@ extension HostUtility {
     
     /// Creates a host appropriate for the type of element.
     static
-    func makeHost(for element: CompositeElement, parentRenderedElement: PlatformContent?) -> _Host {
+    func makeHost(for element: CompositeElement) -> _Host {
         // empty
         if let empty = element as? EmptyElement {
             return _EmptyElementHost(element: empty)
@@ -21,7 +21,7 @@ extension HostUtility {
             return __ModifiedElementHost(modifiedElement: modifiedElement)
         }
         else if let primitive = element as? PrimitiveElement {
-            return __PrimitiveElementHost(element: primitive, parentRenderedElement: parentRenderedElement!)
+            return __PrimitiveElementHost(element: primitive)
         }
         // composites
         else {

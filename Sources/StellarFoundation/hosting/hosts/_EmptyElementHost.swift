@@ -15,13 +15,13 @@ struct _EmptyElementHost: _PrimitiveElementHost {
         self.element = element
     }
     
-    func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
-        .init(renderedElement: nil, children: [], modifiers: context.modifiers)
+    func render(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput? {
+        nil
     }
     
-    func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput {
-        .init(renderedElement: nil, children: [], modifiers: .init())
+    func update(with context: RenderContext, enqueueUpdate: @autoclosure () -> Void) -> RenderOutput? {
+        nil
     }
     
-    func dismantle(with context: RenderContext) {}
+    func dismantle(with context: DismantleContext) {}
 }
