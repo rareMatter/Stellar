@@ -23,6 +23,7 @@ where Parent : SContent, Content : SContent, Footer : SContent {
     }
 }
 extension SSection: _SContentContainer {
+    public
     var children: [any SContent] { [parent, content, footer] }
 }
 
@@ -37,6 +38,7 @@ struct _SSectionPart<Content: SContent>: SPrimitiveContent {
     let part: SectionPartType
 }
 extension _SSectionPart: _SContentContainer {
+    public
     var children: [any SContent] { [content] }
 }
 

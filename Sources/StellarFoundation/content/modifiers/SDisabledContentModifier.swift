@@ -6,7 +6,7 @@
 //
 
 public
-struct SDisabledContentModifier: SContentModifier {
+struct SDisabledContentModifier: PrimitiveContentModifier {
     public typealias Body = Never
     public let isDisabled: Bool
 }

@@ -24,6 +24,7 @@ public
 protocol PrimitiveSceneModifier: SSceneModifier, PrimitiveModifier
 where Body == Never {}
 extension PrimitiveSceneModifier {
+    public
     func body(content: any SScene) -> Self.Body {
         fatalError()
     }

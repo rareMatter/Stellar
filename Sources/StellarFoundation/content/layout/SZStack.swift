@@ -26,8 +26,9 @@ where C : SContent {
     }
 }
 extension SZStack: _SContentContainer {
+    public
     var children: [any SContent] {
-        (content as? GroupedContent)?.children
+        (content as? any GroupedContent)?.children
         ?? [content]
     }
 }

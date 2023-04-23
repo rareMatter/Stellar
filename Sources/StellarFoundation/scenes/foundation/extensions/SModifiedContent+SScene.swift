@@ -10,5 +10,5 @@ extension ModifiedElement: SScene, PrimitiveScene
 where Content : SScene, Modifier : SSceneModifier {}
 
 // MARK: modifier chains
-extension ModifiedElement: SSceneModifier
+extension ModifiedElement: SSceneModifier, PrimitiveSceneModifier
 where Content : SSceneModifier, Modifier : SSceneModifier {}

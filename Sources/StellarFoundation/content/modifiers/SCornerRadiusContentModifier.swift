@@ -6,7 +6,7 @@
 //
 
 public
-struct SCornerRadiusModifier: SContentModifier {
+struct SCornerRadiusModifier: PrimitiveContentModifier {
     public typealias Body = Never
     public let cornerRadius: Double
     public let antialiased: Bool

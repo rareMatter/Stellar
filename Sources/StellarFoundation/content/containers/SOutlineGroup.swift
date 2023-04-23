@@ -21,7 +21,7 @@ where Data : RandomAccessCollection, ID : Hashable {
 }
 
 // MARK: SContent conformance
-extension SOutlineGroup: SContent
+extension SOutlineGroup: CompositeElement, SContent
 where Parent : SContent, Leaf : SContent, Subgroup : SContent {
     
     public

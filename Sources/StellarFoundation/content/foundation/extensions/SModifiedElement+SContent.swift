@@ -6,15 +6,19 @@
 //
 
 // MARK: content and primitive content conformance
-public
 extension ModifiedElement: SContent, SPrimitiveContent
 where Content : SContent, Modifier : SContentModifier {}
 
 // MARK: modifier chains
-public
-extension ModifiedElement: ElementModifier, SContentModifier
-where Content : SContentModifier, Modifier : SContentModifier {
-    public func body(content: Self.Content) -> Self.Body {
+extension ModifiedElement: ElementModifier
+where Content : ElementModifier, Modifier : ElementModifier {
+    public
+    func _body(element: CompositeElement) -> CompositeElement {
         fatalError()
     }
 }
+
+extension ModifiedElement: PrimitiveModifier {}
+
+extension ModifiedElement: SContentModifier, PrimitiveContentModifier
+where Content : SContentModifier, Modifier : SContentModifier {}

@@ -20,6 +20,7 @@ where Content : SContent, Selection : Hashable {
     }
 }
 extension SList: _SContentContainer {
+    public
     var children: [any SContent] { [content] }
 }
 

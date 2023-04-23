@@ -26,6 +26,7 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
 }
 // TODO: This likely should be removed after a lazy approach is implemented.
 extension SForEach: GroupedContent {
+    public
     var children: [any SContent] {
         data.map { element in
             SIdentifiableContent(content(element), id: element[keyPath: id])

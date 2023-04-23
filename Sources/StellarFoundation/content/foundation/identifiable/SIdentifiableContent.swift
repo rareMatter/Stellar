@@ -27,6 +27,7 @@ where Content: SContent, ID: Hashable {
      */
 }
 extension SIdentifiableContent: _SContentContainer {
+    public
     var children: [any SContent] { [content] }
 }
 extension SIdentifiableContent: AnySIdentifiableContent {

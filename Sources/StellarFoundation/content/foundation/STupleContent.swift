@@ -174,5 +174,6 @@ struct STupleContent<T>: SPrimitiveContent {
 
 // MARK: - content container
 extension STupleContent: GroupedContent {
+    public
     var children: [any SContent] { _children }
 }

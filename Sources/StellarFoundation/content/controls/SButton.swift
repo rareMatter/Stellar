@@ -26,6 +26,7 @@ extension SButton {
 }
 
 extension SButton: _SContentContainer {
+    public
     var children: [any SContent] { [content] }
 }
 

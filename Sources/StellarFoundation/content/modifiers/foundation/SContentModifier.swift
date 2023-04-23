@@ -9,7 +9,7 @@ public
 protocol SContentModifier: ElementModifier {
     
     typealias Content = _SContentModifierProxy<Self>
-    associatedtype Body: SContent
+    associatedtype Body : SContent
     
     @SContentBuilder func body(content: Self.Content) -> Self.Body
 }
@@ -24,6 +24,7 @@ extension SContentModifier {
 protocol PrimitiveContentModifier: SContentModifier, PrimitiveModifier
 where Body == Never {}
 extension PrimitiveContentModifier {
+    public
     func body(content: Content) -> Never {
         primitiveBodyFailure(withType: String(reflecting: Self.self))
     }

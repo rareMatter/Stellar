@@ -34,6 +34,7 @@ extension SContextMenuButton {
 }
 
 extension SContextMenuButton: _SContentContainer {
+    public
     var children: [any SContent] { [_SContextMenuButtonContent(content: content), label] }
 }
 
@@ -49,6 +50,7 @@ where Content : SContent {
     let content: Content
 }
 extension _SContextMenuButtonContent: _SContentContainer {
+    public
     var children: [any SContent] { [content] }
 }
 

@@ -6,7 +6,7 @@
 //
 
 public
-struct STapHandlerModifier: SContentModifier {
+struct STapHandlerModifier: PrimitiveContentModifier {
     public typealias Body = Never
     public let tapHandler: () -> Void
 }
