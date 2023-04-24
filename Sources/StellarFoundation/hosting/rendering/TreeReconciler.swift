@@ -114,7 +114,7 @@ class TreeReconciler {
         }
         
         guard let output else { return }
-        reconcileHostChildren(node, renderOutput: output)
+        reconcileChildrenOf(node, using: output)
     }
     
     /// Recursively dismantles the tree.
@@ -137,7 +137,7 @@ class TreeReconciler {
     ///   - childRenderContext: A render context produced by the re-render of `node`, to be provided to children, as needed, during reconciliation.
     ///   - newChildElements: The new collection of children produced from a re-render of `node`.
     private
-    func reconcileHostChildren(_ node: HostTreeNode, renderOutput: RenderOutput) {
+    func reconcileChildrenOf(_ node: HostTreeNode, using renderOutput: RenderOutput) {
         
         let inheritedModifiers = renderOutput.modifiers != nil ? Reference(renderOutput.modifiers!) : node.value.inheritedModifiers
         let parentRenderedElement = renderOutput.renderedElement != nil ? Reference(renderOutput.renderedElement!) : node.value.parentRenderedElement
