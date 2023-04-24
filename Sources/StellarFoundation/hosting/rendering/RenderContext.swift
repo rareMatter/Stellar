@@ -9,6 +9,7 @@ import OrderedCollections
 import utilities
 
 /// Contextual data for performing rendering.
+public
 struct RenderContext {
     // TODO: Need transaction.
     let parentRenderedElement: Reference<PlatformContent>

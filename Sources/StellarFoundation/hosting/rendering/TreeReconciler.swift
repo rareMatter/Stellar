@@ -21,7 +21,6 @@ import utilities
 ///
 // TODO: This might be more aptly named HostTreeManager or such.
 #warning("Ensure environment is updated in hosts, hosted elements.")
-#warning("Resource Location: HostUtility. Avoids exposing types as public.")
 @MainActor
 public
 final
@@ -47,6 +46,9 @@ class TreeReconciler {
     private
     let hostTreeRoot: HostTreeNode
     
+    private
+    let makeHostFor: (_ element: CompositeElement) -> _Host
+    
     /// A platform-specific event loop scheduler.
     ///
     /// Often, rendering updates are queued due to user interactions.
@@ -58,10 +60,12 @@ class TreeReconciler {
     public
     init(app: any SApp,
          rootPlatformContent: PlatformContent,
+         makeHost: @escaping (_ element: CompositeElement) -> _Host = HostUtility.makeHost(for:),
          scheduler: @escaping (@escaping @autoclosure () -> Void) -> Void) {
+        self.makeHostFor = makeHost
         self.scheduler = scheduler
         
-        let host = HostUtility.makeHost(for: app)
+        let host = makeHost(app)
         let hostingContainer = HostingContainer(
             host: host,
             inheritedModifiers: .init(.init()),
@@ -75,10 +79,12 @@ class TreeReconciler {
     public
     init(content: any SContent,
          rootPlatformContent: PlatformContent,
+         makeHost: @escaping (_ element: CompositeElement) -> _Host = HostUtility.makeHost(for:),
          platformExecutionScheduler: @escaping (@escaping @autoclosure () -> Void) -> Void) {
+        self.makeHostFor = makeHost
         self.scheduler = platformExecutionScheduler
         
-        let host = HostUtility.makeHost(for: content)
+        let host = makeHost(content)
         let hostingContainer = HostingContainer(
             host: host,
             inheritedModifiers: .init(.init()),
@@ -147,7 +153,7 @@ class TreeReconciler {
         case (true, false):
             // children were added
             node.children = renderOutput.children.map {
-                let host = HostUtility.makeHost(for: $0)
+                let host = makeHostFor($0)
                 let hostingContainer = HostingContainer(
                     host: host,
                     inheritedModifiers: inheritedModifiers,
@@ -188,7 +194,7 @@ class TreeReconciler {
                 // differing types,
                 // create a new element host, render, then dismantle the old child.
                 else {
-                    newChildHost = HostUtility.makeHost(for: childElement)
+                    newChildHost = makeHostFor(childElement)
                     /* TODO: Mount with sibling?
                      newChild.mount(beforeSibling: childHost.firstPrimitivePlatformContent(),
                      onParent: self,
@@ -214,7 +220,7 @@ class TreeReconciler {
             else {
                 // render any remaining children
                 newChildElements.forEach { childElement in
-                    let newChildHost = HostUtility.makeHost(for: childElement)
+                    let newChildHost = makeHostFor(childElement)
                     let hostingContainer = HostingContainer(
                         host: newChildHost,
                         inheritedModifiers: inheritedModifiers,

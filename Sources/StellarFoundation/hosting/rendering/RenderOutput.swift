@@ -7,6 +7,7 @@
 
 import OrderedCollections
 
+public
 struct RenderOutput {
     // TODO: Need preference store here?
     let renderedElement: PlatformContent?

@@ -5,11 +5,13 @@
 //  Created by Jesse Spencer on 4/10/23.
 //
 
+public
 enum HostUtility {}
 
 extension HostUtility {
     
     /// Creates a host appropriate for the type of element.
+    public
     static
     func makeHost(for element: CompositeElement) -> _Host {
         // empty

@@ -5,6 +5,7 @@
 //  Created by Jesse Spencer on 4/3/23.
 //
 
+public
 protocol _Host {
     var element: CompositeElement { get set }
     
