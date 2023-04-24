@@ -130,7 +130,6 @@ class TreeReconciler {
         }
     }
     
-    // TODO: Rename to reconcileNodeChildren or such.
     /// Reconciles the existing children of the node with the new, provided collection of children produced from a new rendering.
     /// - Parameters:
     ///   - node: The node whose children need to be reconciled after a re-render.
@@ -266,11 +265,9 @@ class TreeReconciler {
         let queue = updateQueue
         updateQueue.removeAll()
         
-        // TODO: This needs to reconcile child nodes, which will no longer be handled by the hosts. Pass render context down.
         queue.forEach { update in
             recursiveRender(update.node)
         }
-        
         performPostrenderCallbacks()
     }
         
