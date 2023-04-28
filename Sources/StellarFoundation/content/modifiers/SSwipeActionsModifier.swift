@@ -11,7 +11,7 @@ where Actions : SContent {
     let edge: SHorizontalEdge
     let allowsFullSwipe: Bool
     
-    func body(content: Content) -> some SContent {
+    func body(content: any SContent) -> some SContent {
         SwipeActionsModifierContainer(actions: actions,
                                       edge: edge,
                                       allowsFullSwipe: allowsFullSwipe)
@@ -26,6 +26,9 @@ where Actions : SContent {
 }
 extension SwipeActionsModifierContainer: _SContentContainer {
     var children: [any SContent] { [actions] }
+}
+extension SwipeActionsModifierContainer {
+    var _body: CompositeElement { fatalError() }
 }
 
 public

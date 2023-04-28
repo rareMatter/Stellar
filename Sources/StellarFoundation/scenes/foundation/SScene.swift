@@ -12,9 +12,9 @@ protocol SScene: CompositeElement {
     
     // TODO: Needs @MainActor.
     /// The body of the scene.
-    @SSceneBuilder var body: Self.Body { get }
+    @SSceneBuilder
+    var body: Self.Body { get }
 }
-
 extension SScene {
     var typeConstructorName: String {
         StellarFoundation.typeConstructorName(getType(self))

@@ -15,7 +15,7 @@ protocol SSceneModifier: ElementModifier {
 extension SSceneModifier {
     public
     func _body(element: CompositeElement) -> CompositeElement {
-        guard let scene = element as? Body else { fatalError() }
+        guard let scene = element as? any SScene else { fatalError() }
         return body(content: scene)
     }
 }

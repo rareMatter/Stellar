@@ -6,4 +6,6 @@
 //
 
 extension ModifiedElement: CompositeElement, PrimitiveElement
-where Content : CompositeElement, Modifier : ElementModifier {}
+where Content : CompositeElement, Modifier : ElementModifier {
+    public var _body: CompositeElement { fatalError() }
+}
