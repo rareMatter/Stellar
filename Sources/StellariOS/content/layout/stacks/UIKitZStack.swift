@@ -30,7 +30,7 @@ class UIKitZStack: UIView, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let zStack = primitiveContent.value as? AnyZStack else { return }
         alignment = zStack.alignment
         spacing = zStack.spacing
@@ -59,7 +59,7 @@ class UIKitZStack: UIView, UIKitContent {
         return content
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         guard let view = child as? UIView else { fatalError() }
         view.removeFromSuperview()
     }

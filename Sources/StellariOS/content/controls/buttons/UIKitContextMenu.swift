@@ -47,7 +47,7 @@ class UIKitContextMenu: UIControl, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
 
     func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
@@ -68,7 +68,7 @@ class UIKitContextMenu: UIControl, UIKitContent {
         return nil
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         fatalError()
     }
 
@@ -130,7 +130,7 @@ class UIKitContextMenuContent: UIKitContent {
         applyModifiers(modifiers)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
     
     func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
@@ -154,8 +154,7 @@ class UIKitContextMenuContent: UIKitContent {
         }
     }
     
-    func removeChild(_ child: PlatformContent,
-                for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         if let content = child as? UIKitContent,
            let index = children.firstIndex(where: { $0 === content }) {
             children.remove(at: index)

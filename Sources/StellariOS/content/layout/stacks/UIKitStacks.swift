@@ -30,12 +30,11 @@ class UIKitPrimitiveStackView: UIStackView, UIKitContent {
         return content
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         fatalError()
     }
     
-    func removeChild(_ child: PlatformContent,
-                     for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         guard let view = child as? UIView else { fatalError() }
         view.removeFromSuperview()
     }
@@ -61,7 +60,7 @@ class UIKitHStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    override func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let anyHStack = primitiveContent.value as? AnyHStack else { fatalError() }
         updateState(with: anyHStack)
         applyModifiers(modifiers.uiKitModifiers())
@@ -102,7 +101,7 @@ class UIKitVStack: UIKitPrimitiveStackView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    override func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let vStack = primitiveContent.value as? AnyVStack else { fatalError() }
         updateState(with: vStack)
         applyModifiers(modifiers.uiKitModifiers())

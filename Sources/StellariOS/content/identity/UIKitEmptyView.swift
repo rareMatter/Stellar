@@ -20,12 +20,12 @@ class UIKitEmptyView: UIView, UIKitContent {
         fatalError()
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {}
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {}
     func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         assertionFailure()
         return nil
     }
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         assertionFailure()
     }
 }

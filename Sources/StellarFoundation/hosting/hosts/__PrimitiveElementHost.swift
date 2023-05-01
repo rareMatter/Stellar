@@ -27,12 +27,13 @@ struct __PrimitiveElementHost: _PrimitiveElementHost {
     
     mutating
     func render(with context: RenderContext, enqueueUpdate: @escaping () -> Void) -> RenderOutput? {
-        #warning("This is creating and storing a rendered element and then returning a copy. Reference-type is not required of rendered elements. This behavior may be inconsistent to platform architectures and cause side-effect bugs. Either reference types should be required, or storage of a rendered element should be consolidated. Why is the rendered element stored in nodes? To be passed down for child appending?")
+        //FIXME: This is creating and storing a rendered element and then returning a copy. Reference-type is not required of rendered elements. This behavior may be inconsistent to platform architectures and cause side-effect bugs. Either reference types should be required, or storage of a rendered element should be consolidated. Why is the rendered element stored in nodes? To be passed down for child appending?
         // render
         let primitiveContext = PrimitiveContext(value: element)
+        // FIXME: Preceeding sibling is not provided.
         renderedElement = context
             .parentRenderedElement.value
-            .addChild(for: primitiveContext,
+            .addChild(for: primitiveContext, preceedingSibling: nil,
                       modifiers: context.modifiers.map(Modifier.init),
                       context: .init())
         

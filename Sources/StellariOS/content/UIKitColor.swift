@@ -23,7 +23,7 @@ class UIKitColor: UIView, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case let .color(color) = primitiveContent.type else { fatalError() }
         updateState(withColor: color)
         applyModifiers(modifiers.uiKitModifiers())
@@ -38,7 +38,7 @@ class UIKitColor: UIView, UIKitContent {
         backgroundColor = .makeColor(color)
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         fatalError()
     }
 }

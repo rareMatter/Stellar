@@ -21,7 +21,7 @@ class UIKitTextEditor: _TextView, UIKitContent {
         applyModifiers(modifiers)
     }
 
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let primitive = primitiveContent.value as? STextEditor else { fatalError() }
         updateState(with: primitive)
         applyModifiers(modifiers.uiKitModifiers())
@@ -40,7 +40,7 @@ class UIKitTextEditor: _TextView, UIKitContent {
         fatalError()
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         fatalError()
     }
 }

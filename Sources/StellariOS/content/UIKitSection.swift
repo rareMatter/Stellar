@@ -24,7 +24,7 @@ class UIKitSection: UIKitContent {
         content = .init(part: .content, modifiers: modifiers)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) { fatalError() }
     
     func addChild(for primitiveContent: PrimitiveContext, preceedingSibling sibling: PlatformContent?, modifiers: [Modifier], context: HostMountingContext) -> PlatformContent? {
         
@@ -51,8 +51,7 @@ class UIKitSection: UIKitContent {
         }
     }
     
-    func removeChild(_ child: PlatformContent,
-                for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         guard let content = child as? UIKitContent else { fatalError() }
         // TODO: Likely the collection view (or similar) which owns this will need to be informed here.
         if content === header {
@@ -89,7 +88,7 @@ class UIKitSectionPart: UIKitContent {
         self.modifiers = modifiers
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         fatalError()
     }
     
@@ -101,7 +100,7 @@ class UIKitSectionPart: UIKitContent {
         return content
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         fatalError()
     }
 }

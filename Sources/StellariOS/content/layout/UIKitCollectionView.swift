@@ -84,14 +84,13 @@ class UIKitCollectionView: UICollectionView, UIKitContent, UICollectionViewDeleg
         collectionDataSource.apply(snapshot)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case .list(let anyList) = primitiveContent.type else { fatalError() }
         updateSelections(anyList.selectionSet)
         applyModifiers(modifiers.uiKitModifiers())
     }
     
-    func removeChild(_ child: PlatformContent,
-                     for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         guard let section = child as? UIKitSection else {
             fatalError("Unexpected child added to \(self): \(child).")
         }

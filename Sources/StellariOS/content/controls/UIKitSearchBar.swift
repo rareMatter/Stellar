@@ -23,7 +23,7 @@ class UIKitSearchBar: _UIKitSearchTextField, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case .searchBar(let primitive) = primitiveContent.type else { fatalError() }
         updateState(with: primitive)
         applyModifiers(modifiers.uiKitModifiers())
@@ -43,7 +43,7 @@ class UIKitSearchBar: _UIKitSearchTextField, UIKitContent {
         fatalError()
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         fatalError()
     }
 }

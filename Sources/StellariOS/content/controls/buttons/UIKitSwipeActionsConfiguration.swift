@@ -41,7 +41,7 @@ class UIKitSwipeActionsConfiguration: UIKitContent {
         applyModifiers(modifiers)
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let config = primitiveContent.value as? UIKitSwipeActionsConfiguration else { fatalError() }
         edge = config.edge
         allowsFullSwipe = config.allowsFullSwipe
@@ -68,8 +68,7 @@ class UIKitSwipeActionsConfiguration: UIKitContent {
         else { fatalError() }
     }
     
-    func removeChild(_ child: PlatformContent,
-                for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         if let button = child as? UIKitButton,
            let index = buttons.firstIndex(of: button) {
             buttons.remove(at: index)

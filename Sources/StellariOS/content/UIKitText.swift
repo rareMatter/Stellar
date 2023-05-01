@@ -25,7 +25,7 @@ class UIKitText: UILabel, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard let text = primitiveContent.value as? SText else { fatalError() }
         self.text = text.string
         applyModifiers(modifiers.uiKitModifiers())
@@ -35,7 +35,7 @@ class UIKitText: UILabel, UIKitContent {
         fatalError()
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    func removeChild(_ child: PlatformContent) {
         fatalError()
     }
 }

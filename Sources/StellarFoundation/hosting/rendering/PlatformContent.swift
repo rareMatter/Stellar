@@ -14,6 +14,7 @@ protocol PlatformContent {
     /// TODO
     /// - returns The content which was added to the rendered hierarchy or `nil` if none was added.
     func addChild(for primitiveContent: PrimitiveContext,
+                  preceedingSibling sibling: PlatformContent?,
                   modifiers: [Modifier],
                   context: HostMountingContext) -> PlatformContent?
     

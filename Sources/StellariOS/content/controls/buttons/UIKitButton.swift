@@ -51,7 +51,7 @@ class UIKitButton: UIControl, UIKitContent {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func update(withPrimitive primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
+    func update(with primitiveContent: PrimitiveContext, modifiers: [Modifier]) {
         guard case let .button(anyButton) = primitiveContent.type else { fatalError() }
         if anyButton.actionHandler != tapHandlerContainer {
             tapGesture.handler = anyButton.actionHandler.t
@@ -61,9 +61,9 @@ class UIKitButton: UIControl, UIKitContent {
     }
     
     func addChild(for primitiveContent: PrimitiveContext,
-                         preceedingSibling sibling: PlatformContent?,
-                         modifiers: [Modifier],
-                         context: HostMountingContext) -> PlatformContent? {
+                  preceedingSibling sibling: PlatformContent?,
+                  modifiers: [Modifier],
+                  context: HostMountingContext) -> PlatformContent? {
         
         // TODO: Need support for UIKitImage.
         switch primitiveContent.type {
@@ -84,7 +84,8 @@ class UIKitButton: UIControl, UIKitContent {
                         before: sibling as? UIView)
     }
     
-    func removeChild(_ child: PlatformContent, for task: UnmountHostTask) {
+    
+    func removeChild(_ child: PlatformContent) {
         if child is UIKitText {
             guard let text = text else {
                 assertionFailure("Unexpected child removal in \(Self.self). Child: \(child). Child will not be removed.")
