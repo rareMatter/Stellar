@@ -14,6 +14,9 @@ where OptionalContent: SContent {
     }
     
     let storage: Storage
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 extension _SOptionalContent: _SContentContainer {

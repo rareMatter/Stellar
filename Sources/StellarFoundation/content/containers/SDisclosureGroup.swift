@@ -43,4 +43,5 @@ where Label : SContent, Content : SContent {
             content()
         }
     }
+    public var _body: CompositeElement { body }
 }

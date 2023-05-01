@@ -9,7 +9,9 @@
 public
 enum SSceneBuilder {
     
-    static func buildBlock(_ content: some SScene) -> some SScene {
+    // TODO: When attempting to use `some SScene` as the parameter and return type, building fails at use sites such as `Never` body types with only a call to `fatalError()`.
+    static func buildBlock<C>(_ content: C) -> C
+    where C : SScene {
         content
     }
     

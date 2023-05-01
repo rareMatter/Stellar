@@ -11,7 +11,3 @@
 protocol SPrimitiveContent: SContent, PrimitiveElement
 where Self.Body == Never {}
 
-extension SPrimitiveContent
-where Body == Never {
-    public var body: Never { fatalError() }
-}

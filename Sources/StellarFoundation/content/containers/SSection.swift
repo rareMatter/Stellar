@@ -21,6 +21,9 @@ where Parent : SContent, Content : SContent, Footer : SContent {
         self.content = .init(content: content(), part: .content)
         self.footer = .init(content: footer(), part: .footer)
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SSection: _SContentContainer {
     public
@@ -36,6 +39,9 @@ struct _SSectionPart<Content: SContent>: SPrimitiveContent {
     let content: Content
     public
     let part: SectionPartType
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension _SSectionPart: _SContentContainer {
     public

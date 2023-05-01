@@ -23,12 +23,12 @@ where Actions : SContent {
     let actions: Actions
     let edge: SHorizontalEdge
     let allowsFullSwipe: Bool
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SwipeActionsModifierContainer: _SContentContainer {
     var children: [any SContent] { [actions] }
-}
-extension SwipeActionsModifierContainer {
-    var _body: CompositeElement { fatalError() }
 }
 
 public

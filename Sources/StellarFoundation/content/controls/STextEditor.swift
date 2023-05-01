@@ -19,4 +19,7 @@ struct STextEditor: SPrimitiveContent {
         self.placeholderText = placeholderText
         self.onTextChange = onTextChange
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }

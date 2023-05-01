@@ -9,6 +9,9 @@ public
 struct SText: SPrimitiveContent {
     public
     let string: String
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 public
 extension SText {

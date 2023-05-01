@@ -24,6 +24,9 @@ where C : SContent {
         self.spacing = spacing ?? defaultStackSpacing
         self.content = content()
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SVStack: _SContentContainer {
     public

@@ -5,19 +5,15 @@
 //  Created by Jesse Spencer on 11/19/21.
 //
 
-struct SBackgroundModifier<Background>: SContentModifier
+struct SBackgroundModifier<Background>: PrimitiveContentModifier
 where Background : SContent {
     // TODO: ...
 //    var environment: EnvironmentValues
     var background: Background
     var alignment: SAlignment = .center
     
-    func body(content: Content) -> some SContent {
-        SZStack(alignment: alignment) {
-            content
-            background
-        }
-    }
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SBackgroundModifier: Equatable
 where Background : Equatable {

@@ -10,6 +10,9 @@ struct SContextMenuButton<Label, Content>: SPrimitiveContent
 where Label : SContent, Content : SContent {
     let content: Content
     let label: Label
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 public
@@ -48,6 +51,9 @@ public
 struct _SContextMenuButtonContent<Content>: SPrimitiveContent
 where Content : SContent {
     let content: Content
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension _SContextMenuButtonContent: _SContentContainer {
     public

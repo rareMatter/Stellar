@@ -8,6 +8,9 @@
 struct STupleScene<T>: PrimitiveScene {
     let value: T
     private let _children: [any SScene]
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 // MARK: tuple initializers
 extension STupleScene {

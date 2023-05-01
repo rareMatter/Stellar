@@ -170,6 +170,9 @@ struct STupleContent<T>: SPrimitiveContent {
         value = (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10)
         _children = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10]
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 // MARK: - content container

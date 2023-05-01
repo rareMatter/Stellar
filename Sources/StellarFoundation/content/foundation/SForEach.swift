@@ -22,7 +22,10 @@ where Data: RandomAccessCollection, ID: Hashable, Content: SContent {
         self.data = data
         self.id = id
         self.content = content
-    }    
+    }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 // TODO: This likely should be removed after a lazy approach is implemented.
 extension SForEach: GroupedContent {
@@ -104,4 +107,7 @@ struct AnyForEach: SPrimitiveContent {
         self.data = Array(forEach.data.map({ $0 as Any }))
         self.id = forEach.id
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }

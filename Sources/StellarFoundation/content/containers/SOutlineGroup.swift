@@ -62,6 +62,7 @@ where Parent : SContent, Leaf : SContent, Subgroup : SContent {
             })
         }
     }
+    public var _body: CompositeElement { body }
 }
 
 // MARK: Create an outline group from a single item or a collection of data.
@@ -201,4 +202,6 @@ public
 struct SOutlineSubgroupChildren: SPrimitiveContent {
     @SContentBuilder
     let children: () -> any SContent
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }

@@ -15,6 +15,9 @@ where C : SContent {
     init(@SContentBuilder content: () -> C) {
         self.content = content()
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 public

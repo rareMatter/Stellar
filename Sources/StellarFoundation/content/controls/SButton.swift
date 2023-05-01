@@ -13,6 +13,9 @@ where Content : SContent {
     public
     let actionHandler: SIdentifiableContainer<() -> Void>
     let content: Content
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 public

@@ -5,4 +5,4 @@
 //  Created by Jesse Spencer on 11/1/22.
 //
 
-extension Never : PrimitiveScene {}
+extension Never: PrimitiveScene {}

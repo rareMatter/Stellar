@@ -9,8 +9,3 @@ public
 protocol PrimitiveScene: SScene, PrimitiveElement
 where Self.Body == Never {}
 
-public
-extension PrimitiveScene
-where Self.Body == Never {
-    var body: Never { fatalError() }
-}

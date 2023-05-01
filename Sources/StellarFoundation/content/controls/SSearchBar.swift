@@ -19,4 +19,7 @@ struct SSearchBar: SPrimitiveContent {
         self.onSearch = onSearch
         self.onSearchEnded = onSearchEnded
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }

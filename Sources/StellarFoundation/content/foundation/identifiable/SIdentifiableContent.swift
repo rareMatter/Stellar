@@ -25,6 +25,9 @@ where Content: SContent, ID: Hashable {
             // .environment(\.id, AnyHashable(id))
     }
      */
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SIdentifiableContent: _SContentContainer {
     public

@@ -49,6 +49,7 @@ struct SColor: SContent {
             dynamicColor
         }
     }
+    public var _body: CompositeElement { body }
 }
 public
 extension SColor {
@@ -120,6 +121,7 @@ struct DynamicColor: SContent {
         // TODO: Provide environment property.
         resolveColor(.light)
     }
+    public var _body: CompositeElement { body }
 }
 
 /// You do not need to use this type directly, instead create colors using `SColor`.
@@ -161,6 +163,9 @@ struct PrimitiveColor: SPrimitiveContent, AnyColor {
         self.opacity = opacity.clamp(to: Self.allowedOpacityRange)
         self.colorSpace = colorSpace
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 public

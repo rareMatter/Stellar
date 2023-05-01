@@ -24,6 +24,9 @@ where C : SContent {
         self.spacing = spacing
         self.content = content()
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SZStack: _SContentContainer {
     public

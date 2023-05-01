@@ -18,6 +18,9 @@ where Content : SContent, Selection : Hashable {
         case one(SBinding<Selection>)
         case many(SBinding<Set<Selection>>)
     }
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 extension SList: _SContentContainer {
     public

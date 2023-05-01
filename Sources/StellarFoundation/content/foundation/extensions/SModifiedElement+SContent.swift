@@ -7,7 +7,10 @@
 
 // MARK: content and primitive content conformance
 extension ModifiedElement: SContent, SPrimitiveContent
-where Content : SContent, Modifier : SContentModifier {}
+where Content : SContent, Modifier : SContentModifier {
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
+}
 
 // MARK: modifier chains
 extension ModifiedElement: ElementModifier

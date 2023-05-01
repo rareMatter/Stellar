@@ -15,6 +15,9 @@ where TrueContent: SContent, FalseContent: SContent {
     }
     
     let storage: Storage
+    
+    public var body: Never { fatalError() }
+    public var _body: CompositeElement { fatalError() }
 }
 
 extension _SConditionalContent: _SContentContainer {
