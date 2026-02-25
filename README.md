@@ -1,28 +1,90 @@
-# StellarUI
+# Stellar
 
-## Craft it with StellarUI.
-### A declarative cross-platform UI framework for tomorrow's work.
+> **Stellar is a work in progress.**
 
-## StellarUI is a work in progress.
+A declarative, cross-platform UI framework for Swift — write once, run everywhere. Inspired by SwiftUI and React.
 
-## A declarative user interface framework for writing once and running everywhere.
-### Inspired by and modeled after other recent declarative frameworks such as SwiftUI and React.
+## Requirements
 
-## Framework Goals
----
-### - Compile for every platform - Desktop, Mobile, Web.
-### This is an ambitious goal. Initially, only Apple platforms will be supported.
-### - Interoperate with native frameworks. This will allow for needed flexibility as time passes and the project, and its environments, change.
-### - Modularity.
+- Swift 5.5+
+- iOS 15+
 
-## Coding Goals
----
-### - Clarity over convention. This framework represents a new frontier. What that means is - if a convention is obviously going to be unclear to future programmers - don't use it. However, conventions within StellarUI must be consistent.
-### - Stability over speed. The turtoise beats the hare. Features should not be rushed if stability will be at risk. This is a long-term project with long-term goals. Even small instabilities can harm trust and cause big problems down the line.
+Planned platform support includes macOS 11+, iPadOS 14+, and watchOS.
 
-## Non-goals
----
-### - To mirror SwiftUI, even though many aspects will closely resemble, if not mirror, SwiftUI. Other frameworks exist whose goal is to mirror and interoperate with SwiftUI. That is not the case for StellarUI. Instead, the focus should be on noticing pitfalls encountered by SwiftUI (if any) and avoiding them. A natural consequence of this approach will be a delay between SwiftUI features and StellarUI adoption of similar features. 
+## Installation
 
-## Supported Platforms
-iOS 15+ is currently the only supported platform. Planned platform support includes macOS 11+, iPadOS 14+, watchOS.
+### Swift Package Manager
+
+Add Stellar to your `Package.swift` dependencies. Because Stellar has not yet published a stable release, reference the `main` branch:
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/rareMatter/Stellar", branch: "main")
+]
+```
+
+> Once a stable release is published, prefer specifying a version tag (e.g., `.upToNextMajor(from: "1.0.0")`) over a branch reference.
+
+Then add `"Stellar"` to the `dependencies` array of any target that needs it:
+
+```swift
+.target(name: "MyApp", dependencies: ["Stellar"])
+```
+
+## Usage
+
+### Defining your app
+
+Conform a type to `SApp` and mark it with `@main` to define the entry point:
+
+```swift
+import Stellar
+
+@main
+struct MyApp: SApp {
+    var window: some SWindow {
+        SWindow {
+            ContentView()
+        }
+    }
+}
+```
+
+### Building views
+
+Conform a type to `SContent` and implement `body` using `@SContentBuilder`:
+
+```swift
+import Stellar
+
+struct ContentView: SContent {
+    var body: some SContent {
+        SVStack {
+            SText("Hello, Stellar!")
+            SButton(action: { print("tapped") }) {
+                SText("Tap me")
+            }
+        }
+    }
+}
+```
+
+### Managing state
+
+Use `@SState` for local view state and `SBinding` to pass mutable values down the view hierarchy:
+
+```swift
+struct CounterView: SContent {
+    @SState var count = 0
+
+    var body: some SContent {
+        SVStack {
+            SText("Count: \(count)")
+            SButton(action: { count += 1 }) {
+                SText("Increment")
+            }
+        }
+    }
+}
+```
+
