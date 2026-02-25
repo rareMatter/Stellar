@@ -88,17 +88,3 @@ struct CounterView: SContent {
 }
 ```
 
-## Framework Goals
-
-- **Cross-platform compilation** — Desktop, Mobile, Web. This is an ambitious goal; initially only Apple platforms are supported.
-- **Native framework interoperability** — Allows for needed flexibility as the project and its environments evolve.
-- **Modularity** — Components should be independently useful and composable.
-
-## Coding Goals
-
-- **Clarity over convention** — If a convention will obviously be unclear to future contributors, don't use it. Conventions within Stellar must be consistent.
-- **Stability over speed** — The tortoise beats the hare. Features should not be rushed if stability is at risk. This is a long-term project with long-term goals. Even small instabilities can harm trust and cause big problems down the line.
-
-## Non-goals
-
-- **To mirror SwiftUI** — Many aspects of Stellar will closely resemble SwiftUI, but mirroring it is not the goal. Other frameworks exist whose purpose is to mirror and interoperate with SwiftUI; Stellar is not one of them. Instead, the focus is on learning from SwiftUI's design (including any pitfalls) and making deliberate choices. A natural consequence is that there will be a delay between SwiftUI features and Stellar adoption of similar features.
